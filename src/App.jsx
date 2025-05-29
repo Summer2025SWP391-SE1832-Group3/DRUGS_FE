@@ -3,11 +3,20 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 // import './App.css'
 import Navbar from './components/layouts/Navbar'
+import Sidebar from './components/layouts/Sidebar'
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const handleToggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  }
 
   return (
     <>
-      <Navbar />
+      <Navbar onToggleSidebar={handleToggleSidebar} />
+      <Sidebar open={sidebarOpen} />
+      <main style={{ marginLeft: sidebarOpen ? 240 : 0, transition: 'margin-left 0.3s' }}>
+        
+      </main>
     </>
   )
 }

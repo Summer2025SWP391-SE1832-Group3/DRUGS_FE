@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function Navbar() {
+export default function Navbar({ onToggleSidebar }) {
     // Optional: Define focus handlers if needed
     // const focused = (e) => { /* ... */ }
     // const defocused = (e) => { /* ... */ }
@@ -10,7 +10,7 @@ export default function Navbar() {
     return (
         <>
             <nav
-                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky mt-1 top-1 px-0 mx-1 shadow-none border-radius-xl z-index-sticky"
+                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky top-1 px-0 shadow-none z-index-sticky"
                 id="navbarBlur"
                 data-scroll="true"
             >
@@ -37,7 +37,7 @@ export default function Navbar() {
                         <h6 className="font-weight-bolder text-white mb-0">New User</h6>
                     </div>
                     <div className="sidenav-toggler sidenav-toggler-inner d-xl-block d-none ">
-                        <a href="#" className="nav-link text-body p-0" onClick={preventDefault}>
+                        <a href="#" className="nav-link text-body p-0" onClick={e => { e.preventDefault(); onToggleSidebar && onToggleSidebar(); }}>
                             <div className="sidenav-toggler-inner text-white">
                                 <i className="sidenav-toggler-line bg-white" />
                                 <i className="sidenav-toggler-line bg-white" />

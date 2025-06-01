@@ -15,11 +15,29 @@ export default function Navbar({ onToggleSidebar }) {
                 data-scroll="true"
             >
                 <div className="container-fluid py-1 px-3">
+                    <div className="sidenav-toggler sidenav-toggler-inner d-xl-block d-none me-3">
+                        <a href="#" className="nav-link text-body p-0" onClick={e => { e.preventDefault(); onToggleSidebar && onToggleSidebar(); }}>
+                            <div className="sidenav-toggler-inner text-white">
+                                <i className="sidenav-toggler-line bg-white" />
+                                <i className="sidenav-toggler-line bg-white" />
+                                <i className="sidenav-toggler-line bg-white" />
+                            </div>
+                        </a>
+                    </div>
                     <div aria-label="breadcrumb">
                         <ol className="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                             <li className="breadcrumb-item text-sm">
-                                <a className="opacity-3 text-dark" href="#" onClick={preventDefault}>
-                                    {/* ...SVG... */}
+                                <a className="text-dark" href="#" onClick={preventDefault}>
+                                    <img 
+                                        src="https://cdn.iconscout.com/icon/premium/png-256-thumb/drug-abuse-2755791-2288754.png?f=webp"
+                                        alt="Logo"
+                                        style={{ 
+                                            height: '24px',
+                                            width: '24px',
+                                            objectFit: 'cover',
+                                            verticalAlign: 'middle',
+                                        }}
+                                    />
                                 </a>
                             </li>
                             <li className="breadcrumb-item text-sm">
@@ -36,15 +54,7 @@ export default function Navbar({ onToggleSidebar }) {
                         </ol>
                         <h6 className="font-weight-bolder text-white mb-0">New User</h6>
                     </div>
-                    <div className="sidenav-toggler sidenav-toggler-inner d-xl-block d-none ">
-                        <a href="#" className="nav-link text-body p-0" onClick={e => { e.preventDefault(); onToggleSidebar && onToggleSidebar(); }}>
-                            <div className="sidenav-toggler-inner text-white">
-                                <i className="sidenav-toggler-line bg-white" />
-                                <i className="sidenav-toggler-line bg-white" />
-                                <i className="sidenav-toggler-line bg-white" />
-                            </div>
-                        </a>
-                    </div>
+                    
                     <div
                         className="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4"
                         id="navbar"

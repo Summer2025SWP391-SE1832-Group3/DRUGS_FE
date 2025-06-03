@@ -11,7 +11,7 @@ export default function AppLayouts() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   useEffect(() => {
     localStorage.setItem('isLoggedIn', isLoggedIn);
-  }, [isLoggedIn]);
+  })
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   }

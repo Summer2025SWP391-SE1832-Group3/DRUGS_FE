@@ -11,11 +11,11 @@ export default function Login() {
   }
   const onFinish = (values) => {
     if (values.username === fakeAccount.userName && values.password === fakeAccount.password) {
-      message.success('Đăng nhập thành công!');
+      message.success('Login successfully!');
       setIsLoggedIn(true);
-      navigate('/courseList');
+      navigate('/profile');
     } else {
-      message.error('Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin đăng nhập của bạn.');
+      message.error('Login failed! Please enter again your information.');
     }
   }
   const onFinishFailed = errorInfo => {
@@ -34,7 +34,7 @@ export default function Login() {
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
-              Đăng nhập
+              Login
             </Button>
           </Form.Item>
         </Form>

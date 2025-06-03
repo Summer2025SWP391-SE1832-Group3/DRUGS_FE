@@ -55,7 +55,7 @@ export default function Header() {
                                     onClick={() => navigate('/login')}
                                     style={{ minWidth: 90 }}
                                 >
-                                    Đăng nhập
+                                    Login
                                 </a>
                                 {/* Nút Đăng ký */}
                                 <a
@@ -63,7 +63,7 @@ export default function Header() {
                                     onClick={() => navigate('/register')}
                                     style={{ minWidth: 90 }}
                                 >
-                                    Đăng ký
+                                    Register
                                 </a>
                             </li>
                         </ul>

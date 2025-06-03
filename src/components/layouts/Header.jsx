@@ -10,7 +10,7 @@ export default function Header() {
     return (
         <>
             <nav
-                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky top-1 px-0 shadow-none z-index-sticky"
+                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky top-0 px-0 shadow-none z-index-sticky"
                 id="navbarBlur"
                 data-scroll="true"
             >
@@ -19,7 +19,7 @@ export default function Header() {
                     <div aria-label="breadcrumb">
                         <ol className="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                             <li className="breadcrumb-item text-sm">
-                                <a onClick={() => navigate('/home')}>
+                                <a onClick={() => navigate('/')}>
                                     <img
                                         src="https://cdn.iconscout.com/icon/premium/png-256-thumb/drug-abuse-2755791-2288754.png?f=webp"
                                         alt="Logo"

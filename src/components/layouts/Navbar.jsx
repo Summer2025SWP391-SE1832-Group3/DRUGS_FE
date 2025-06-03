@@ -10,7 +10,7 @@ export default function Navbar({ onToggleSidebar }) {
     return (
         <>
             <nav
-                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky top-1 px-0 shadow-none z-index-sticky"
+                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky top-0 px-0 shadow-none z-index-sticky"
                 id="navbarBlur"
                 data-scroll="true"
             >
@@ -87,7 +87,7 @@ export default function Navbar({ onToggleSidebar }) {
                                     href="#"
                                     className="nav-link text-body p-0"
                                     id="iconNavbarSidenav"
-                                    onClick={preventDefault}
+                                    onClick={e => { e.preventDefault(); onToggleSidebar && onToggleSidebar(); }}
                                 >
                                     <div className="sidenav-toggler-inner">
                                         <i className="sidenav-toggler-line" />

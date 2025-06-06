@@ -17,13 +17,14 @@ export default function Navbar({ onToggleSidebar }) {
     return (
         <>
             <nav
-                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky top-0 px-0 shadow-none z-index-sticky"
+                className="navbar navbar-main bg-gradient-dark navbar-expand-lg position-sticky top-0 px-0 py-0 shadow-none z-index-sticky"
                 id="navbarBlur"
                 data-scroll="true"
+                style={{ minHeight: 56 }}
             >
-                <div className="container-fluid py-1 px-3">
+                <div className="container-fluid py-0 px-3">
                     <div className="sidenav-toggler sidenav-toggler-inner d-xl-block d-none me-3">
-                        <a href="#" className="nav-link text-body p-0" onClick={e => { e.preventDefault(); onToggleSidebar && onToggleSidebar(); }}>
+                        <a href="#" className="nav-link text-body p-0" onClick={e => {  onToggleSidebar && onToggleSidebar(); }}>
                             <div className="sidenav-toggler-inner text-white">
                                 <i className="sidenav-toggler-line bg-white" />
                                 <i className="sidenav-toggler-line bg-white" />

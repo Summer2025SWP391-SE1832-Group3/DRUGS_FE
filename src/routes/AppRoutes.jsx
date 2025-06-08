@@ -5,7 +5,8 @@ import AppLayouts from '../components/layouts/AppLayouts'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import Home from '../pages/Home'
-import CourseList from '../pages/CourseList'
+import Profile from '../pages/Profile'
+import CourseList from '../pages/course/CourseList'
 
 
 export default function AppRoutes() {
@@ -13,9 +14,11 @@ export default function AppRoutes() {
     <div>
       <Routes>
         <Route element={<AppLayouts/>}>
+          <Route index element={<Home/>}/>
           <Route path="/" element={<Home/>}/>
           <Route path="login" element={<Login/>}/>
           <Route path="register" element={<Register/>}/>
+          <Route path= "profile" element={<Profile/>}/>
           <Route path="courseList" element={<CourseList/>}/>
         </Route>
 

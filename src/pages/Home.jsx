@@ -1,10 +1,17 @@
 import React from 'react'
-import Headers from '../components/layouts/Header'
+import homeImage from '../assets/homeImage.png';
 
 export default function Home() {
   return (
     <>
-    <div>Home</div>
+      <img 
+      src={homeImage}
+      style={{ width: '100%', 
+        minHeight: 'calc(100vh - 56px)', 
+        objectFit: 'cover', 
+         left: 0 }}
+      alt='Home Image'
+      />
     </>
   )
 }

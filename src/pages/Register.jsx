@@ -2,14 +2,23 @@ import React from 'react';
 import { Form, Input, Button, Card, message, Select, DatePicker, Row, Col } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
+import { AccountAPI } from '../apis/account';
 
 export default function Register() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
   const onFinish = (values) => {
-    console.log('Registration successful:', values);
-    message.success('Registration successful!');
-    navigate('/login'); 
+    AccountAPI.register(values)
+    .then(value => {
+      console.log("Register response",value)
+      messageApi.success('Registration ok!');
+      navigate('/login'); 
+    })
+    .catch(e=>{
+      console.log(e)
+      messageApi.error('Registration fail!');
+    })
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -25,6 +34,7 @@ export default function Register() {
       justifyContent: 'center',
       padding: '24px'
     }}>
+      {contextHolder}
       <Card         
         style={{
           width: '100%',
@@ -76,7 +86,7 @@ export default function Register() {
             <Col xs={24} sm={12}>
               <Form.Item
                 label={<span style={{ fontWeight: 500 }}>Phone Number</span>}
-                name="phone"
+                name="phoneNumber"
                 rules={[
                   { required: true, message: 'Please enter your phone number!' },
                   { pattern: /^[0-9]{10}$/, message: 'Phone number must be 10 digits!' }
@@ -179,7 +189,7 @@ export default function Register() {
                 rules={[
                   { required: true, message: 'Please enter password!' },
                   { min: 6, message: 'Password must be at least 6 characters!' },
-                  { pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/, 
+                  { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/, 
                     message: 'Password must contain at least one letter and one number!' }
                 ]}
                 hasFeedback

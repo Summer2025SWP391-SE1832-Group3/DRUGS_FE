@@ -21,17 +21,17 @@ export default function Sidebar({ open }) {
           <i className="material-symbols-rounded me-2">dashboard</i>
           Courses
         </Link>
-        <Link to="/users" className="nav-link text-white">
+        <Link to="/" className="nav-link text-white">
           <i className="material-symbols-rounded me-2">group</i>
           Consultants
         </Link>
-        <Link to="/drugs" className="nav-link text-white">
+        <Link to="/" className="nav-link text-white">
           <i className="material-symbols-rounded me-2">event</i>
           Events
         </Link>
-        <Link to="/orders" className="nav-link text-white">
-          <i className="material-symbols-rounded me-2">shopping_cart</i>
-          Orders
+        <Link to="/blogList" className="nav-link text-white">
+          <i className="material-symbols-rounded me-2">post</i>
+          Blogs
         </Link>
         <Link to="/settings" className="nav-link text-white">
           <i className="material-symbols-rounded me-2">settings</i>

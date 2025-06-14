@@ -1,12 +1,25 @@
 import axios from "axios"
 
-export default apiBase = "https://localhost:7045/api"
+const apiBase = "https://localhost:7045/api"
+export default apiBase;
+
 export const BlogAPI = {
-    getAll: () => {
-        const result = axios.get(`${apiBase}/Blog`)
-        .then((response) => {
-            console.log("Blog list", response.data)
-        })
-        return result
+    getAll: async () => {
+        try {
+            const response = await axios.get(`${apiBase}/Blog`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching blogs:", error);
+            throw error;
+        }
+    },
+    getById: async (id) => {
+        try {
+            const response = await axios.get(`${apiBase}/Blog/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching blog with id ${id}:`, error);
+            throw error;
+        }
     }
 }

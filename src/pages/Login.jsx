@@ -1,15 +1,12 @@
 import React, { useEffect } from 'react'
 import { Form, Input, Button, Card, message } from 'antd'
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { BlogAPI } from '../apis/blog';
 
 export default function Login() {
   const navigate = useNavigate();
   const { setIsLoggedIn } = useOutletContext();
 
-  useEffect(() => {
-    BlogAPI.getAll();
-  },[])
+  
   const fakeAccount = {
     userName: 'anhvu',
     password: '1'

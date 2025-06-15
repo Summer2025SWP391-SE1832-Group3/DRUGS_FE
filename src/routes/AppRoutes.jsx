@@ -7,6 +7,7 @@ import Register from '../pages/Register'
 import Home from '../pages/Home'
 import Profile from '../pages/Profile'
 import CourseList from '../pages/course/CourseList'
+import BlogManager from '../pages/BlogManager'
 
 
 export default function AppRoutes() {
@@ -20,6 +21,7 @@ export default function AppRoutes() {
           <Route path="register" element={<Register/>}/>
           <Route path= "profile" element={<Profile/>}/>
           <Route path="courseList" element={<CourseList/>}/>
+          <Route path="blogManager" element={<BlogManager/>}/>
         </Route>
 
       </Routes>

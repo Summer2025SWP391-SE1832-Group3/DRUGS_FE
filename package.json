@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "antd": "^5.25.4",
+    "axios": "^1.10.0",
     "bootstrap": "^5.3.6",
     "material-dashboard": "^3.0.9",
     "react": "^19.1.0",

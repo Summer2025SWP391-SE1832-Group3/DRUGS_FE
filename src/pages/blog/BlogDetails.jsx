@@ -43,7 +43,7 @@ const StyledTag = styled(Tag)`
 const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
 
 export default function BlogDetails() {
-  const { id } = useParams();
+  const { blogId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState(null);
@@ -52,7 +52,7 @@ export default function BlogDetails() {
     const fetchBlogDetails = async () => {
       try {
         setLoading(true);
-        const response = await BlogAPI.getById(id);
+        const response = await BlogAPI.getById(blogId);
         setBlog(response);
       } catch (error) {
         console.error('Error fetching blog details:', error);
@@ -62,7 +62,7 @@ export default function BlogDetails() {
     };
 
     fetchBlogDetails();
-  }, [id]);
+  }, [blogId]);
 
   if (loading) {
     return (

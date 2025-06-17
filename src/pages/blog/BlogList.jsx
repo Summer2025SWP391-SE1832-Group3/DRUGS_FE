@@ -113,23 +113,6 @@ export default function BlogList() {
         </Paragraph>
       </StyledHeader>
 
-      {/* Temporary debug section */}
-      {blogs.length > 0 && (
-        <div style={{ background: '#fff', padding: '16px', marginBottom: '24px', borderRadius: '8px' }}>
-          <h4>Debug Info:</h4>
-          <p>Number of blogs: {blogs.length}</p>
-          <p>First blog keys: {Object.keys(blogs[0]).join(', ')}</p>
-          <p>First blog ID: {blogs[0].blogId}</p>
-          <p>First blog object: {JSON.stringify(blogs[0], null, 2)}</p>
-          <button 
-            onClick={() => navigate(`/blogDetails/${blogs[0].blogId}`)}
-            style={{ marginTop: '8px', padding: '8px 16px' }}
-          >
-            Test Navigate to First Blog
-          </button>
-        </div>
-      )}
-
       {blogs.length === 0 ? (
         <Empty description="No blog posts available" />
       ) : (

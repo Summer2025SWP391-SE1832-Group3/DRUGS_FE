@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar({ onToggleSidebar }) {
     // Optional: Define focus handlers if needed
@@ -8,11 +8,47 @@ export default function Navbar({ onToggleSidebar }) {
 
     const preventDefault = (e) => e.preventDefault();
     const navigate = useNavigate();
+    const location = useLocation();
+    
     const handleLogout = () => {
         localStorage.removeItem('isLoggedIn');
         navigate('/login');
         window.location.reload(); //đảm bảo layout cập nhật lại trạng thái đăng nhập
     };
+
+    // Function to get page name based on current path
+    const getPageName = () => {
+        const path = location.pathname;
+        
+        switch (path) {
+            case '/':
+                return 'Home';
+            case '/login':
+                return 'Login';
+            case '/register':
+                return 'Register';
+            case '/profile':
+                return 'Profile';
+            case '/courseList':
+                return 'Course List';
+            case '/blogList':
+                return 'Blog List';
+            case '/blogDetails':
+                return 'Blog Details';
+            case '/blogByUserId':
+                return 'My Blogs';
+            default:
+                if (path.startsWith('/blogDetails/')) {
+                    return 'Blog Details';
+                }
+                if (path.startsWith('/blogByUserId/')) {
+                    return 'My Blogs';
+                }
+                return 'Page';
+        }
+    };
+
+    const currentPageName = getPageName();
 
     return (
         <>
@@ -23,8 +59,8 @@ export default function Navbar({ onToggleSidebar }) {
                 style={{ minHeight: 56 }}
             >
                 <div className="container-fluid py-0 px-3">
-                    <div className="sidenav-toggler sidenav-toggler-inner d-xl-block d-none me-3">
-                        <a href="#" className="nav-link text-body p-0" onClick={e => {  onToggleSidebar && onToggleSidebar(); }}>
+                    <div className="sidenav-toggler sidenav-toggler-inner d-xl-block d-none me-3" style={{ cursor: 'pointer' }}>
+                        <a className="nav-link text-body p-0" onClick={e => {  onToggleSidebar && onToggleSidebar(); }}>
                             <div className="sidenav-toggler-inner text-white">
                                 <i className="sidenav-toggler-line bg-white" />
                                 <i className="sidenav-toggler-line bg-white" />
@@ -50,7 +86,7 @@ export default function Navbar({ onToggleSidebar }) {
                                 </a>
                             </li>
                             <li className="breadcrumb-item text-sm">
-                                <a className="opacity-7 text-white" href="#" onClick={preventDefault}>
+                                <a className="opacity-7 text-white" onClick={preventDefault}>
                                     Pages
                                 </a>
                             </li>
@@ -58,7 +94,7 @@ export default function Navbar({ onToggleSidebar }) {
                                 className="breadcrumb-item text-sm text-white active"
                                 aria-current="page"
                             >
-                                New User
+                                {currentPageName}
                             </li>
                         </ol>
                     </div>
@@ -81,7 +117,6 @@ export default function Navbar({ onToggleSidebar }) {
                             </li>
                             <li className="nav-item d-xl-none ps-3 d-flex align-items-center">
                                 <a
-                                    href="#"
                                     className="nav-link text-body p-0"
                                     id="iconNavbarSidenav"
                                     onClick={e => { e.preventDefault(); onToggleSidebar && onToggleSidebar(); }}
@@ -94,7 +129,7 @@ export default function Navbar({ onToggleSidebar }) {
                                 </a>
                             </li>
                             <li className="nav-item dropdown px-3">
-                                <a href="#" className="nav-link text-body p-0"
+                                <a className="nav-link text-body p-0"
                                     onClick={preventDefault}
                                     id="settingsDropdown"
                                     data-bs-toggle="dropdown"

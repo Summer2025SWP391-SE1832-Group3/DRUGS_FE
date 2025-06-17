@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, List, Typography, Tag, Space, Spin, Empty, message } from 'antd';
+import { Card, List, Typography, Tag, Space, Spin, Empty, message, Modal } from 'antd';
 import { CalendarOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { BlogAPI } from '../../apis/blog';
 import styled, { keyframes } from 'styled-components';
@@ -124,10 +124,56 @@ const ViewButton = styled.div`
   }
 `;
 
+const ModalContent = styled.div`
+  .blog-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  
+  .blog-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  
+  .blog-content {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #4a5568;
+    margin-bottom: 24px;
+    white-space: pre-wrap;
+  }
+  
+  .blog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid #e2e8f0;
+    color: #718096;
+    font-size: 14px;
+  }
+  
+  .blog-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+`;
+
+const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
+
 export default function BlogByUserId() {
   const [loading, setLoading] = useState(true);
   const [blogs, setBlogs] = useState([]);
   const [visibleBlogs, setVisibleBlogs] = useState([]);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const navigate = useNavigate();
   const { userId } = useParams();
   
@@ -175,6 +221,16 @@ export default function BlogByUserId() {
       return () => clearTimeout(timer);
     }
   }, [blogs, loading]);
+
+  const handleViewBlog = (blog) => {
+    setSelectedBlog(blog);
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setSelectedBlog(null);
+  };
 
   if (loading) {
     return (
@@ -224,7 +280,7 @@ export default function BlogByUserId() {
                   <StyledTag color={blog.status === 'Approved' ? 'green' : 'orange'}>
                     {blog.status}
                   </StyledTag>
-                  <ViewButton onClick={() => navigate(`/blogDetails/${blog.blogId}`)}>
+                  <ViewButton onClick={() => handleViewBlog(blog)}>
                     <EyeOutlined />
                     View
                   </ViewButton>
@@ -249,6 +305,40 @@ export default function BlogByUserId() {
           )}
         />
       )}
+
+      <Modal
+        title="Blog Details"
+        open={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={800}
+        centered
+        style={{ top: 20 }}
+      >
+        {selectedBlog && (
+          <ModalContent>
+            <img
+              src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0 ? selectedBlog.blogImages[0] : DEFAULT_BLOG_IMAGE}
+              alt={selectedBlog.title}
+              className="blog-image"
+            />
+            <div className="blog-title">{selectedBlog.title}</div>
+            <div className="blog-content">{selectedBlog.content}</div>
+            <div className="blog-meta">
+              <div className="blog-status">
+                <StyledTag color={selectedBlog.status === 'Approved' ? 'green' : 'orange'}>
+                  {selectedBlog.status}
+                </StyledTag>
+                <span>Posted by: {selectedBlog.postedBy}</span>
+              </div>
+              <div>
+                <CalendarOutlined style={{ marginRight: '8px' }} />
+                {new Date(selectedBlog.postedAt).toLocaleDateString()}
+              </div>
+            </div>
+          </ModalContent>
+        )}
+      </Modal>
     </StyledContainer>
   );
 }

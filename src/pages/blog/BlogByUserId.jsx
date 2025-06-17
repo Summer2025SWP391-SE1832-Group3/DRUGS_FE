@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Card, List, Typography, Tag, Space, Spin, Empty, message, Modal } from 'antd';
-import { CalendarOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, List, Typography, Tag, Space, Spin, Empty, message, Modal, Button, Form } from 'antd';
+import { CalendarOutlined, EyeOutlined, UserOutlined, PlusOutlined } from '@ant-design/icons';
 import { BlogAPI } from '../../apis/blog';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
+import CreateBlogForm from '../../components/blog/CreateBlogForm';
 
 const { Title, Paragraph } = Typography;
+const apiBase = "https://localhost:7045/api";  // Add /api back for API endpoints
 
 // Animation keyframes
 const fadeInUp = keyframes`
@@ -124,6 +126,55 @@ const ViewButton = styled.div`
   }
 `;
 
+const StyledModal = styled(Modal)`
+  .ant-modal-content {
+    max-height: calc(100vh - 100px);
+    margin: 50px auto;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .ant-modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding: 24px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
+
+  .ant-modal-header {
+    border-radius: 16px 16px 0 0;
+    padding: 16px 24px;
+  }
+
+  .ant-modal-title {
+    font-size: 20px;
+    color: #2c3e50;
+    font-weight: 600;
+  }
+
+  .ant-modal-close {
+    top: 16px;
+    right: 16px;
+  }
+`;
+
 const ModalContent = styled.div`
   .blog-image {
     width: 100%;
@@ -157,6 +208,9 @@ const ModalContent = styled.div`
     border-top: 1px solid #e2e8f0;
     color: #718096;
     font-size: 14px;
+    position: sticky;
+    bottom: 0;
+    background: white;
   }
   
   .blog-status {
@@ -168,29 +222,84 @@ const ModalContent = styled.div`
 
 const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
 
+// Add image error handling component
+const BlogImage = ({ src, alt, className, style, fallbackSrc = DEFAULT_BLOG_IMAGE }) => {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    if (!hasError) {
+      console.log(`Image failed to load: ${src}, using fallback`);
+      setImgSrc(fallbackSrc);
+      setHasError(true);
+    }
+  };
+
+  // Log the full image URL for debugging
+  console.log('Attempting to load image:', src);
+
+  return (
+    <img
+      src={imgSrc}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={handleError}
+    />
+  );
+};
+
+const CreateButton = styled(Button)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  height: 44px;
+  padding: 0 30px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  
+  &:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 export default function BlogByUserId() {
   const [loading, setLoading] = useState(true);
   const [blogs, setBlogs] = useState([]);
   const [visibleBlogs, setVisibleBlogs] = useState([]);
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { userId } = useParams();
-  
-  useEffect(() => {
-    const fetchUserBlogs = async () => {
-      try {
-        setLoading(true);
-        const response = await BlogAPI.getByUserId(userId);
-        setBlogs(response);
-      } catch (error) {
-        console.error('Error fetching user blogs:', error);
-        message.error('Failed to fetch blogs');
-      } finally {
-        setLoading(false);
-      }
-    };
 
+  const fetchUserBlogs = async () => {
+    try {
+      setLoading(true);
+      const response = await BlogAPI.getByUserId(userId);
+      console.log('Full API Response:', response);
+      console.log('Blog data structure:', {
+        firstBlog: response[0],
+        imageField: response[0]?.image,
+        blogImagesField: response[0]?.blogImages
+      });
+      setBlogs(response);
+    } catch (error) {
+      console.error('Error fetching user blogs:', error);
+      message.error('Failed to fetch blogs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserBlogs();
   }, [userId]);
 
@@ -223,6 +332,8 @@ export default function BlogByUserId() {
   }, [blogs, loading]);
 
   const handleViewBlog = (blog) => {
+    console.log('Selected blog data:', blog);
+    console.log('Blog images array:', blog.blogImages);
     setSelectedBlog(blog);
     setIsModalVisible(true);
   };
@@ -230,6 +341,30 @@ export default function BlogByUserId() {
   const handleModalClose = () => {
     setIsModalVisible(false);
     setSelectedBlog(null);
+  };
+
+  const handleCreateBlog = async (values) => {
+    try {
+      setUploading(true);
+      const imageFile = values.blogImages?.[0]?.originFileObj;
+      console.log('Image file to upload:', imageFile);
+      
+      const formData = {
+        ...values,
+        blogImages: imageFile ? [imageFile] : []
+      };
+      
+      console.log('Form data being sent:', formData);
+      await BlogAPI.createBlog(formData);
+      message.success('Blog created successfully');
+      setIsCreateModalVisible(false);
+      fetchUserBlogs();
+    } catch (error) {
+      console.error('Error creating blog:', error);
+      message.error('Failed to create blog');
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (loading) {
@@ -253,6 +388,16 @@ export default function BlogByUserId() {
           Manage and view your published articles
         </Paragraph>
       </StyledHeader>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <CreateButton 
+          type="primary" 
+          icon={<PlusOutlined />} 
+          onClick={() => setIsCreateModalVisible(true)}
+        >
+          Create New Blog
+        </CreateButton>
+      </div>
 
       {blogs.length === 0 ? (
         <Empty 
@@ -287,6 +432,7 @@ export default function BlogByUserId() {
                 </Space>
               }
             >
+              
               <Paragraph 
                 ellipsis={{ rows: 3 }} 
                 style={{ 
@@ -306,25 +452,42 @@ export default function BlogByUserId() {
         />
       )}
 
+      {/* Create Blog Modal */}
       <Modal
-        title="Blog Details"
+        title="Create New Blog"
+        open={isCreateModalVisible}
+        onCancel={() => setIsCreateModalVisible(false)}
+        footer={null}
+        width={800}
+        destroyOnHidden
+      >
+        <CreateBlogForm
+          onFinish={handleCreateBlog}
+          onCancel={() => setIsCreateModalVisible(false)}
+          uploading={uploading}
+        />
+      </Modal>
+
+      <StyledModal
         open={isModalVisible}
         onCancel={handleModalClose}
         footer={null}
         width={800}
         centered
-        style={{ top: 20 }}
+        destroyOnHidden
       >
         {selectedBlog && (
           <ModalContent>
-            <img
-              src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0 ? selectedBlog.blogImages[0] : DEFAULT_BLOG_IMAGE}
+            <div className="blog-title">{selectedBlog.title}</div>
+            <BlogImage
+              src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0 
+                ? `https://localhost:7045${selectedBlog.blogImages[0]}` 
+                : DEFAULT_BLOG_IMAGE}
               alt={selectedBlog.title}
               className="blog-image"
             />
-            <div className="blog-title">{selectedBlog.title}</div>
             <div className="blog-content">{selectedBlog.content}</div>
-            <div className="blog-meta">
+            <div className="blog-content d-flex justify-content-between">
               <div className="blog-status">
                 <StyledTag color={selectedBlog.status === 'Approved' ? 'green' : 'orange'}>
                   {selectedBlog.status}
@@ -338,7 +501,7 @@ export default function BlogByUserId() {
             </div>
           </ModalContent>
         )}
-      </Modal>
+      </StyledModal>
     </StyledContainer>
   );
 }

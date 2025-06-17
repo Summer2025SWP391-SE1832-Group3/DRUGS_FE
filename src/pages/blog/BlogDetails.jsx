@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Card, Space, Avatar, Tag, Spin, Button, Divider, List } from 'antd';
+import { Typography, Card, Space, Avatar, Tag, Spin, Button, Divider, List, Empty } from 'antd';
 import { UserOutlined, CalendarOutlined, ArrowLeftOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons';
 import { BlogAPI } from '../../apis/blog';
 import styled from 'styled-components';
@@ -43,26 +43,49 @@ const StyledTag = styled(Tag)`
 const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
 
 export default function BlogDetails() {
-  const { blogId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState(null);
+
+  console.log('BlogDetails - id from useParams:', id);
+  console.log('BlogDetails - typeof id:', typeof id);
+  console.log('BlogDetails - window.location.pathname:', window.location.pathname);
+  console.log('BlogDetails - user from localStorage:', JSON.parse(localStorage.getItem('user')));
 
   useEffect(() => {
     const fetchBlogDetails = async () => {
       try {
         setLoading(true);
-        const response = await BlogAPI.getById(blogId);
+        console.log('Fetching blog with id:', id);
+        
+        // Try public endpoint first
+        try {
+          const response = await BlogAPI.getById(id);
+          setBlog(response);
+          return;
+        } catch (publicError) {
+          console.log('Public endpoint failed, trying authenticated endpoint:', publicError);
+        }
+        
+        // Fall back to authenticated endpoint
+        const response = await BlogAPI.getById(id);
         setBlog(response);
       } catch (error) {
         console.error('Error fetching blog details:', error);
+        console.error('Error response:', error.response);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlogDetails();
-  }, [blogId]);
+    if (id) {
+      fetchBlogDetails();
+    } else {
+      console.error('No blog ID provided');
+      setLoading(false);
+    }
+  }, [id]);
 
   if (loading) {
     return (

@@ -12,8 +12,12 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         const user = JSON.parse(localStorage.getItem('user'));
+        console.log('User from localStorage in interceptor:', user);
         if (user && user.token) {
             config.headers.Authorization = `Bearer ${user.token}`;
+            console.log('Authorization header set:', config.headers.Authorization);
+        } else {
+            console.log('No user token found');
         }
         return config;
     },
@@ -32,12 +36,12 @@ export const BlogAPI = {
             throw error;
         }
     },
-    getById: async (blogId) => {
+    getById: async (id) => {
         try {
-            const response = await axiosInstance.get(`/Blog/${blogId}`);
+            const response = await axiosInstance.get(`/Blog/${id}`);
             return response.data;
         } catch (error) {
-            console.error(`Error fetching blog with id ${blogId}:`, error);
+            console.error(`Error fetching blog with id ${id}:`, error);
             throw error;
         }
     },

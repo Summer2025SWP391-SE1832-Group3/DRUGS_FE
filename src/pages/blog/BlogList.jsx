@@ -67,8 +67,10 @@ export default function BlogList() {
         const response = await BlogAPI.getAll();
         console.log('API Response:', response); // Debug log
         if (response && Array.isArray(response)) {
+          console.log('First blog object:', response[0]); // Debug log
           setBlogs(response);
         } else if (response && response.data && Array.isArray(response.data)) {
+          console.log('First blog object from response.data:', response.data[0]); // Debug log
           setBlogs(response.data);
         } else {
           console.error('Unexpected API response format:', response);
@@ -85,8 +87,11 @@ export default function BlogList() {
     fetchBlogs();
   }, []);
 
-  const handleReadMore = (blogId) => {
-    navigate(`/blogDetails/${blogId}`);
+  const handleReadMore = (id) => {
+    console.log('BlogList - Navigating to blog details with id:', id);
+    console.log('BlogList - typeof id:', typeof id);
+    console.log('BlogList - blog object:', blogs.find(blog => blog.blogId === id));
+    navigate(`/blogDetails/${id}`);
   };
 
   if (loading) {
@@ -107,6 +112,23 @@ export default function BlogList() {
           Discover insights and updates from our community
         </Paragraph>
       </StyledHeader>
+
+      {/* Temporary debug section */}
+      {blogs.length > 0 && (
+        <div style={{ background: '#fff', padding: '16px', marginBottom: '24px', borderRadius: '8px' }}>
+          <h4>Debug Info:</h4>
+          <p>Number of blogs: {blogs.length}</p>
+          <p>First blog keys: {Object.keys(blogs[0]).join(', ')}</p>
+          <p>First blog ID: {blogs[0].blogId}</p>
+          <p>First blog object: {JSON.stringify(blogs[0], null, 2)}</p>
+          <button 
+            onClick={() => navigate(`/blogDetails/${blogs[0].blogId}`)}
+            style={{ marginTop: '8px', padding: '8px 16px' }}
+          >
+            Test Navigate to First Blog
+          </button>
+        </div>
+      )}
 
       {blogs.length === 0 ? (
         <Empty description="No blog posts available" />

@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import CreateBlogForm from '../../components/blog/CreateBlogForm';
 
 const { Title, Paragraph } = Typography;
-const apiBase = "https://localhost:7045/api";  // Add /api back for API endpoints
+const apiBase = "https://localhost:7045";
 
 // Animation keyframes
 const fadeInUp = keyframes`
@@ -229,14 +229,10 @@ const BlogImage = ({ src, alt, className, style, fallbackSrc = DEFAULT_BLOG_IMAG
 
   const handleError = () => {
     if (!hasError) {
-      console.log(`Image failed to load: ${src}, using fallback`);
       setImgSrc(fallbackSrc);
       setHasError(true);
     }
   };
-
-  // Log the full image URL for debugging
-  console.log('Attempting to load image:', src);
 
   return (
     <img
@@ -284,15 +280,8 @@ export default function BlogByUserId() {
     try {
       setLoading(true);
       const response = await BlogAPI.getByUserId(userId);
-      console.log('Full API Response:', response);
-      console.log('Blog data structure:', {
-        firstBlog: response[0],
-        imageField: response[0]?.image,
-        blogImagesField: response[0]?.blogImages
-      });
       setBlogs(response);
     } catch (error) {
-      console.error('Error fetching user blogs:', error);
       message.error('Failed to fetch blogs');
     } finally {
       setLoading(false);
@@ -332,8 +321,6 @@ export default function BlogByUserId() {
   }, [blogs, loading]);
 
   const handleViewBlog = (blog) => {
-    console.log('Selected blog data:', blog);
-    console.log('Blog images array:', blog.blogImages);
     setSelectedBlog(blog);
     setIsModalVisible(true);
   };
@@ -346,21 +333,17 @@ export default function BlogByUserId() {
   const handleCreateBlog = async (values) => {
     try {
       setUploading(true);
-      const imageFile = values.blogImages?.[0]?.originFileObj;
-      console.log('Image file to upload:', imageFile);
-      
+      const imageFile = values.blogImages?.[0]?.originFileObj;      
       const formData = {
         ...values,
         blogImages: imageFile ? [imageFile] : []
       };
       
-      console.log('Form data being sent:', formData);
       await BlogAPI.createBlog(formData);
       message.success('Blog created successfully');
       setIsCreateModalVisible(false);
       fetchUserBlogs();
     } catch (error) {
-      console.error('Error creating blog:', error);
       message.error('Failed to create blog');
     } finally {
       setUploading(false);
@@ -481,7 +464,7 @@ export default function BlogByUserId() {
             <div className="blog-title">{selectedBlog.title}</div>
             <BlogImage
               src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0 
-                ? `https://localhost:7045${selectedBlog.blogImages[0]}` 
+                ? `${apiBase}${selectedBlog.blogImages[0]}` 
                 : DEFAULT_BLOG_IMAGE}
               alt={selectedBlog.title}
               className="blog-image"

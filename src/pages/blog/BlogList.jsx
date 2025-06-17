@@ -6,6 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
+const apiBase = "https://localhost:7045";  // Base URL without /api for static files
 
 // Animation keyframes
 const fadeInUp = keyframes`
@@ -101,7 +102,7 @@ export default function BlogList() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await BlogAPI.getAll();
+        const response = await BlogAPI.getApprovedBlogs();
         if (response && Array.isArray(response)) {
           setBlogs(response);
         } else if (response && response.data && Array.isArray(response.data)) {
@@ -217,7 +218,9 @@ export default function BlogList() {
                 cover={
                   <img
                     alt={blog.title}
-                    src={blog.blogImages && blog.blogImages.length > 0 ? blog.blogImages[0] : DEFAULT_BLOG_IMAGE}
+                    src={blog.blogImages && blog.blogImages.length > 0 
+                      ? `${apiBase}${blog.blogImages[0]}` 
+                      : DEFAULT_BLOG_IMAGE}
                     style={{ height: 240, objectFit: 'cover' }}
                   />
                 }

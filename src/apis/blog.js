@@ -27,7 +27,7 @@ axiosInstance.interceptors.request.use(
 );
 
 export const BlogAPI = {
-    getAll: async () => {
+    getApprovedBlogs: async () => {
         try {
             const response = await axiosInstance.get('/Blog/approvedBlogs');
             return response.data;

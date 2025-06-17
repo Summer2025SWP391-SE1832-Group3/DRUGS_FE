@@ -20,7 +20,7 @@ import { BlogAPI } from '../apis/blog';
 const { Title, Paragraph } = Typography;
 
 const HeroSection = styled.div`
-  background: linear-gradient(rgba(32, 87, 109, 0.8), rgba(33, 75, 138, 0.8)), url(${homeImage});
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${homeImage});
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -83,11 +83,12 @@ const StyledCard = styled(Card)`
   transition: all 0.4s ease-in-out;
   border-radius: 16px;
   border: none;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  background: #ffffff;
   
   &:hover {
     transform: translateY(-10px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
   }
   
   .ant-card-body {
@@ -98,13 +99,13 @@ const StyledCard = styled(Card)`
   .service-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
-    color: #1890ff;
+    color: #2c3e50;
     transition: all 0.3s ease;
   }
   
   &:hover .service-icon {
     transform: scale(1.1);
-    color: #096dd9;
+    color: #34495e;
   }
 `;
 
@@ -114,11 +115,12 @@ const BlogCard = styled(Card)`
   border-radius: 16px;
   overflow: hidden;
   border: none;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  background: #ffffff;
   
   &:hover {
     transform: translateY(-12px);
-    box-shadow: 0 16px 50px rgba(0,0,0,0.15);
+    box-shadow: 0 16px 50px rgba(0,0,0,0.1);
   }
 
   .ant-card-cover img {
@@ -137,7 +139,7 @@ const BlogCard = styled(Card)`
 `;
 
 const CallToActionSection = styled.div`
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  background: #2c3e50;
   color: white;
   padding: 80px 0;
   text-align: center;
@@ -156,7 +158,7 @@ const CallToActionSection = styled.div`
 `;
 
 const BlogSection = styled.div`
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: #f8f9fa;
   padding: 80px 0;
   position: relative;
   
@@ -167,7 +169,7 @@ const BlogSection = styled.div`
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, #dee2e6 50%, transparent 100%);
+    background: #e9ecef;
   }
 `;
 
@@ -183,14 +185,14 @@ const StatCard = styled.div`
   
   .ant-statistic-title {
     font-size: 1rem;
-    color: #666;
+    color: #6c757d;
     margin-bottom: 8px;
   }
   
   .ant-statistic-content {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1890ff;
+    color: #2c3e50;
   }
 `;
 
@@ -233,22 +235,23 @@ export default function Home() {
           <Title level={1} style={{ color: 'white' }}>
             Drug Use Prevention Support System
           </Title>
-          <Title level={3} style={{ color: 'white' }}>
+          <Title level={3} style={{ color: 'white', opacity: 0.9 }}>
             Empowering communities through education, support, and prevention
           </Title>
           <Button 
             type="primary" 
             size="large" 
             style={{ 
-              backgroundColor: '#001529',
-              borderColor: '#001529',
+              backgroundColor: 'white',
+              borderColor: 'white',
+              color: '#2c3e50',
               height: '48px',
               padding: '0 32px',
               fontSize: '16px',
               borderRadius: '24px',
-              boxShadow: '0 4px 15px rgba(0,21,41,0.3)'
+              boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
             }}
-            icon={<SafetyOutlined />}
+            icon={<SafetyOutlined style={{ color: '#2c3e50' }} />}
           >
             Get Help Now
           </Button>
@@ -257,7 +260,7 @@ export default function Home() {
 
       <StatsSection>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          <Title level={2} style={{ textAlign: 'center', marginBottom: 48 }}>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: 48, color: '#2c3e50' }}>
             Our Impact
           </Title>
           <Row gutter={[32, 32]}>
@@ -267,7 +270,7 @@ export default function Home() {
                   title="Communities Served" 
                   value={150} 
                   suffix="+" 
-                  prefix={<TeamOutlined style={{ color: '#1890ff', fontSize: '24px' }} />}
+                  prefix={<TeamOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
                 />
               </StatCard>
             </Col>
@@ -277,7 +280,7 @@ export default function Home() {
                   title="Lives Impacted" 
                   value={5000} 
                   suffix="+" 
-                  prefix={<HeartOutlined style={{ color: '#1890ff', fontSize: '24px' }} />}
+                  prefix={<HeartOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
                 />
               </StatCard>
             </Col>
@@ -287,7 +290,7 @@ export default function Home() {
                   title="Success Rate" 
                   value={95} 
                   suffix="%" 
-                  prefix={<TrophyOutlined style={{ color: '#1890ff', fontSize: '24px' }} />}
+                  prefix={<TrophyOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
                 />
               </StatCard>
             </Col>
@@ -297,7 +300,7 @@ export default function Home() {
                   title="Years of Service" 
                   value={10} 
                   suffix="+" 
-                  prefix={<GlobalOutlined style={{ color: '#1890ff', fontSize: '24px' }} />}
+                  prefix={<GlobalOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
                 />
               </StatCard>
             </Col>
@@ -305,12 +308,12 @@ export default function Home() {
         </div>
       </StatsSection>
 
-      <div style={{ padding: '80px 0', background: 'white' }}>
+      <div style={{ padding: '80px 0', background: '#ffffff' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          <Title level={2} style={{ textAlign: 'center', marginBottom: 16 }}>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: 16, color: '#2c3e50' }}>
             Our Services
           </Title>
-          <Paragraph style={{ textAlign: 'center', marginBottom: 48, fontSize: '18px', color: '#666' }}>
+          <Paragraph style={{ textAlign: 'center', marginBottom: 48, fontSize: '18px', color: '#6c757d' }}>
             Comprehensive support and resources for drug prevention and community wellness
           </Paragraph>
           <Row gutter={[32, 32]}>
@@ -347,16 +350,16 @@ export default function Home() {
 
       <BlogSection>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          <Title level={2} style={{ textAlign: 'center', marginBottom: 16 }}>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: 16, color: '#2c3e50' }}>
             Latest Blog Posts
           </Title>
-          <Paragraph style={{ textAlign: 'center', marginBottom: 48, fontSize: '18px', color: '#666' }}>
+          <Paragraph style={{ textAlign: 'center', marginBottom: 48, fontSize: '18px', color: '#6c757d' }}>
             Stay informed with our latest articles and insights on drug prevention and community support
           </Paragraph>
           
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px' }}>
-              <Spin size="large" />
+              <Spin size="large" style={{ color: '#2c3e50' }} />
             </div>
           ) : (
             <Row gutter={[32, 32]}>
@@ -377,7 +380,7 @@ export default function Home() {
                         onClick={() => handleReadMore(blog.blogId)}
                         style={{ 
                           border: 'none',
-                          color: '#1890ff',
+                          color: '#2c3e50',
                           fontWeight: '500'
                         }}
                       >
@@ -387,7 +390,7 @@ export default function Home() {
                   >
                     <Card.Meta
                       title={
-                        <Title level={4} style={{ margin: 0, fontSize: '18px', lineHeight: '1.4' }}>
+                        <Title level={4} style={{ margin: 0, fontSize: '18px', lineHeight: '1.4', color: '#2c3e50' }}>
                           {blog.title}
                         </Title>
                       }
@@ -395,7 +398,7 @@ export default function Home() {
                         <div>
                           <Paragraph 
                             ellipsis={{ rows: 3 }} 
-                            style={{ marginTop: '16px', marginBottom: '16px', fontSize: '14px', lineHeight: '1.6' }}
+                            style={{ marginTop: '16px', marginBottom: '16px', fontSize: '14px', lineHeight: '1.6', color: '#6c757d' }}
                           >
                             {blog.content}
                           </Paragraph>
@@ -404,9 +407,9 @@ export default function Home() {
                             justifyContent: 'space-between', 
                             alignItems: 'center', 
                             fontSize: '12px', 
-                            color: '#666',
+                            color: '#6c757d',
                             paddingTop: '12px',
-                            borderTop: '1px solid #f0f0f0'
+                            borderTop: '1px solid #e9ecef'
                           }}>
                             <span>
                               <UserOutlined style={{ marginRight: '6px' }} />
@@ -433,13 +436,13 @@ export default function Home() {
                 size="large"
                 onClick={() => navigate('/blogList')}
                 style={{ 
-                  backgroundColor: '#001529',
-                  borderColor: '#001529',
+                  backgroundColor: '#2c3e50',
+                  borderColor: '#2c3e50',
                   height: '48px',
                   padding: '0 32px',
                   fontSize: '16px',
                   borderRadius: '24px',
-                  boxShadow: '0 4px 15px rgba(0,21,41,0.3)'
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
                 }}
               >
                 View All Blogs
@@ -479,7 +482,7 @@ export default function Home() {
               size="large"
               style={{ 
                 backgroundColor: 'white', 
-                color: '#1890ff',
+                color: '#2c3e50',
                 height: '48px',
                 padding: '0 32px',
                 fontSize: '16px',

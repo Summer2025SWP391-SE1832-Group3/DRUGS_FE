@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, message, Space, ConfigProvider, Flex } from "antd";
+import { Table, Button, Popconfirm, message, Space, ConfigProvider, Flex, Tag } from "antd";
 import { BlogManagerAPI } from "../apis/blogManager";
 
 export default function BlogManager() {
@@ -13,6 +13,7 @@ export default function BlogManager() {
       setBlogs(res.data);
     } catch (err) {
       message.error("Failed to fetch blogs!");
+      setBlogs([]);
     }
     setLoading(false);
   };
@@ -41,29 +42,54 @@ export default function BlogManager() {
     }
   };
 
-  const handleEdit = (record) => {
-    // Tùy bạn muốn mở modal hay chuyển trang edit
-    message.info("Edit feature not implemented yet!");
+  const handleReject = async (id) => {
+    try {
+      await BlogManagerAPI.reject(id);
+      message.success("Rejected successfully!");
+      fetchBlogs();
+    } catch {
+      message.error("Reject failed!");
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 0:
+        return "Pending";
+      case 1:
+        return "Approved";
+      case 2:
+        return "Rejected";
+      default:
+        return "Unknown";
+    }
   };
 
   const columns = [
     { title: "ID", dataIndex: "blogId", key: "blogId" },
-    { title: "Staff Creator", dataIndex: "staffCreator", key: "staffCreator" },
     { title: "Title", dataIndex: "title", key: "title" },
     { title: "Content", dataIndex: "content", key: "content" },
-    { title: "Category", dataIndex: "category", key: "category" },
+    { title: "Posted At", dataIndex: "postedAt", key: "postedAt" },
+    { title: "Posted By", dataIndex: "postedBy", key: "postedBy" },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        if (status === "Approved")
+          return <Tag color="success">Approved</Tag>;
+        if (status === "Pending" || status === 0)
+          return <Tag color="processing">Processing</Tag>;
+        if (status === "Rejected" || status === 2)
+          return <Tag color="error">Rejected</Tag>;
+        return <Tag color="default">{status}</Tag>;
+      }
+    },
     {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
         <Flex gap="small" wrap>
-          <Button
-            color="warning"
-            variant="solid"
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
           <Popconfirm
             title="Are you sure to delete?"
             onConfirm={() => handleDelete(record.blogId)}
@@ -76,8 +102,17 @@ export default function BlogManager() {
             color="cyan"
             variant="solid"
             onClick={() => handleApprove(record.blogId)}
+            disabled={record.status === "Approved"}
           >
             Approve
+          </Button>
+          <Button
+            color="warning"
+            variant="solid"
+            onClick={() => handleReject(record.blogId)}
+            disabled={record.status === "Rejected"}
+          >
+            Reject
           </Button>
         </Flex>
       ),
@@ -94,6 +129,7 @@ export default function BlogManager() {
           rowKey="blogId"
           loading={loading}
           pagination={{ pageSize: 6 }}
+          bordered
         />
       </div>
     </ConfigProvider>

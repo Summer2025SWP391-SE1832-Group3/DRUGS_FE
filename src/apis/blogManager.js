@@ -1,10 +1,10 @@
-import axios from "axios";
-const apiBase = "https://localhost:7045/api";
+
+import axiosInstance from "./axiosInstance"; // ✅ Đúng
 
 export const BlogManagerAPI = {
-  getAll: () => axios.get(`${apiBase}/Blog/Manager`),
-  update: (id, data) => axios.put(`${apiBase}/Blog/${id}`, data),
-  delete: (id) => axios.delete(`${apiBase}/Blog/${id}`),
-  approve: (id) => axios.post(`${apiBase}/Blog/approve/${id}`),
-  reject: (id) => axios.post(`${apiBase}/Blog/reject/${id}`),
+  getAll: () => axiosInstance.get("/Blog/allBlogs"),
+  update: (id, data) => axiosInstance.put(`/Blog/${id}`, data),
+  delete: (id) => axiosInstance.delete(`/Blog/${id}`),
+  approve: (id) => axiosInstance.post(`/Blog/approve/${id}`),
+  reject: (id) => axiosInstance.post(`/Blog/reject/${id}`),
 };

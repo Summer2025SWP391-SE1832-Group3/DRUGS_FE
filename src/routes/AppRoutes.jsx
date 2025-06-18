@@ -12,6 +12,7 @@ import BlogManager from '../pages/BlogManager'
 import BlogList from '../pages/blog/BlogList'
 import BlogDetails from '../pages/blog/BlogDetails'
 import BlogByUserId from '../pages/blog/BlogByUserId'
+import CreateBlogStaff from '../pages/CreateBlogStaff'
 
 export default function AppRoutes() {
   return (
@@ -28,6 +29,7 @@ export default function AppRoutes() {
           <Route path="blogList" element={<BlogList/>}/>
           <Route path="blogDetails/:id" element={<BlogDetails/>}/>
           <Route path="blogByUserId/:userId" element={<BlogByUserId/>}/>
+          <Route path="createBlogStaff" element={<CreateBlogStaff/>}/>
         </Route>
 
       </Routes>

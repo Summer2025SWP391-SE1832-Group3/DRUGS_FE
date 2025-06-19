@@ -333,7 +333,9 @@ export default function BlogByUserId() {
   const handleCreateBlog = async (values) => {
     try {
       setUploading(true);
-      const imageFile = values.blogImages?.[0]?.originFileObj;      
+      const imageFile = values.blogImages?.[0]?.originFileObj;    
+      console.log('values.blogImages:', values.blogImages);
+      console.log('imageFile:', imageFile); // Phải là File, không phải undefined  
       const formData = {
         ...values,
         blogImages: imageFile ? [imageFile] : []

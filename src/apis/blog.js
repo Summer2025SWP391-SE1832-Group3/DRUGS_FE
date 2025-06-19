@@ -63,10 +63,8 @@ export const BlogAPI = {
             
             // Handle single image upload
             if (blogData.blogImages && blogData.blogImages.length > 0) {
-                // Log the image file for debugging
-                console.log('Uploading image:', blogData.blogImages[0]);
-                // Use 'blogImages' as the field name to match the API
-                formData.append('blogImages', blogData.blogImages[0]);
+                // Đổi tên trường thành 'images' để backend nhận đúng
+                formData.append('images', blogData.blogImages[0]?.originFileObj || blogData.blogImages[0]);
             }
 
             // Log all FormData entries for debugging
@@ -76,7 +74,7 @@ export const BlogAPI = {
 
             const response = await axiosInstance.post('/Blog', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    // 'Content-Type': 'multipart/form-data',
                     'Accept': 'application/json',
                 },
                 transformRequest: [(data) => data], // Prevent axios from transforming the FormData

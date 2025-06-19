@@ -126,6 +126,30 @@ const ViewButton = styled.div`
   }
 `;
 
+const DeleteButton = styled(Button)`
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  border: none;
+  color: white;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 8px 20px;
+  box-shadow: 0 4px 20px rgba(255, 77, 79, 0.08);
+  transition: all 0.3s ease;
+  margin-left: 4px;
+
+  &:hover, &:focus {
+    background: linear-gradient(135deg, #d9363e 0%, #ff7875 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 77, 79, 0.18);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const StyledModal = styled(Modal)`
   .ant-modal-content {
     max-height: calc(100vh - 100px);
@@ -179,9 +203,11 @@ const ModalContent = styled.div`
   .blog-image {
     width: 100%;
     height: 300px;
-    object-fit: cover;
+    object-fit: contain; /* Sửa lại ở đây */
+    background: #fff;    /* Thêm nếu muốn nền trắng */
     border-radius: 12px;
     margin-bottom: 24px;
+    display: block;
   }
   
   .blog-title {
@@ -279,6 +305,7 @@ export default function BlogByUserId() {
   const fetchUserBlogs = async () => {
     try {
       setLoading(true);
+      setVisibleBlogs([]); // Reset lại visibleBlogs để animation chạy lại
       const response = await BlogAPI.getByUserId(userId);
       setBlogs(response);
     } catch (error) {
@@ -292,31 +319,20 @@ export default function BlogByUserId() {
     fetchUserBlogs();
   }, [userId]);
 
-  // Animate blogs appearing one by one
   useEffect(() => {
     if (blogs.length > 0 && !loading) {
-      const timer = setTimeout(() => {
-        const animateBlogs = () => {
-          setVisibleBlogs(prev => {
-            if (prev.length < blogs.length) {
-              return blogs.slice(0, prev.length + 1);
-            }
-            return prev;
-          });
-        };
-
-        // Show blogs one by one with 200ms delay
-        const interval = setInterval(() => {
-          animateBlogs();
-          if (visibleBlogs.length >= blogs.length) {
-            clearInterval(interval);
-          }
-        }, 200);
-
-        return () => clearInterval(interval);
-      }, 500); // Start animation after header appears
-
-      return () => clearTimeout(timer);
+      setVisibleBlogs([]); // Reset lại trước khi chạy animation
+      let current = 0;
+      const interval = setInterval(() => {
+        setVisibleBlogs(blogs.slice(0, current + 1));
+        current++;
+        if (current >= blogs.length) {
+          clearInterval(interval);
+        }
+      }, 200);
+      return () => clearInterval(interval);
+    } else if (blogs.length === 0 && visibleBlogs.length !== 0) {
+      setVisibleBlogs([]);
     }
   }, [blogs, loading]);
 
@@ -333,14 +349,14 @@ export default function BlogByUserId() {
   const handleCreateBlog = async (values) => {
     try {
       setUploading(true);
-      const imageFile = values.blogImages?.[0]?.originFileObj;    
+      const imageFile = values.blogImages?.[0]?.originFileObj;
       console.log('values.blogImages:', values.blogImages);
       console.log('imageFile:', imageFile); // Phải là File, không phải undefined  
       const formData = {
         ...values,
         blogImages: imageFile ? [imageFile] : []
       };
-      
+
       await BlogAPI.createBlog(formData);
       message.success('Blog created successfully');
       setIsCreateModalVisible(false);
@@ -350,6 +366,25 @@ export default function BlogByUserId() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleDeleteBlog = (blog) => {
+    Modal.confirm({
+      title: 'Delete Confirm',
+      content: `Are you sure you want to delete the blog "${blog.title}"?`,
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk: async () => {
+        try {
+          await BlogAPI.deleteBlog(blog.blogId);
+          message.success('Blog deleted successfully');
+          fetchUserBlogs();
+        } catch (error) {
+          message.error('Failed to delete blog');
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -375,9 +410,9 @@ export default function BlogByUserId() {
       </StyledHeader>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <CreateButton 
-          type="primary" 
-          icon={<PlusOutlined />} 
+        <CreateButton
+          type="primary"
+          icon={<PlusOutlined />}
           onClick={() => setIsCreateModalVisible(true)}
         >
           Create New Blog
@@ -385,11 +420,11 @@ export default function BlogByUserId() {
       </div>
 
       {blogs.length === 0 ? (
-        <Empty 
-          description="No blog posts found" 
-          style={{ 
-            background: 'white', 
-            padding: '40px', 
+        <Empty
+          description="No blog posts found"
+          style={{
+            background: 'white',
+            padding: '40px',
             borderRadius: '12px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
           }}
@@ -414,14 +449,17 @@ export default function BlogByUserId() {
                     <EyeOutlined />
                     View
                   </ViewButton>
+                  <DeleteButton danger type="primary" onClick={() => handleDeleteBlog(blog)}>
+                    Delete
+                  </DeleteButton>
                 </Space>
               }
             >
-              
-              <Paragraph 
-                ellipsis={{ rows: 3 }} 
-                style={{ 
-                  fontSize: '14px', 
+
+              <Paragraph
+                ellipsis={{ rows: 3 }}
+                style={{
+                  fontSize: '14px',
                   lineHeight: '1.6',
                   marginBottom: '16px'
                 }}
@@ -465,8 +503,8 @@ export default function BlogByUserId() {
           <ModalContent>
             <div className="blog-title">{selectedBlog.title}</div>
             <BlogImage
-              src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0 
-                ? `${apiBase}${selectedBlog.blogImages[0]}` 
+              src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0
+                ? `${apiBase}${selectedBlog.blogImages[0]}`
                 : DEFAULT_BLOG_IMAGE}
               alt={selectedBlog.title}
               className="blog-image"

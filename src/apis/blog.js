@@ -88,5 +88,14 @@ export const BlogAPI = {
             console.error("Error creating blog:", error);
             throw error;
         }
+    },
+    deleteBlog: async (id) => {
+        try {
+            const response = await axiosInstance.delete(`/Blog/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error deleting blog with id ${id}:`, error);
+            throw error;
+        }
     }
 }

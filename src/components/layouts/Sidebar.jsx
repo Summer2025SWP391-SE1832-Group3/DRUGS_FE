@@ -4,7 +4,7 @@ import { message } from 'antd';
 
 export default function Sidebar({ open }) {
     const navigate = useNavigate();
-    const navbarHeight = 54;
+    const navbarHeight = 55;
 
     const handlePersonalBlogsClick = () => {
         const userData = localStorage.getItem('user');

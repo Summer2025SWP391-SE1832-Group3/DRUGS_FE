@@ -1,5 +1,5 @@
 
-import axiosInstance from "./axiosInstance"; // ✅ Đúng
+import axiosInstance from "./axiosInstance"; 
 
 export const BlogManagerAPI = {
   getAll: () => axiosInstance.get("/Blog/allBlogs"),

@@ -7,7 +7,9 @@ import Register from '../pages/Register'
 import Home from '../pages/Home'
 import Profile from '../pages/Profile'
 import CourseList from '../pages/course/CourseList'
-
+import BlogList from '../pages/blog/BlogList'
+import BlogDetails from '../pages/blog/BlogDetails'
+import BlogByUserId from '../pages/blog/BlogByUserId'
 
 export default function AppRoutes() {
   return (
@@ -20,6 +22,9 @@ export default function AppRoutes() {
           <Route path="register" element={<Register/>}/>
           <Route path= "profile" element={<Profile/>}/>
           <Route path="courseList" element={<CourseList/>}/>
+          <Route path="blogList" element={<BlogList/>}/>
+          <Route path="blogDetails/:id" element={<BlogDetails/>}/>
+          <Route path="blogByUserId/:userId" element={<BlogByUserId/>}/>
         </Route>
 
       </Routes>

@@ -1,7 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-})
+  optimizeDeps: {
+    include: [
+      'antd/es/locale/vi_VN', // hoặc locale bạn dùng
+      'antd/es/modal',
+      'antd/es/message',
+      'antd/es/notification',
+      'antd/es/button',
+      'antd/es/style',
+    ],
+  },
+});

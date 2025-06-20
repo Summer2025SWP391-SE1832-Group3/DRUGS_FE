@@ -8,7 +8,7 @@ export default function AppLayouts() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem('isLoggedIn') === 'true';
   })
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   useEffect(() => {
     localStorage.setItem('isLoggedIn', isLoggedIn);
   })

@@ -41,23 +41,17 @@ const StyledTag = styled(Tag)`
 `;
 
 const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
-
+const apiBase = "https://localhost:7045";
 export default function BlogDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState(null);
 
-  console.log('BlogDetails - id from useParams:', id);
-  console.log('BlogDetails - typeof id:', typeof id);
-  console.log('BlogDetails - window.location.pathname:', window.location.pathname);
-  console.log('BlogDetails - user from localStorage:', JSON.parse(localStorage.getItem('user')));
-
   useEffect(() => {
     const fetchBlogDetails = async () => {
       try {
         setLoading(true);
-        console.log('Fetching blog with id:', id);
         
         // Try public endpoint first
         try {
@@ -136,7 +130,7 @@ export default function BlogDetails() {
 
         {blog.blogImages && blog.blogImages.length > 0 ? (
           <StyledImage 
-            src={blog.blogImages[0]} 
+            src={`${apiBase}${blog.blogImages[0]}`}
             alt={blog.title}
           />
         ) : (

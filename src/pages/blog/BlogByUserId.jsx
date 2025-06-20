@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Card, List, Typography, Tag, Space, Spin, Empty, message } from 'antd';
-import { CalendarOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, List, Typography, Tag, Space, Spin, Empty, message, Modal, Button, Form } from 'antd';
+import { CalendarOutlined, EyeOutlined, UserOutlined, PlusOutlined } from '@ant-design/icons';
 import { BlogAPI } from '../../apis/blog';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
+import CreateBlogForm from '../../components/blog/CreateBlogForm';
 
 const { Title, Paragraph } = Typography;
+const apiBase = "https://localhost:7045";
 
 // Animation keyframes
 const fadeInUp = keyframes`
@@ -124,57 +126,266 @@ const ViewButton = styled.div`
   }
 `;
 
+const DeleteButton = styled(Button)`
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  border: none;
+  color: white;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 8px 20px;
+  box-shadow: 0 4px 20px rgba(255, 77, 79, 0.08);
+  transition: all 0.3s ease;
+  margin-left: 4px;
+
+  &:hover, &:focus {
+    background: linear-gradient(135deg, #d9363e 0%, #ff7875 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 77, 79, 0.18);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const StyledModal = styled(Modal)`
+  .ant-modal-content {
+    max-height: calc(100vh - 100px);
+    margin: 50px auto;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .ant-modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding: 24px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
+
+  .ant-modal-header {
+    border-radius: 16px 16px 0 0;
+    padding: 16px 24px;
+  }
+
+  .ant-modal-title {
+    font-size: 20px;
+    color: #2c3e50;
+    font-weight: 600;
+  }
+
+  .ant-modal-close {
+    top: 16px;
+    right: 16px;
+  }
+`;
+
+const ModalContent = styled.div`
+  .blog-image {
+    width: 100%;
+    height: 300px;
+    object-fit: contain; /* Sửa lại ở đây */
+    background: #fff;    /* Thêm nếu muốn nền trắng */
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: block;
+  }
+  
+  .blog-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  
+  .blog-content {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #4a5568;
+    margin-bottom: 24px;
+    white-space: pre-wrap;
+  }
+  
+  .blog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid #e2e8f0;
+    color: #718096;
+    font-size: 14px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+  }
+  
+  .blog-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+`;
+
+const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
+
+// Add image error handling component
+const BlogImage = ({ src, alt, className, style, fallbackSrc = DEFAULT_BLOG_IMAGE }) => {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    if (!hasError) {
+      setImgSrc(fallbackSrc);
+      setHasError(true);
+    }
+  };
+
+  return (
+    <img
+      src={imgSrc}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={handleError}
+    />
+  );
+};
+
+const CreateButton = styled(Button)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  height: 44px;
+  padding: 0 30px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  
+  &:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 export default function BlogByUserId() {
   const [loading, setLoading] = useState(true);
   const [blogs, setBlogs] = useState([]);
   const [visibleBlogs, setVisibleBlogs] = useState([]);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { userId } = useParams();
-  
-  useEffect(() => {
-    const fetchUserBlogs = async () => {
-      try {
-        setLoading(true);
-        const response = await BlogAPI.getByUserId(userId);
-        setBlogs(response);
-      } catch (error) {
-        console.error('Error fetching user blogs:', error);
-        message.error('Failed to fetch blogs');
-      } finally {
-        setLoading(false);
-      }
-    };
 
+  const fetchUserBlogs = async () => {
+    try {
+      setLoading(true);
+      setVisibleBlogs([]); // Reset lại visibleBlogs để animation chạy lại
+      const response = await BlogAPI.getByUserId(userId);
+      setBlogs(response);
+    } catch (error) {
+      message.error('Failed to fetch blogs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserBlogs();
   }, [userId]);
 
-  // Animate blogs appearing one by one
   useEffect(() => {
     if (blogs.length > 0 && !loading) {
-      const timer = setTimeout(() => {
-        const animateBlogs = () => {
-          setVisibleBlogs(prev => {
-            if (prev.length < blogs.length) {
-              return blogs.slice(0, prev.length + 1);
-            }
-            return prev;
-          });
-        };
-
-        // Show blogs one by one with 200ms delay
-        const interval = setInterval(() => {
-          animateBlogs();
-          if (visibleBlogs.length >= blogs.length) {
-            clearInterval(interval);
-          }
-        }, 200);
-
-        return () => clearInterval(interval);
-      }, 500); // Start animation after header appears
-
-      return () => clearTimeout(timer);
+      setVisibleBlogs([]); // Reset lại trước khi chạy animation
+      let current = 0;
+      const interval = setInterval(() => {
+        setVisibleBlogs(blogs.slice(0, current + 1));
+        current++;
+        if (current >= blogs.length) {
+          clearInterval(interval);
+        }
+      }, 200);
+      return () => clearInterval(interval);
+    } else if (blogs.length === 0 && visibleBlogs.length !== 0) {
+      setVisibleBlogs([]);
     }
   }, [blogs, loading]);
+
+  const handleViewBlog = (blog) => {
+    setSelectedBlog(blog);
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setSelectedBlog(null);
+  };
+
+  const handleCreateBlog = async (values) => {
+    try {
+      setUploading(true);
+      const imageFile = values.blogImages?.[0]?.originFileObj;
+      console.log('values.blogImages:', values.blogImages);
+      console.log('imageFile:', imageFile); // Phải là File, không phải undefined  
+      const formData = {
+        ...values,
+        blogImages: imageFile ? [imageFile] : []
+      };
+
+      await BlogAPI.createBlog(formData);
+      message.success('Blog created successfully');
+      setIsCreateModalVisible(false);
+      fetchUserBlogs();
+    } catch (error) {
+      message.error('Failed to create blog');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteBlog = (blog) => {
+    Modal.confirm({
+      title: 'Delete Confirm',
+      content: `Are you sure you want to delete the blog "${blog.title}"?`,
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk: async () => {
+        try {
+          await BlogAPI.deleteBlog(blog.blogId);
+          message.success('Blog deleted successfully');
+          fetchUserBlogs();
+        } catch (error) {
+          message.error('Failed to delete blog');
+        }
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -198,12 +409,22 @@ export default function BlogByUserId() {
         </Paragraph>
       </StyledHeader>
 
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <CreateButton
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setIsCreateModalVisible(true)}
+        >
+          Create New Blog
+        </CreateButton>
+      </div>
+
       {blogs.length === 0 ? (
-        <Empty 
-          description="No blog posts found" 
-          style={{ 
-            background: 'white', 
-            padding: '40px', 
+        <Empty
+          description="No blog posts found"
+          style={{
+            background: 'white',
+            padding: '40px',
             borderRadius: '12px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
           }}
@@ -224,17 +445,21 @@ export default function BlogByUserId() {
                   <StyledTag color={blog.status === 'Approved' ? 'green' : 'orange'}>
                     {blog.status}
                   </StyledTag>
-                  <ViewButton onClick={() => navigate(`/blogDetails/${blog.blogId}`)}>
+                  <ViewButton onClick={() => handleViewBlog(blog)}>
                     <EyeOutlined />
                     View
                   </ViewButton>
+                  <DeleteButton danger type="primary" onClick={() => handleDeleteBlog(blog)}>
+                    Delete
+                  </DeleteButton>
                 </Space>
               }
             >
-              <Paragraph 
-                ellipsis={{ rows: 3 }} 
-                style={{ 
-                  fontSize: '14px', 
+
+              <Paragraph
+                ellipsis={{ rows: 3 }}
+                style={{
+                  fontSize: '14px',
                   lineHeight: '1.6',
                   marginBottom: '16px'
                 }}
@@ -249,6 +474,57 @@ export default function BlogByUserId() {
           )}
         />
       )}
+
+      {/* Create Blog Modal */}
+      <Modal
+        title="Create New Blog"
+        open={isCreateModalVisible}
+        onCancel={() => setIsCreateModalVisible(false)}
+        footer={null}
+        width={800}
+        destroyOnHidden
+      >
+        <CreateBlogForm
+          onFinish={handleCreateBlog}
+          onCancel={() => setIsCreateModalVisible(false)}
+          uploading={uploading}
+        />
+      </Modal>
+
+      <StyledModal
+        open={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={800}
+        centered
+        destroyOnHidden
+      >
+        {selectedBlog && (
+          <ModalContent>
+            <div className="blog-title">{selectedBlog.title}</div>
+            <BlogImage
+              src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0
+                ? `${apiBase}${selectedBlog.blogImages[0]}`
+                : DEFAULT_BLOG_IMAGE}
+              alt={selectedBlog.title}
+              className="blog-image"
+            />
+            <div className="blog-content">{selectedBlog.content}</div>
+            <div className="blog-content d-flex justify-content-between">
+              <div className="blog-status">
+                <StyledTag color={selectedBlog.status === 'Approved' ? 'green' : 'orange'}>
+                  {selectedBlog.status}
+                </StyledTag>
+                <span>Posted by: {selectedBlog.postedBy}</span>
+              </div>
+              <div>
+                <CalendarOutlined style={{ marginRight: '8px' }} />
+                {new Date(selectedBlog.postedAt).toLocaleDateString()}
+              </div>
+            </div>
+          </ModalContent>
+        )}
+      </StyledModal>
     </StyledContainer>
   );
 }

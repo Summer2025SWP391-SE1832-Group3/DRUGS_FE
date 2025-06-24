@@ -8,6 +8,7 @@ import Home from '../pages/Home'
 import Profile from '../pages/Profile'
 import CourseList from '../pages/course/CourseList'
 import BlogManager from '../pages/BlogManager'
+import CreateAccountAdmin from '../pages/CreateAccountAdmin'
 
 import BlogList from '../pages/blog/BlogList'
 import BlogDetails from '../pages/blog/BlogDetails'
@@ -29,6 +30,7 @@ export default function AppRoutes() {
           <Route path="blogList" element={<BlogList/>}/>
           <Route path="blogDetails/:id" element={<BlogDetails/>}/>
           <Route path="blogByUserId/:userId" element={<BlogByUserId/>}/>
+          <Route path="createAccountAdmin" element={<CreateAccountAdmin/>}/>
        
         </Route>
 

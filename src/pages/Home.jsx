@@ -206,7 +206,7 @@ export default function Home() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await BlogAPI.getAll();
+        const response = await BlogAPI.getApprovedBlogs();
         if (response && Array.isArray(response)) {
           const approvedBlogs = response.filter(blog => blog.status === 'Approved').slice(0, 6);
           setBlogs(approvedBlogs);

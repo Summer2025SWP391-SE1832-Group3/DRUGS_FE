@@ -56,11 +56,14 @@ const shimmer = keyframes`
 // Main Container with improved background
 const StyledContainer = styled.div`
   min-height: 100vh;
+  width: 100%;
+  min-width: 100%;
+  overflow-x: hidden;
   background: linear-gradient(135deg, 
 rgb(212, 213, 221) 0%, 
 rgb(202, 196, 209) 25%, 
 rgb(217, 212, 218) 50%, 
-    #f5576c 75%, 
+rgb(224, 172, 179) 75%, 
     #4facfe 100%);
   background-size: 400% 400%;
   animation: ${gradient} 15s ease infinite;

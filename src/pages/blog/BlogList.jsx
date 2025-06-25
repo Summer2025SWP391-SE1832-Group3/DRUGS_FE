@@ -6,7 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
-const apiBase = "https://localhost:7045";  // Base URL without /api for static files
+const apiBase = "https://api-drug-be.purintech.id.vn";  // Base URL without /api for static files
 
 // Animation keyframes
 const fadeInUp = keyframes`

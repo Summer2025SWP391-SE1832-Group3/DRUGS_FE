@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const apiBase = "https://localhost:7045/api"
+const apiBase = "https://api-drug-be.purintech.id.vn/api"
 export default apiBase;
 
 // Create axios instance with default config
@@ -12,10 +12,8 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         const user = JSON.parse(localStorage.getItem('user'));
-        console.log('User from localStorage in interceptor:', user);
         if (user && user.token) {
             config.headers.Authorization = `Bearer ${user.token}`;
-            console.log('Authorization header set:', config.headers.Authorization);
         } else {
             console.log('No user token found');
         }
@@ -97,5 +95,39 @@ export const BlogAPI = {
             console.error(`Error deleting blog with id ${id}:`, error);
             throw error;
         }
-    }
+    },
+    updateBlog: async (id, blogData) => {
+        try {
+            const formData = new FormData();
+            formData.append('title', blogData.title);
+            formData.append('content', blogData.content);
+            formData.append('category', blogData.category);
+            
+            // Handle single image upload (nếu có)
+            if (blogData.blogImages && blogData.blogImages.length > 0) {
+                formData.append('images', blogData.blogImages[0]?.originFileObj || blogData.blogImages[0]);
+            }
+
+            // Log all FormData entries for debugging
+            for (let pair of formData.entries()) {
+                console.log('FormData entry:', pair[0], pair[1]);
+            }
+
+            const response = await axiosInstance.put(`/Blog/${id}`, formData, {
+                headers: {
+                    // 'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                },
+                transformRequest: [(data) => data], // Prevent axios from transforming the FormData
+            });
+
+            // Log the response for debugging
+            console.log('Blog update response:', response.data);
+            
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating blog with id ${id}:`, error);
+            throw error;
+        }
+    },
 }

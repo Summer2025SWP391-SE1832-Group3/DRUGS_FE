@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Card, List, Typography, Tag, Space, Spin, Empty, message, Modal, Button, Form } from 'antd';
-import { CalendarOutlined, EyeOutlined, UserOutlined, PlusOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Card, List, Typography, Tag, Space, Spin, Empty, message, Modal, Button, Form, Avatar, Tooltip } from 'antd';
+import { CalendarOutlined, EyeOutlined, UserOutlined, PlusOutlined, EditOutlined, DeleteOutlined, HeartOutlined, MessageOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { BlogAPI } from '../../apis/blog';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import CreateBlogForm from '../../components/blog/CreateBlogForm';
 
-const { Title, Paragraph } = Typography;
-const apiBase = "https://localhost:7045";
+const { Title, Paragraph, Text } = Typography;
+const apiBase = "https://api-drug-be.purintech.id.vn";
+const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
 
-// Animation keyframes
+// Enhanced Animation keyframes
 const fadeInUp = keyframes`
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
@@ -21,238 +22,551 @@ const fadeInUp = keyframes`
   }
 `;
 
-const StyledContainer = styled.div`
-  padding: 24px;
-  background-color: #f5f5f5;
-  min-height: 100vh;
+const slideInLeft = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 `;
 
+const pulse = keyframes`
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+`;
+
+const gradient = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+const shimmer = keyframes`
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+`;
+
+// Main Container with improved background
+const StyledContainer = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(135deg, 
+rgb(212, 213, 221) 0%, 
+rgb(202, 196, 209) 25%, 
+rgb(217, 212, 218) 50%, 
+    #f5576c 75%, 
+    #4facfe 100%);
+  background-size: 400% 400%;
+  animation: ${gradient} 15s ease infinite;
+  padding: 32px;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+`;
+
+const ContentWrapper = styled.div`
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+`;
+
+// Enhanced Header with glassmorphism effect
 const StyledHeader = styled.div`
   text-align: center;
-  margin-bottom: 40px;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  animation: ${fadeInUp} 0.8s ease-out;
+  margin-bottom: 48px;
+  padding: 40px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  animation: ${fadeInUp} 1s ease-out;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    animation: ${shimmer} 3s infinite;
+  }
+  
+  .header-icon {
+    font-size: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+    display: inline-block;
+    animation: ${pulse} 2s infinite;
+  }
+  
+  .header-title {
+    background: linear-gradient(135deg, #2c3e50 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 !important;
+    font-weight: 800;
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+  }
+  
+  .header-subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+    margin-top: 12px !important;
+    margin-bottom: 0 !important;
+    font-weight: 500;
+  }
 `;
 
-const StyledCard = styled(Card)`
-  margin-bottom: 24px;
-  border-radius: 12px;
+// Enhanced Blog Card with better hover effects
+const StyledBlogCard = styled(Card)`
+  margin-bottom: 32px;
+  border-radius: 20px;
   border: none;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  transition: all 0.4s ease-in-out;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0;
-  animation: ${fadeInUp} 0.6s ease-out forwards;
+  animation: ${slideInLeft} 0.8s ease-out forwards;
+  overflow: hidden;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
   
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.15),
+      0 8px 32px rgba(102, 126, 234, 0.2);
+      
+    &::before {
+      transform: translateX(0);
+    }
   }
   
   .ant-card-head {
-    border-bottom: 1px solid #f0f0f0;
-    padding: 0 24px;
+    border-bottom: 1px solid rgba(240, 240, 240, 0.5);
+    padding: 24px 32px 20px;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(248, 250, 252, 0.9) 100%);
   }
   
   .ant-card-head-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2c3e50;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
     line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   
   .ant-card-body {
-    padding: 24px;
+    padding: 32px;
   }
   
   .ant-card-extra {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
   }
 `;
 
+// Enhanced Tags with better styling
 const StyledTag = styled(Tag)`
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
   border: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   
   &.ant-tag-green {
-    background: #f6ffed;
-    color: #52c41a;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   }
   
   &.ant-tag-orange {
-    background: #fff7e6;
-    color: #fa8c16;
-  }
-`;
-
-const StyledMeta = styled.div`
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-  font-size: 13px;
-`;
-
-const ViewButton = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  font-size: 13px;
-  
-  &:hover {
-    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const DeleteButton = styled(Button)`
-  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
-  border: none;
-  color: white;
-  border-radius: 20px;
-  font-weight: 500;
-  font-size: 13px;
-  padding: 8px 20px;
-  box-shadow: 0 4px 20px rgba(255, 77, 79, 0.08);
-  transition: all 0.3s ease;
-  margin-left: 4px;
-
-  &:hover, &:focus {
-    background: linear-gradient(135deg, #d9363e 0%, #ff7875 100%);
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 77, 79, 0.18);
-  }
-
-  &:active {
-    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
   }
 `;
 
-const StyledModal = styled(Modal)`
-  .ant-modal-content {
-    max-height: calc(100vh - 100px);
-    margin: 50px auto;
-    overflow: hidden;
-    border-radius: 16px;
-  }
-
-  .ant-modal-body {
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-    padding: 24px;
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 3px;
-    }
-
-    &::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  }
-
-  .ant-modal-header {
-    border-radius: 16px 16px 0 0;
-    padding: 16px 24px;
-  }
-
-  .ant-modal-title {
-    font-size: 20px;
-    color: #2c3e50;
-    font-weight: 600;
-  }
-
-  .ant-modal-close {
-    top: 16px;
-    right: 16px;
-  }
-`;
-
-const ModalContent = styled.div`
-  .blog-image {
-    width: 100%;
-    height: 300px;
-    object-fit: contain; /* Sửa lại ở đây */
-    background: #fff;    /* Thêm nếu muốn nền trắng */
-    border-radius: 12px;
-    margin-bottom: 24px;
-    display: block;
-  }
-  
-  .blog-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 16px;
-    line-height: 1.3;
-  }
-  
-  .blog-content {
+// Enhanced Blog Content with better typography
+const BlogContent = styled.div`
+  .blog-preview {
     font-size: 16px;
     line-height: 1.7;
-    color: #4a5568;
+    color: #475569;
     margin-bottom: 24px;
-    white-space: pre-wrap;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(transparent, rgba(255, 255, 255, 0.9));
+      pointer-events: none;
+    }
   }
   
   .blog-meta {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 16px 0;
-    border-top: 1px solid #e2e8f0;
-    color: #718096;
-    font-size: 14px;
-    position: sticky;
-    bottom: 0;
-    background: white;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+    margin-top: 20px;
   }
   
-  .blog-status {
+  .meta-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 20px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    
+    .anticon {
+      color: #94a3b8;
+    }
   }
 `;
 
-const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
+// Enhanced Action Buttons
+const ActionButton = styled(Button)`
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 20px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  
+  &.view-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    
+    &:hover {
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+  }
+  
+  &.edit-btn {
+    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(6, 182, 212, 0.3);
+    
+    &:hover {
+      background: linear-gradient(135deg, #0891b2 0%, #0284c7 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4);
+      color: white;
+    }
+  }
+  
+  &.delete-btn {
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    
+    &:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+      color: white;
+    }
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
 
-// Add image error handling component
+// Enhanced Create Button
+const CreateButton = styled(Button)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  height: 56px;
+  padding: 0 40px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 28px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  .anticon {
+    font-size: 18px;
+  }
+  
+  &:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+  
+  &:active {
+    transform: translateY(-2px) scale(1.02);
+  }
+`;
+
+// Enhanced Modal styling
+const StyledModal = styled(Modal)`
+  .ant-modal-content {
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+  }
+
+  .ant-modal-header {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.95) 0%, 
+      rgba(248, 250, 252, 0.95) 100%);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    padding: 24px 32px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .ant-modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #2c3e50 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ant-modal-body {
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.95);
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.5);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 4px;
+    }
+  }
+
+  .ant-modal-close {
+    top: 20px;
+    right: 20px;
+    
+    .ant-modal-close-x {
+      width: 44px;
+      height: 44px;
+      line-height: 44px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+    }
+  }
+`;
+
+// Enhanced Modal Content
+const ModalContent = styled.div`
+  .blog-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 16px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+  
+  .blog-title {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #2c3e50 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 24px;
+    line-height: 1.2;
+  }
+  
+  .blog-content {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #475569;
+    margin-bottom: 32px;
+    white-space: pre-wrap;
+  }
+  
+  .blog-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0;
+    border-top: 2px solid rgba(226, 232, 240, 0.6);
+    margin-top: 24px;
+  }
+  
+  .blog-meta-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .meta-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+  }
+`;
+
+// Enhanced Empty State
+const StyledEmpty = styled(Empty)`
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 80px 40px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  
+  .ant-empty-image {
+    margin-bottom: 24px;
+    
+    svg {
+      width: 120px;
+      height: 120px;
+      opacity: 0.6;
+    }
+  }
+  
+  .ant-empty-description {
+    font-size: 18px;
+    color: #64748b;
+    font-weight: 500;
+  }
+`;
+
+// Loading Spinner Container
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  
+  .ant-spin {
+    .ant-spin-dot {
+      i {
+        background-color: #667eea;
+      }
+    }
+  }
+`;
+
+// Enhanced Image component with better error handling
 const BlogImage = ({ src, alt, className, style, fallbackSrc = DEFAULT_BLOG_IMAGE }) => {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
 
+  useEffect(() => {
+    setImgSrc(src);
+    setHasError(false);
+  }, [src]);
+  
   const handleError = () => {
     if (!hasError) {
       setImgSrc(fallbackSrc);
@@ -271,25 +585,11 @@ const BlogImage = ({ src, alt, className, style, fallbackSrc = DEFAULT_BLOG_IMAG
   );
 };
 
-const CreateButton = styled(Button)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  height: 44px;
-  padding: 0 30px;
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 24px;
-  
-  &:hover {
-    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-`;
+function getImageUrl(img) {
+  if (!img) return DEFAULT_BLOG_IMAGE;
+  if (img.startsWith('http')) return img;
+  return `${apiBase}${img}`;
+}
 
 export default function BlogByUserId() {
   const [loading, setLoading] = useState(true);
@@ -299,13 +599,15 @@ export default function BlogByUserId() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editBlog, setEditBlog] = useState(null);
   const navigate = useNavigate();
   const { userId } = useParams();
 
   const fetchUserBlogs = async () => {
     try {
       setLoading(true);
-      setVisibleBlogs([]); // Reset lại visibleBlogs để animation chạy lại
+      setVisibleBlogs([]);
       const response = await BlogAPI.getByUserId(userId);
       setBlogs(response);
     } catch (error) {
@@ -321,7 +623,7 @@ export default function BlogByUserId() {
 
   useEffect(() => {
     if (blogs.length > 0 && !loading) {
-      setVisibleBlogs([]); // Reset lại trước khi chạy animation
+      setVisibleBlogs([]);
       let current = 0;
       const interval = setInterval(() => {
         setVisibleBlogs(blogs.slice(0, current + 1));
@@ -329,29 +631,38 @@ export default function BlogByUserId() {
         if (current >= blogs.length) {
           clearInterval(interval);
         }
-      }, 200);
+      }, 150);
       return () => clearInterval(interval);
     } else if (blogs.length === 0 && visibleBlogs.length !== 0) {
       setVisibleBlogs([]);
     }
   }, [blogs, loading]);
 
-  const handleViewBlog = (blog) => {
+  const openViewModal = (blog) => {
     setSelectedBlog(blog);
     setIsModalVisible(true);
+    setIsEditMode(false);
+    setEditBlog(null);
   };
 
-  const handleModalClose = () => {
+  const openEditModal = (blog) => {
+    setSelectedBlog(blog);
+    setIsModalVisible(true);
+    setIsEditMode(true);
+    setEditBlog(blog);
+  };
+
+  const closeModal = () => {
     setIsModalVisible(false);
     setSelectedBlog(null);
+    setIsEditMode(false);
+    setEditBlog(null);
   };
 
   const handleCreateBlog = async (values) => {
     try {
       setUploading(true);
       const imageFile = values.blogImages?.[0]?.originFileObj;
-      console.log('values.blogImages:', values.blogImages);
-      console.log('imageFile:', imageFile); // Phải là File, không phải undefined  
       const formData = {
         ...values,
         blogImages: imageFile ? [imageFile] : []
@@ -368,13 +679,48 @@ export default function BlogByUserId() {
     }
   };
 
+  const handleUpdateBlog = async (values) => {
+    try {
+      setUploading(true);
+      let blogImages = values.blogImages;
+      let imageFile = blogImages?.[0]?.originFileObj;
+      if (!imageFile && editBlog && editBlog.blogImages && editBlog.blogImages.length > 0) {
+        imageFile = undefined;
+        blogImages = editBlog.blogImages;
+      } else if (imageFile) {
+        blogImages = [imageFile];
+      } else {
+        blogImages = [];
+      }
+      const formData = {
+        ...values,
+        blogImages
+      };
+      await BlogAPI.updateBlog(editBlog.blogId, formData);
+      message.success('Blog updated successfully');
+      closeModal();
+      fetchUserBlogs();
+    } catch (error) {
+      message.error('Failed to update blog');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDeleteBlog = (blog) => {
     Modal.confirm({
-      title: 'Delete Confirm',
-      content: `Are you sure you want to delete the blog "${blog.title}"?`,
-      okText: 'Yes',
+      title: 'Delete Confirmation',
+      content: (
+        <div>
+          <p>Are you sure you want to delete this blog post?</p>
+          <Text strong>"{blog.title}"</Text>
+          <p style={{ marginTop: 8, color: '#ef4444' }}>This action cannot be undone.</p>
+        </div>
+      ),
+      okText: 'Delete',
       okType: 'danger',
-      cancelText: 'No',
+      cancelText: 'Cancel',
+      centered: true,
       onOk: async () => {
         try {
           await BlogAPI.deleteBlog(blog.blogId);
@@ -387,145 +733,244 @@ export default function BlogByUserId() {
     });
   };
 
+  const editInitialValues = useMemo(() => {
+    if (!editBlog) return undefined;
+    return {
+      title: editBlog.title,
+      content: editBlog.content,
+      category: editBlog.category,
+      blogImages:
+        editBlog.blogImages && editBlog.blogImages.length > 0
+          ? [
+              {
+                uid: '-1',
+                name: 'current-image.jpg',
+                status: 'done',
+                url: getImageUrl(editBlog.blogImages[0]),
+              },
+            ]
+          : [],
+    };
+  }, [editBlog]);
+
   if (loading) {
     return (
       <StyledContainer>
-        <div style={{ textAlign: 'center', padding: '50px' }}>
-          <Spin size="large" />
-        </div>
+        <ContentWrapper>
+          <LoadingContainer>
+            <Spin size="large" />
+          </LoadingContainer>
+        </ContentWrapper>
       </StyledContainer>
     );
   }
 
   return (
     <StyledContainer>
-      <StyledHeader>
-        <Title level={2} style={{ margin: 0, color: '#2c3e50' }}>
-          <UserOutlined style={{ marginRight: '12px', color: '#667eea' }} />
-          My Blog Posts
-        </Title>
-        <Paragraph style={{ marginTop: '8px', color: '#666', marginBottom: 0 }}>
-          Manage and view your published articles
-        </Paragraph>
-      </StyledHeader>
+      <ContentWrapper>
+        <StyledHeader>
+          <div className="header-icon">
+            <UserOutlined />
+          </div>
+          <Title level={1} className="header-title">
+            My Blog Collection
+          </Title>
+          <Paragraph className="header-subtitle">
+            Create, manage and showcase your amazing stories
+          </Paragraph>
+        </StyledHeader>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <CreateButton
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setIsCreateModalVisible(true)}
-        >
-          Create New Blog
-        </CreateButton>
-      </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+          <CreateButton
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsCreateModalVisible(true)}
+            size="large"
+          >
+            Create New Blog
+          </CreateButton>
+        </div>
 
-      {blogs.length === 0 ? (
-        <Empty
-          description="No blog posts found"
-          style={{
-            background: 'white',
-            padding: '40px',
-            borderRadius: '12px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}
-        />
-      ) : (
-        <List
-          dataSource={visibleBlogs}
-          renderItem={(blog, index) => (
-            <StyledCard
-              key={blog.blogId}
-              style={{
-                animationDelay: `${index * 0.2}s`,
-                animationDuration: '0.6s'
-              }}
-              title={blog.title}
-              extra={
-                <Space>
-                  <StyledTag color={blog.status === 'Approved' ? 'green' : 'orange'}>
-                    {blog.status}
-                  </StyledTag>
-                  <ViewButton onClick={() => handleViewBlog(blog)}>
-                    <EyeOutlined />
-                    View
-                  </ViewButton>
-                  <DeleteButton danger type="primary" onClick={() => handleDeleteBlog(blog)}>
-                    Delete
-                  </DeleteButton>
-                </Space>
-              }
-            >
-
-              <Paragraph
-                ellipsis={{ rows: 3 }}
+        {blogs.length === 0 ? (
+          <StyledEmpty
+            description="No blog posts found. Start creating your first amazing story!"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        ) : (
+          <List
+            dataSource={visibleBlogs}
+            renderItem={(blog, index) => (
+              <StyledBlogCard
+                key={blog.blogId}
                 style={{
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                  marginBottom: '16px'
+                  animationDelay: `${index * 0.15}s`,
                 }}
+                title={blog.title}
+                extra={
+                  <Space wrap>
+                    <StyledTag color={blog.status === 'Approved' ? 'green' : 'orange'}>
+                      {blog.status}
+                    </StyledTag>
+                    <ActionButton 
+                      className="view-btn"
+                      icon={<EyeOutlined />}
+                      onClick={() => openViewModal(blog)}
+                    >
+                      View
+                    </ActionButton>
+                    <ActionButton 
+                      className="edit-btn"
+                      icon={<EditOutlined />}
+                      onClick={() => openEditModal(blog)}
+                    >
+                      Edit
+                    </ActionButton>
+                    <ActionButton 
+                      className="delete-btn"
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleDeleteBlog(blog)}
+                    >
+                      Delete
+                    </ActionButton>
+                  </Space>
+                }
               >
-                {blog.content}
-              </Paragraph>
-              <StyledMeta>
-                <CalendarOutlined />
-                <span>Published on {new Date(blog.postedAt).toLocaleDateString()}</span>
-              </StyledMeta>
-            </StyledCard>
-          )}
-        />
-      )}
-
-      {/* Create Blog Modal */}
-      <Modal
-        title="Create New Blog"
-        open={isCreateModalVisible}
-        onCancel={() => setIsCreateModalVisible(false)}
-        footer={null}
-        width={800}
-        destroyOnHidden
-      >
-        <CreateBlogForm
-          onFinish={handleCreateBlog}
-          onCancel={() => setIsCreateModalVisible(false)}
-          uploading={uploading}
-        />
-      </Modal>
-
-      <StyledModal
-        open={isModalVisible}
-        onCancel={handleModalClose}
-        footer={null}
-        width={800}
-        centered
-        destroyOnHidden
-      >
-        {selectedBlog && (
-          <ModalContent>
-            <div className="blog-title">{selectedBlog.title}</div>
-            <BlogImage
-              src={selectedBlog.blogImages && selectedBlog.blogImages.length > 0
-                ? `${apiBase}${selectedBlog.blogImages[0]}`
-                : DEFAULT_BLOG_IMAGE}
-              alt={selectedBlog.title}
-              className="blog-image"
-            />
-            <div className="blog-content">{selectedBlog.content}</div>
-            <div className="blog-content d-flex justify-content-between">
-              <div className="blog-status">
-                <StyledTag color={selectedBlog.status === 'Approved' ? 'green' : 'orange'}>
-                  {selectedBlog.status}
-                </StyledTag>
-                <span>Posted by: {selectedBlog.postedBy}</span>
-              </div>
-              <div>
-                <CalendarOutlined style={{ marginRight: '8px' }} />
-                {new Date(selectedBlog.postedAt).toLocaleDateString()}
-              </div>
-            </div>
-          </ModalContent>
+                <BlogContent>
+                  <div className="blog-preview">
+                    <Paragraph
+                      ellipsis={{ rows: 3 }}
+                      style={{ margin: 0, fontSize: '16px', lineHeight: '1.6' }}
+                    >
+                      {blog.content}
+                    </Paragraph>
+                  </div>
+                  
+                  <div className="blog-meta">
+                    <div className="meta-left">
+                      <div className="meta-item">
+                        <CalendarOutlined />
+                        <span>{new Date(blog.postedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}</span>
+                      </div>
+                      <div className="meta-item">
+                        <UserOutlined />
+                        <span>{blog.postedBy}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '16px', color: '#94a3b8' }}>
+                      <Tooltip title="Likes">
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <HeartOutlined />
+                          <span>{Math.floor(Math.random() * 50) + 10}</span>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title="Comments">
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <MessageOutlined />
+                          <span>{Math.floor(Math.random() * 20) + 5}</span>
+                        </span>
+                      </Tooltip>
+                    </div>
+                  </div>
+                </BlogContent>
+              </StyledBlogCard>
+            )}
+          />
         )}
-      </StyledModal>
+
+        {/* Create Blog Modal */}
+        <StyledModal
+          title="Create New Blog Post"
+          open={isCreateModalVisible}
+          onCancel={() => setIsCreateModalVisible(false)}
+          footer={null}
+          width={900}
+          destroyOnHidden
+        >
+          <CreateBlogForm
+            onFinish={handleCreateBlog}
+            onCancel={() => setIsCreateModalVisible(false)}
+            uploading={uploading}
+          />
+        </StyledModal>
+
+        {/* View/Edit Blog Modal */}
+        <StyledModal
+          title={isEditMode ? "Edit Blog Post" : "Blog Post Details"}
+          open={isModalVisible}
+          onCancel={closeModal}
+          footer={null}
+          width={900}
+          destroyOnHidden
+        >
+          {selectedBlog && !isEditMode && (
+            <ModalContent>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start',
+                marginBottom: '32px' 
+              }}>
+                <div className="blog-title">{selectedBlog.title}</div>
+                <ActionButton
+                  className="edit-btn"
+                  icon={<EditOutlined />}
+                  onClick={() => openEditModal(selectedBlog)}
+                >
+                  Edit Blog
+                </ActionButton>
+              </div>
+              
+              <BlogImage
+                src={getImageUrl(selectedBlog.blogImages && selectedBlog.blogImages[0])}
+                alt={selectedBlog.title}
+                className="blog-image"
+              />
+              
+              <div className="blog-content">{selectedBlog.content}</div>
+              
+              <div className="blog-footer">
+                <div className="blog-meta-info">
+                  <div className="meta-info-item">
+                    <StyledTag color={selectedBlog.status === 'Approved' ? 'green' : 'orange'}>
+                      {selectedBlog.status}
+                    </StyledTag>
+                  </div>
+                  <div className="meta-info-item">
+                    <UserOutlined />
+                    <span>By {selectedBlog.postedBy}</span>
+                  </div>
+                  <div className="meta-info-item">
+                    <span>Category: {selectedBlog.category}</span>
+                  </div>
+                </div>
+                <div className="meta-info-item">
+                  <CalendarOutlined />
+                  <span>{new Date(selectedBlog.postedAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}</span>
+                </div>
+              </div>
+            </ModalContent>
+          )}
+          
+          {selectedBlog && isEditMode && (
+            <div>
+              <CreateBlogForm
+                onFinish={handleUpdateBlog}
+                onCancel={() => setIsEditMode(false)}
+                uploading={uploading}
+                initialValues={editInitialValues}
+              />
+            </div>
+          )}
+        </StyledModal>
+      </ContentWrapper>
     </StyledContainer>
   );
 }
-

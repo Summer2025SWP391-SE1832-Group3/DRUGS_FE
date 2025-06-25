@@ -106,19 +106,7 @@ export default function Navbar({ onToggleSidebar }) {
                             </div>
                         </div>
 
-                        <div aria-label="breadcrumb" className="d-none d-lg-block">
-                            <ol className="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0">
-                                <li className="breadcrumb-item text-sm">
-                                    <a className="opacity-7 text-white text-decoration-none" onClick={() => navigate('/')}>
-                                        <i className="material-symbols-rounded me-1" style={{ fontSize: '16px' }}>home</i>
-                                        Hub
-                                    </a>
-                                </li>
-                                <li className="breadcrumb-item text-sm text-white active fw-bold" aria-current="page">
-                                    {currentPageName}
-                                </li>
-                            </ol>
-                        </div>
+                        
                     </div>
 
                     {/* Right side navigation */}

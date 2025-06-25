@@ -27,7 +27,7 @@ export default function AppLayouts() {
         <Header />
       )}
 
-      <div style={{ marginTop: 64, paddingTop: 0, marginLeft: isLoggedIn && sidebarOpen ? 240 : 0, transition: 'margin-left 0.3s' }}>
+      <div style={{ marginTop: 64, paddingTop: 0, marginLeft: isLoggedIn && sidebarOpen ? 200 : 0, transition: 'margin-left 0.3s' }}>
         <Outlet context={{ setIsLoggedIn }} />
       </div>
     </GlobalBackground>

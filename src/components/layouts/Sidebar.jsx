@@ -6,8 +6,18 @@ export default function Sidebar({ open }) {
     const navigate = useNavigate();
     const navbarHeight = 64;
 
+    let isStaff = false;
+    let isManager = false;
+    const userData = localStorage.getItem('user');
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            isStaff = user && user.role === "Staff";
+            isManager = user && user.role === "Manager";
+        } catch { }
+    }
+
     const handlePersonalBlogsClick = () => {
-        const userData = localStorage.getItem('user');
         if (!userData) {
             message.warning('Please login to view your personal blogs');
             navigate('/');
@@ -49,10 +59,12 @@ export default function Sidebar({ open }) {
                     <i className="material-symbols-rounded me-2">account_circle</i>
                     <span style={{ fontSize: 15 }}>Profile</span>
                 </Link>
-                <Link to="/courseList" className="nav-link text-white d-flex align-items-center px-3 py-2">
-                    <i className="material-symbols-rounded me-2">dashboard</i>
-                    <span style={{ fontSize: 15 }}>Courses</span>
-                </Link>
+                {(isStaff || isManager) && (
+                    <Link to="/manageCourse" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                        <i className="material-symbols-rounded me-2">dashboard</i>
+                        <span style={{ fontSize: 15 }}>Manage Course</span>
+                    </Link>
+                )}
                 <Link to="/" className="nav-link text-white d-flex align-items-center px-3 py-2">
                     <i className="material-symbols-rounded me-2">group</i>
                     <span style={{ fontSize: 15 }}>Consultants</span>
@@ -61,14 +73,12 @@ export default function Sidebar({ open }) {
                     <i className="material-symbols-rounded me-2">event</i>
                     <span style={{ fontSize: 15 }}>Events</span>
                 </Link>
-                <Link to="/blogList" className="nav-link text-white d-flex align-items-center px-3 py-2">
-                    <i className="material-symbols-rounded me-2">post</i>
-                    <span style={{ fontSize: 15 }}>Blogs</span>
-                </Link>
-                <a onClick={handlePersonalBlogsClick} className="nav-link text-white d-flex align-items-center px-3 py-2" style={{ cursor: 'pointer' }}>
-                    <i className="material-symbols-rounded me-2">post</i>
-                    <span style={{ fontSize: 15 }}>Personal Blogs</span>
-                </a>
+                {isStaff && (
+                    <a onClick={handlePersonalBlogsClick} className="nav-link text-white d-flex align-items-center px-3 py-2" style={{ cursor: 'pointer' }}>
+                        <i className="material-symbols-rounded me-2">post</i>
+                        <span style={{ fontSize: 15 }}>Personal Blogs</span>
+                    </a>
+                )}
             </nav>
         </aside>
     )

@@ -20,8 +20,7 @@ import { BlogAPI } from '../apis/blog';
 const { Title, Paragraph } = Typography;
 
 const MainContainer = styled.div`
-  width: 100vw;
-  max-width: 100vw;
+  width: 100%;
   margin: 0;
   padding: 0;
 `;

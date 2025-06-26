@@ -56,7 +56,7 @@ export default function Navbar({ onToggleSidebar }) {
     return (
         <>
             <nav
-                className="navbar navbar-main navbar-expand-lg shadow-lg z-index-sticky"
+                className="d-flex navbar navbar-main navbar-expand-lg shadow-lg z-index-sticky"
                 id="navbarBlur"
                 data-scroll="true"
                 style={{ 
@@ -107,36 +107,59 @@ export default function Navbar({ onToggleSidebar }) {
                             </div>
                         </div>
                     </div>
-
+                    {/* Centered Courses & Blogs navigation - absolute center */}
+                    <div style={{ position: 'absolute', left: '50%', top: 0, height: '100%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', zIndex: 2 }}>
+                        <div style={{ display: 'flex', gap: 32, alignItems: 'center', maxWidth: 350 }}>
+                            <a
+                                onClick={() => navigate('/courseList')}
+                                style={{
+                                    minWidth: 110,
+                                    fontWeight: 600,
+                                    fontSize: 16,
+                                    color: 'white',
+                                    background: 'transparent',
+                                    border: '2px solid #fff',
+                                    borderRadius: 30,
+                                    padding: '8px 28px',
+                                    boxShadow: 'none',
+                                    transition: 'all 0.2s',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8
+                                }}
+                            >
+                                <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>dashboard</i>
+                                Courses
+                            </a>
+                            <a
+                                onClick={() => navigate('/blogList')}
+                                style={{
+                                    minWidth: 110,
+                                    fontWeight: 600,
+                                    fontSize: 16,
+                                    color: 'white',
+                                    background: 'transparent',
+                                    border: '2px solid #fff',
+                                    borderRadius: 30,
+                                    padding: '8px 28px',
+                                    boxShadow: 'none',
+                                    transition: 'all 0.2s',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8
+                                }}
+                            >
+                                <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>post</i>
+                                Blogs
+                            </a>
+                        </div>
+                    </div>
                     {/* Right side navigation */}
                     <div className="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                         <ul className="ms-md-auto pe-md-3 d-flex align-items-center navbar-nav justify-content-end">
-                            {/* Courses link */}
-                            <li className="nav-item me-2">
-                                <a
-                                    className="nav-link text-white p-2 d-flex align-items-center"
-                                    onClick={() => navigate('/courseList')}
-                                    style={{ cursor: 'pointer', borderRadius: '8px' }}
-                                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                                >
-                                    <i className="material-symbols-rounded me-1">dashboard</i>
-                                    <span className="d-none d-lg-inline">Courses</span>
-                                </a>
-                            </li>
-                            {/* All Blogs link */}
-                            <li className="nav-item me-2">
-                                <a
-                                    className="nav-link text-white p-2 d-flex align-items-center"
-                                    onClick={() => navigate('/blogList')}
-                                    style={{ cursor: 'pointer', borderRadius: '8px' }}
-                                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                                >
-                                    <i className="material-symbols-rounded me-1">post</i>
-                                    <span className="d-none d-lg-inline">All Blogs</span>
-                                </a>
-                            </li>
+                            
                             {/* Support Resources Dropdown */}
                             <li className="nav-item dropdown me-2">
                                 <a 
@@ -200,24 +223,6 @@ export default function Navbar({ onToggleSidebar }) {
                                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                                 >
                                     <i className="material-symbols-rounded">account_circle</i>
-                                </a>
-                            </li>
-
-                            {/* Mobile sidebar toggle */}
-                            <li className="nav-item d-xl-none ps-2 d-flex align-items-center">
-                                <a
-                                    className="nav-link text-white p-2"
-                                    id="iconNavbarSidenav"
-                                    onClick={e => { e.preventDefault(); onToggleSidebar && onToggleSidebar(); }}
-                                    style={{ borderRadius: '8px' }}
-                                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                                >
-                                    <div className="sidenav-toggler-inner">
-                                        <i className="sidenav-toggler-line bg-white" />
-                                        <i className="sidenav-toggler-line bg-white" />
-                                        <i className="sidenav-toggler-line bg-white" />
-                                    </div>
                                 </a>
                             </li>
 

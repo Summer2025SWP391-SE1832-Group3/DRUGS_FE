@@ -8,6 +8,7 @@ export default function Navbar({ onToggleSidebar }) {
     
     const handleLogout = () => {
         localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('user');
         navigate('/login');
         window.location.reload();
     };
@@ -105,15 +106,37 @@ export default function Navbar({ onToggleSidebar }) {
                                 </small>
                             </div>
                         </div>
-
-                        
                     </div>
 
                     {/* Right side navigation */}
                     <div className="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                         <ul className="ms-md-auto pe-md-3 d-flex align-items-center navbar-nav justify-content-end">
-                            
-
+                            {/* Courses link */}
+                            <li className="nav-item me-2">
+                                <a
+                                    className="nav-link text-white p-2 d-flex align-items-center"
+                                    onClick={() => navigate('/courseList')}
+                                    style={{ cursor: 'pointer', borderRadius: '8px' }}
+                                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                >
+                                    <i className="material-symbols-rounded me-1">dashboard</i>
+                                    <span className="d-none d-lg-inline">Courses</span>
+                                </a>
+                            </li>
+                            {/* All Blogs link */}
+                            <li className="nav-item me-2">
+                                <a
+                                    className="nav-link text-white p-2 d-flex align-items-center"
+                                    onClick={() => navigate('/blogList')}
+                                    style={{ cursor: 'pointer', borderRadius: '8px' }}
+                                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                >
+                                    <i className="material-symbols-rounded me-1">post</i>
+                                    <span className="d-none d-lg-inline">All Blogs</span>
+                                </a>
+                            </li>
                             {/* Support Resources Dropdown */}
                             <li className="nav-item dropdown me-2">
                                 <a 

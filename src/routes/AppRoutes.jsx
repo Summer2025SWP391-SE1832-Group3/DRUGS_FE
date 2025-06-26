@@ -10,6 +10,7 @@ import CourseList from '../pages/course/CourseList'
 import BlogList from '../pages/blog/BlogList'
 import BlogDetails from '../pages/blog/BlogDetails'
 import BlogByUserId from '../pages/blog/BlogByUserId'
+import ManageCourse from '../pages/course/ManageCourse'
 
 export default function AppRoutes() {
   return (
@@ -25,6 +26,7 @@ export default function AppRoutes() {
           <Route path="blogList" element={<BlogList/>}/>
           <Route path="blogDetails/:id" element={<BlogDetails/>}/>
           <Route path="blogByUserId/:userId" element={<BlogByUserId/>}/>
+          <Route path="manageCourse" element={<ManageCourse/>}/>
         </Route>
 
       </Routes>

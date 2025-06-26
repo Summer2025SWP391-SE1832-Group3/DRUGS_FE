@@ -12,7 +12,7 @@ export default function Header() {
                 className="navbar navbar-main navbar-expand-lg shadow-lg z-index-sticky"
                 id="navbarBlur"
                 data-scroll="true"
-                style={{ 
+                style={{
                     minHeight: 64,
                     background: 'linear-gradient(135deg,rgb(46, 105, 139) 0%,rgb(34, 76, 139) 50%,rgb(53, 50, 205) 100%)',
                     borderBottom: '3px solid rgb(143, 223, 209)',
@@ -26,16 +26,16 @@ export default function Header() {
                 <div className="container-fluid py-0 px-3 d-flex align-items-center justify-content-between">
                     {/* Logo và tiêu đề */}
                     <div className="d-flex align-items-center">
-                        <div className="d-flex align-items-center justify-content-center me-2" 
-                             style={{
-                                 width: '40px',
-                                 height: '40px',
-                                 background: 'linear-gradient(45deg,rgb(190, 78, 78),rgb(0, 247, 255))',
-                                 borderRadius: '50%',
-                                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                 cursor: 'pointer'
-                             }}
-                             onClick={() => navigate('/')}
+                        <div className="d-flex align-items-center justify-content-center me-2"
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                background: 'linear-gradient(45deg,rgb(190, 78, 78),rgb(0, 247, 255))',
+                                borderRadius: '50%',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => navigate('/')}
                         >
                             <i className="material-symbols-rounded text-white" style={{ fontSize: '24px', fontWeight: 'bold' }}>
                                 health_and_safety
@@ -56,10 +56,56 @@ export default function Header() {
                             Drug Use Prevention Support System
                         </h6>
                     </div>
-                    {/* Nút Login/Register */}
+                    <div className="d-flex align-items-center justify-content-between" style={{ width: '100%', maxWidth: 350 }}>
+                        <a
+                            onClick={() => navigate('/courseList')}
+                            style={{
+                                minWidth: 110,
+                                fontWeight: 600,
+                                fontSize: 16,
+                                color: 'white',
+                                background: 'transparent',
+                                border: '2px solid #fff',
+                                borderRadius: 30,
+                                padding: '8px 28px',
+                                boxShadow: 'none',
+                                transition: 'all 0.2s',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8
+                            }}
+                        >
+                            <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>dashboard</i>
+                            Courses
+                        </a>
+                        <a
+                            onClick={() => navigate('/blogList')}
+                            style={{
+                                minWidth: 110,
+                                fontWeight: 600,
+                                fontSize: 16,
+                                color: 'white',
+                                background: 'transparent',
+                                border: '2px solid #fff',
+                                borderRadius: 30,
+                                padding: '8px 28px',
+                                boxShadow: 'none',
+                                transition: 'all 0.2s',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8
+                            }}
+                        >
+                            <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>post</i>
+                            Blogs
+                        </a>
+                    </div>
+                    {/* Nút Courses, All Blogs, Login/Register */}
                     <div className="d-flex align-items-center mb-0 pb-0 pt-1 px-0">
                         <a
-                            className="btn btn-outline-light btn-sm"
+                            className="btn btn-success btn-sm"
                             onClick={() => navigate('/login')}
                             style={{ minWidth: 90 }}
                         >

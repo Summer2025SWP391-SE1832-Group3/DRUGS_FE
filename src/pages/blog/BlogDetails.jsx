@@ -41,7 +41,7 @@ const StyledTag = styled(Tag)`
 `;
 
 const DEFAULT_BLOG_IMAGE = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000';
-const apiBase = "https://localhost:7045";
+const apiBase = "https://api-drug-be.purintech.id.vn";
 export default function BlogDetails() {
   const { id } = useParams();
   const navigate = useNavigate();

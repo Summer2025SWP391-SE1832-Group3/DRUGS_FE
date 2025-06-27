@@ -2,12 +2,20 @@ import React, { useEffect } from 'react';
 import { Form, Input, Upload, Button, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
-const CreateBlogForm = ({ onFinish, onCancel, uploading }) => {
+const CreateBlogForm = ({ onFinish, onCancel, uploading, initialValues }) => {
   const [form] = Form.useForm();
+  const isEditMode = !!initialValues;
 
   useEffect(() => {
-    form.resetFields();
-  }, []);
+    if (initialValues) {
+      form.setFieldsValue({
+        ...initialValues,
+        blogImages: initialValues.blogImages || []
+      });
+    }
+    // Không resetFields ở đây để tránh mất dữ liệu khi đang nhập
+    // eslint-disable-next-line
+  }, [initialValues]);
 
   const normFile = (e) => {
     if (Array.isArray(e)) {
@@ -21,7 +29,7 @@ const CreateBlogForm = ({ onFinish, onCancel, uploading }) => {
       form={form}
       layout="vertical"
       onFinish={onFinish}
-      initialValues={{ blogImages: [] }}
+      initialValues={{ blogImages: [], ...initialValues }}
       preserve={false}
       autoComplete="off"
     >
@@ -77,7 +85,6 @@ const CreateBlogForm = ({ onFinish, onCancel, uploading }) => {
       <Form.Item>
         <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
           <Button onClick={() => {
-            form.resetFields();
             onCancel();
           }}>
             Cancel
@@ -91,7 +98,7 @@ const CreateBlogForm = ({ onFinish, onCancel, uploading }) => {
               border: 'none'
             }}
           >
-            Create Blog
+            {isEditMode ? 'Update Blog' : 'Create Blog'}
           </Button>
         </Space>
       </Form.Item>

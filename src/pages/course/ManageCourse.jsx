@@ -1,0 +1,187 @@
+import React, { useState } from 'react'
+import { CreateButton, ActionButton } from '../../components/ui/Buttons'
+import { Table, Modal, Form, Input, message, Space, Typography } from 'antd';
+import coursesData from '../../data/course'
+
+const { Title, Paragraph } = Typography;
+
+export default function ManageCourse() {
+    const [courses, setCourses] = useState(coursesData);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [form] = Form.useForm();
+
+    let isManager = false;
+    const userdata = localStorage.getItem('user');
+    if (userdata) {
+        try {
+            const user = JSON.parse(userdata);
+            isManager = user && user.role === "Manager";
+        } catch { }
+    }
+
+    const showCreateModal = () => {
+        setIsEditMode(false);
+        setSelectedCourse(null);
+        form.resetFields();
+        setIsModalVisible(true);
+    };
+
+    const showEditModal = (course) => {
+        setIsEditMode(true);
+        setSelectedCourse(course);
+        form.setFieldsValue(course);
+        setIsModalVisible(true);
+    };
+
+    const handleDelete = (course) => {
+        Modal.confirm({
+            title: 'Delete Course',
+            content: `Are you sure you want to delete "${course.title}"?`,
+            okText: 'Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: () => {
+                setCourses(courses.filter(c => c.id !== course.id));
+                message.success('Course deleted successfully');
+            }
+        });
+    };
+
+    const handleModalOk = () => {
+        form.validateFields().then(values => {
+            if (isEditMode && selectedCourse) {
+                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...selectedCourse, ...values } : c));
+                message.success('Course updated successfully');
+            } else {
+                const newCourse = {
+                    ...values,
+                    id: Date.now(),
+                    createdBy: 'Admin',
+                    createdAt: new Date().toISOString(),
+                };
+                setCourses([newCourse, ...courses]);
+                message.success('Course created successfully');
+            }
+            setIsModalVisible(false);
+            form.resetFields();
+        });
+    };
+
+    const handleModalCancel = () => {
+        setIsModalVisible(false);
+        form.resetFields();
+    };
+
+    const columns = [
+        {
+            title: 'Title',
+            dataIndex: 'title',
+            key: 'title',
+            render: (text) => <b>{text}</b>,
+        },
+        {
+            title: 'Description',
+            dataIndex: 'description',
+            key: 'description',
+            render: (text) => <Paragraph ellipsis={{ rows: 1 }}>{text}</Paragraph>,
+        },
+        {
+            title: 'Created By',
+            dataIndex: 'createdBy',
+            key: 'createdBy',
+        },
+        {
+            title: 'Created At',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            render: (date) => new Date(date).toLocaleDateString(),
+        },
+        {
+            title: 'Actions',
+            key: 'actions',
+            render: (_, record) => (
+                <Space>
+                    <ActionButton className="edit-btn" onClick={() => showEditModal(record)}>
+                        Edit
+                    </ActionButton>
+                    <ActionButton className="delete-btn" onClick={() => handleDelete(record)}>
+                        Delete
+                    </ActionButton>
+                </Space>
+            ),
+        },
+    ];
+
+    return (
+        <div style={{ width: "100%", margin: '0 auto', padding: 20, fontFamily: 'Inter, Roboto, Arial, sans-serif', background: '#f8f9fb', minHeight: '100vh' }}>
+            {/* Google Fonts */}
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+            <Title level={2} style={{ marginBottom: 0, fontFamily: 'Inter, Roboto, Arial, sans-serif', fontWeight: 700, color: '#2c3e50', letterSpacing: '-1px' }}>Manage Courses</Title>
+            {isManager && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 0 }}>
+                    <CreateButton onClick={showCreateModal} style={{ fontFamily: 'Inter, Roboto, Arial, sans-serif', fontWeight: 600, fontSize: 16 }}>Create New Course</CreateButton>
+                </div>
+            )}
+            <Table
+                columns={columns}
+                dataSource={courses}
+                rowKey="id"
+                pagination={{ pageSize: 5 }}
+                style={{ marginTop: 0, fontFamily: 'Inter, Roboto, Arial, sans-serif', background: 'white', borderRadius: 12, boxShadow: '0 4px 24px rgba(34,76,139,0.08)' }}
+                size="middle"
+                bordered
+            />
+            <style>{`
+        .ant-table-thead > tr > th {
+          background: #f0f4fa !important;
+          font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+          font-weight: 600 !important;
+          color: #34495e !important;
+          font-size: 16px !important;
+        }
+        .ant-table-tbody > tr > td {
+          font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+          font-size: 15px !important;
+          color: #2c3e50 !important;
+        }
+        .ant-table {
+          border-radius: 12px !important;
+        }
+        .ant-btn {
+          font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+        }
+      `}</style>
+            <Modal
+                title={isEditMode ? 'Edit Course' : 'Create New Course'}
+                open={isModalVisible}
+                onOk={handleModalOk}
+                onCancel={handleModalCancel}
+                okText={isEditMode ? 'Update' : 'Create'}
+                destroyOnHidden
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    initialValues={{ title: '', description: '' }}
+                >
+                    <Form.Item
+                        label="Title"
+                        name="title"
+                        rules={[{ required: true, message: 'Please input the course title!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="Description"
+                        name="description"
+                        rules={[{ required: true, message: 'Please input the course description!' }]}
+                    >
+                        <Input.TextArea rows={3} />
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </div>
+    )
+}

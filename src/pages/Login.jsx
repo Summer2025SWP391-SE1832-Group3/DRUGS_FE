@@ -73,7 +73,8 @@ export default function Login() {
           // Create user object with all necessary information
           const userData = {
             ...response,
-            userId: payload.sub // 'sub' claim in JWT contains the user ID
+            userId: payload.sub, // 'sub' claim in JWT contains the user ID
+            role: payload.role
           };
           
           message.success('Login successfully!');

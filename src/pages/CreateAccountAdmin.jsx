@@ -28,7 +28,7 @@ export default function CreateAccountAdmin() {
         );
         if (passwordErrors.length > 0) {
           errors.push(
-            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số."
+            "Password must be at least 8 characters, including uppercase, lowercase, and numbers."
           );
         }
         if (usernameErrors.length > 0) {
@@ -41,7 +41,7 @@ export default function CreateAccountAdmin() {
           error.response.data.message.toLowerCase().includes("mật khẩu")
         ) {
           errors = [
-            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số."
+            "Password must be at least 8 characters, including uppercase, lowercase, and numbers."
           ];
         } else {
           errors = [error.response.data.message];

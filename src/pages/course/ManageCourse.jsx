@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { CreateButton, ActionButton } from '../../components/ui/Buttons'
 import { Table, Modal, Form, Input, message, Space, Typography } from 'antd';
 import coursesData from '../../data/course'
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
 
@@ -11,6 +12,7 @@ export default function ManageCourse() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [form] = Form.useForm();
+    const navigate = useNavigate();
 
     let isManager = false;
     const userdata = localStorage.getItem('user');
@@ -47,6 +49,10 @@ export default function ManageCourse() {
                 message.success('Course deleted successfully');
             }
         });
+    };
+
+    const handleViewCourse = (course) => {
+        navigate(`/courseDetails/${course.id}`);
     };
 
     const handleModalOk = () => {
@@ -103,6 +109,9 @@ export default function ManageCourse() {
             key: 'actions',
             render: (_, record) => (
                 <Space>
+                    <ActionButton className="view-btn" onClick={() => handleViewCourse(record)}>
+                        View
+                    </ActionButton>
                     <ActionButton className="edit-btn" onClick={() => showEditModal(record)}>
                         Edit
                     </ActionButton>

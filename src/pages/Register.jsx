@@ -137,39 +137,6 @@ export default function Register() {
 
             <Col xs={24} sm={12}>
               <Form.Item
-                label={<span style={{ fontWeight: 500 }}>Age</span>}
-                name="age"
-                rules={[
-                  { required: true, message: 'Please enter your age!' },
-                  {
-                    validator: (_, value) => {
-                      if (value && (isNaN(value) || value < 6)) {
-                        return Promise.reject('Age must be at least 6 years old!');
-                      }
-                      return Promise.resolve();
-                    }
-                  }
-                ]}
-              >
-                <Input type="number" placeholder="Enter your age" size="large"/>
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12}>
-              <Form.Item
-                label={<span style={{ fontWeight: 500 }}>Address</span>}
-                name="address"
-                rules={[
-                  { required: true, message: 'Please enter your address!' },
-                  { min: 5, message: 'Address must be at least 5 characters!' }
-                ]}
-              >
-                <Input placeholder="Enter your address" size="large"/>
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12}>
-              <Form.Item
                 label={<span style={{ fontWeight: 500 }}>Username</span>}
                 name="username"
                 rules={[
@@ -188,9 +155,9 @@ export default function Register() {
                 name="password"
                 rules={[
                   { required: true, message: 'Please enter password!' },
-                  { min: 6, message: 'Password must be at least 6 characters!' },
+                  { min: 8, message: 'Password must be at least 8 characters!' },
                   { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/, 
-                    message: 'Password must contain at least one letter and one number!' }
+                    message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number!' }
                 ]}
                 hasFeedback
               >

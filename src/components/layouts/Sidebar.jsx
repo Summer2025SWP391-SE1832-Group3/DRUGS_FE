@@ -8,12 +8,14 @@ export default function Sidebar({ open }) {
 
     let isStaff = false;
     let isManager = false;
+    let isAdmin = false;
     const userData = localStorage.getItem('user');
     if (userData) {
         try {
             const user = JSON.parse(userData);
             isStaff = user && user.role === "Staff";
             isManager = user && user.role === "Manager";
+            isAdmin = user && user.role === "Admin";
         } catch { }
     }
 
@@ -59,20 +61,34 @@ export default function Sidebar({ open }) {
                     <i className="material-symbols-rounded me-2">account_circle</i>
                     <span style={{ fontSize: 15 }}>Profile</span>
                 </Link>
+                {isAdmin && (
+                    <Link to="/accountListAdmin" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                    <i className="material-symbols-rounded me-2">group</i>
+                    <span style={{ fontSize: 15 }}>Manage Account</span>
+                </Link>
+                )}
                 {(isStaff || isManager) && (
                     <Link to="/manageCourse" className="nav-link text-white d-flex align-items-center px-3 py-2">
                         <i className="material-symbols-rounded me-2">dashboard</i>
                         <span style={{ fontSize: 15 }}>Manage Course</span>
                     </Link>
                 )}
+                {(isStaff || isManager) && ( 
+                    <Link to="/manageSurvey" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                    <i className="material-symbols-rounded me-2">assignment_turned_in</i>
+                    <span style={{ fontSize: 15 }}>Manage Survey</span>
+                </Link>
+                )}
                 <Link to="/" className="nav-link text-white d-flex align-items-center px-3 py-2">
                     <i className="material-symbols-rounded me-2">group</i>
                     <span style={{ fontSize: 15 }}>Consultants</span>
                 </Link>
-                <Link to="/" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                {isManager && (
+                    <Link to="/blogManager" className="nav-link text-white d-flex align-items-center px-3 py-2">
                     <i className="material-symbols-rounded me-2">event</i>
-                    <span style={{ fontSize: 15 }}>Events</span>
-                </Link>
+                    <span style={{ fontSize: 15 }}>Blog Manager</span>
+                </Link>              
+                )}
                 {isStaff && (
                     <a onClick={handlePersonalBlogsClick} className="nav-link text-white d-flex align-items-center px-3 py-2" style={{ cursor: 'pointer' }}>
                         <i className="material-symbols-rounded me-2">post</i>

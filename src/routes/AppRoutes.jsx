@@ -7,14 +7,14 @@ import Register from '../pages/Register'
 import Home from '../pages/Home'
 import Profile from '../pages/Profile'
 import CourseList from '../pages/course/CourseList'
-import BlogManager from '../pages/BlogManager'
-import CreateAccountAdmin from '../pages/CreateAccountAdmin'
+import BlogManager from '../pages/blog/BlogManager'
 import AccountListAdmin from '../pages/AccountListAdmin'
 
 import BlogList from '../pages/blog/BlogList'
 import BlogDetails from '../pages/blog/BlogDetails'
 import BlogByUserId from '../pages/blog/BlogByUserId'
 import ManageCourse from '../pages/course/ManageCourse'
+import ManageSurvey from '../pages/survey/ManageSurvey'
 import CourseDetails from '../pages/course/CourseDetails'
 
 
@@ -33,10 +33,9 @@ export default function AppRoutes() {
           <Route path="blogList" element={<BlogList/>}/>
           <Route path="blogDetails/:id" element={<BlogDetails/>}/>
           <Route path="blogByUserId/:userId" element={<BlogByUserId/>}/>
-          <Route path="createAccountAdmin" element={<CreateAccountAdmin/>}/>
           <Route path="accountListAdmin" element={<AccountListAdmin/>}/>
-       
           <Route path="manageCourse" element={<ManageCourse/>}/>
+          <Route path="manageSurvey" element={<ManageSurvey/>}/>
           <Route path="courseDetails/:id" element={<CourseDetails/>}/>
         </Route>
 

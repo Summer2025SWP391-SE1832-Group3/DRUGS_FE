@@ -1,5 +1,5 @@
 import axios from "axios"
-import apiBase from "./blog"
+import apiBase from "./apiBase"
 
 export const AccountAPI =  {
     register: async (value) => {

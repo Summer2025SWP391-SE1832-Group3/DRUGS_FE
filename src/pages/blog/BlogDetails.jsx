@@ -22,7 +22,7 @@ const StyledCard = styled(Card)`
 const StyledImage = styled.img`
   width: 100%;
   max-height: 500px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
   margin-bottom: 24px;
 `;

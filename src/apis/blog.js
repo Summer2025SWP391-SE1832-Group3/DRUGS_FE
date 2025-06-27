@@ -1,7 +1,5 @@
 import axios from "axios"
-
-const apiBase = "https://api-drug-be.purintech.id.vn/api"
-export default apiBase;
+import apiBase from "./apiBase"
 
 // Create axios instance with default config
 const axiosInstance = axios.create({

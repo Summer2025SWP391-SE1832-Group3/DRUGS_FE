@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, message, Space, ConfigProvider, Flex, Tag, Modal, Radio } from "antd";
-import { BlogManagerAPI } from "../apis/blogManager";
+import { Table, Button, Popconfirm, message, Space, ConfigProvider, Flex, Tag, Modal, Select } from "antd";
+import { BlogManagerAPI } from "../../apis/blogManager";
+import StatusTag from "../../components/ui/StatusTag";
 
 export default function BlogManager() {
   const [blogs, setBlogs] = useState([]);
@@ -120,15 +121,15 @@ export default function BlogManager() {
         let color = "default";
         if (status === "Processing" || status === 0) {
           display = "Pending";
-          color = "processing";
+          color = "orange";
         } else if (status === "Approved" || status === 1) {
           display = "Approved";
-          color = "success";
+          color = "green";
         } else if (status === "Rejected" || status === 2) {
           display = "Rejected";
-          color = "error";
+          color = "orange";
         }
-        return <Tag color={color}>{display}</Tag>;
+        return <StatusTag color={color}>{display}</StatusTag>;
       }
     },
     {
@@ -138,20 +139,6 @@ export default function BlogManager() {
         const isFinal = record.status === "Approved" || record.status === 1 || record.status === "Rejected" || record.status === 2;
         return (
           <Flex gap="small" wrap>
-            <Popconfirm
-              title="Are you sure to delete?"
-              onConfirm={(e) => {
-                e?.stopPropagation();
-                handleDelete(record.blogId);
-              }}
-              onCancel={(e) => {
-                e?.stopPropagation();
-              }}
-            >
-              <Button color="danger" variant="solid" onClick={(e) => e.stopPropagation()}>
-                Delete
-              </Button>
-            </Popconfirm>
             <Button
               color="cyan"
               variant="solid"
@@ -174,6 +161,20 @@ export default function BlogManager() {
             >
               Reject
             </Button>
+            <Popconfirm
+              title="Are you sure to delete?"
+              onConfirm={(e) => {
+                e?.stopPropagation();
+                handleDelete(record.blogId);
+              }}
+              onCancel={(e) => {
+                e?.stopPropagation();
+              }}
+            >
+              <Button color="danger" variant="solid" onClick={(e) => e.stopPropagation()}>
+                Delete
+              </Button>
+            </Popconfirm>
           </Flex>
         );
       },
@@ -185,18 +186,16 @@ export default function BlogManager() {
       <div style={{ padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h2 style={{ margin: 0 }}>Blog List</h2>
-          <Radio.Group
+          <Select
+            value={statusFilter}
+            onChange={value => setStatusFilter(value)}
+            style={{ width: 160 }}
             options={[
               { label: 'All', value: 'All' },
               { label: 'Pending', value: 'Pending' },
               { label: 'Approved', value: 'Approved' },
               { label: 'Rejected', value: 'Rejected' },
             ]}
-            optionType="button"
-            buttonStyle="solid"
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            size="small"
           />
         </div>
         <Table

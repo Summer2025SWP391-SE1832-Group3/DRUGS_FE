@@ -265,11 +265,10 @@ export default function AccountListAdmin() {
           </Form>
         </Modal>
         <Modal
-          title="Create Account"
           open={isCreateModalOpen}
           onCancel={() => setIsCreateModalOpen(false)}
           footer={null}
-          destroyOnClose
+          destroyOnHidden
         >
           <CreateAccountAdmin />
         </Modal>

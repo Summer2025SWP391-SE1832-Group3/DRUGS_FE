@@ -6,6 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import CreateBlogForm from '../../components/blog/CreateBlogForm';
 import { ActionButton, CreateButton } from '../../components/ui/Buttons';
+import StatusTag from '../../components/ui/StatusTag';
 
 const { Title, Paragraph, Text } = Typography;
 const apiBase = "https://api-drug-be.purintech.id.vn";
@@ -221,29 +222,6 @@ const StyledBlogCard = styled(Card)`
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
-  }
-`;
-
-// Enhanced Tags with better styling
-const StyledTag = styled(Tag)`
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  border: none;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  
-  &.ant-tag-green {
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  }
-  
-  &.ant-tag-orange {
-    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
   }
 `;
 
@@ -733,9 +711,9 @@ export default function BlogByUserId() {
                 title={blog.title}
                 extra={
                   <Space wrap>
-                    <StyledTag color={blog.status === 'Approved' ? 'green' : 'orange'}>
+                    <StatusTag color={blog.status === 'Approved' ? 'green' : 'orange'}>
                       {blog.status}
-                    </StyledTag>
+                    </StatusTag>
                     <ActionButton 
                       className="view-btn"
                       icon={<EyeOutlined />}
@@ -860,9 +838,9 @@ export default function BlogByUserId() {
               <div className="blog-footer">
                 <div className="blog-meta-info">
                   <div className="meta-info-item">
-                    <StyledTag color={selectedBlog.status === 'Approved' ? 'green' : 'orange'}>
+                    <StatusTag color={selectedBlog.status === 'Approved' ? 'green' : 'orange'}>
                       {selectedBlog.status}
-                    </StyledTag>
+                    </StatusTag>
                   </div>
                   <div className="meta-info-item">
                     <UserOutlined />

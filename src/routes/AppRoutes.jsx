@@ -11,6 +11,7 @@ import BlogList from '../pages/blog/BlogList'
 import BlogDetails from '../pages/blog/BlogDetails'
 import BlogByUserId from '../pages/blog/BlogByUserId'
 import ManageCourse from '../pages/course/ManageCourse'
+import ManageSurvey from '../pages/survey/ManageSurvey'
 
 export default function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ export default function AppRoutes() {
           <Route path="blogDetails/:id" element={<BlogDetails/>}/>
           <Route path="blogByUserId/:userId" element={<BlogByUserId/>}/>
           <Route path="manageCourse" element={<ManageCourse/>}/>
+          <Route path="manageSurvey" element={<ManageSurvey/>}/>
         </Route>
 
       </Routes>

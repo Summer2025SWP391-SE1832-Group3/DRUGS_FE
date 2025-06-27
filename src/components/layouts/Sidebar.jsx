@@ -65,6 +65,10 @@ export default function Sidebar({ open }) {
                         <span style={{ fontSize: 15 }}>Manage Course</span>
                     </Link>
                 )}
+                <Link to="/manageSurvey" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                    <i className="material-symbols-rounded me-2">assignment_turned_in</i>
+                    <span style={{ fontSize: 15 }}>Manage Survey</span>
+                </Link>
                 <Link to="/" className="nav-link text-white d-flex align-items-center px-3 py-2">
                     <i className="material-symbols-rounded me-2">group</i>
                     <span style={{ fontSize: 15 }}>Consultants</span>

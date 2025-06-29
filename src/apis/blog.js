@@ -10,122 +10,85 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         const user = JSON.parse(localStorage.getItem('user'));
-        if (user && user.token) {
+        if (user?.token) {
             config.headers.Authorization = `Bearer ${user.token}`;
-        } else {
-            console.log('No user token found');
         }
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
+
+const handleError = (error, msg) => {
+    console.error(msg, error);
+    throw error;
+};
+
+const buildBlogFormData = (blogData) => {
+    const formData = new FormData();
+    formData.append('title', blogData.title);
+    formData.append('content', blogData.content);
+    formData.append('category', blogData.category);
+    if (blogData.blogImages && blogData.blogImages.length > 0) {
+        formData.append('images', blogData.blogImages[0]?.originFileObj || blogData.blogImages[0]);
+    }
+    return formData;
+};
 
 export const BlogAPI = {
     getApprovedBlogs: async () => {
         try {
-            const response = await axiosInstance.get('/Blog/approvedBlogs');
-            return response.data;
+            const { data } = await axiosInstance.get('/Blog/approvedBlogs');
+            return data;
         } catch (error) {
-            console.error("Error fetching blogs:", error);
-            throw error;
+            handleError(error, "Error fetching blogs:");
         }
     },
     getById: async (id) => {
         try {
-            const response = await axiosInstance.get(`/Blog/${id}`);
-            return response.data;
+            const { data } = await axiosInstance.get(`/Blog/${id}`);
+            return data;
         } catch (error) {
-            console.error(`Error fetching blog with id ${id}:`, error);
-            throw error;
+            handleError(error, `Error fetching blog with id ${id}:`);
         }
     },
     getByUserId: async (userId) => {
         try {
-            const response = await axiosInstance.get(`/Blog/${userId}`);
-            return response.data;
+            const { data } = await axiosInstance.get(`/Blog/${userId}`);
+            return data;
         } catch (error) {
-            console.error(`Error fetching blogs for user ${userId}:`, error);
-            throw error;
+            handleError(error, `Error fetching blogs for user ${userId}:`);
         }
     },
     createBlog: async (blogData) => {
         try {
-            const formData = new FormData();
-            formData.append('title', blogData.title);
-            formData.append('content', blogData.content);
-            formData.append('category', blogData.category);
-            
-            // Handle single image upload
-            if (blogData.blogImages && blogData.blogImages.length > 0) {
-                // Đổi tên trường thành 'images' để backend nhận đúng
-                formData.append('images', blogData.blogImages[0]?.originFileObj || blogData.blogImages[0]);
-            }
-
-            // Log all FormData entries for debugging
-            for (let pair of formData.entries()) {
-                console.log('FormData entry:', pair[0], pair[1]);
-            }
-
-            const response = await axiosInstance.post('/Blog', formData, {
-                headers: {
-                    // 'Content-Type': 'multipart/form-data',
-                    'Accept': 'application/json',
-                },
-                transformRequest: [(data) => data], // Prevent axios from transforming the FormData
+            const formData = buildBlogFormData(blogData);
+            const { data } = await axiosInstance.post('/Blog', formData, {
+                headers: { 'Accept': 'application/json' },
+                transformRequest: [(data) => data],
             });
-
-            // Log the response for debugging
-            console.log('Blog creation response:', response.data);
-            
-            return response.data;
+            return data;
         } catch (error) {
-            console.error("Error creating blog:", error);
-            throw error;
+            handleError(error, "Error creating blog:");
         }
     },
     deleteBlog: async (id) => {
         try {
-            const response = await axiosInstance.delete(`/Blog/${id}`);
-            return response.data;
+            const { data } = await axiosInstance.delete(`/Blog/${id}`);
+            return data;
         } catch (error) {
-            console.error(`Error deleting blog with id ${id}:`, error);
-            throw error;
+            handleError(error, `Error deleting blog with id ${id}:`);
         }
     },
     updateBlog: async (id, blogData) => {
         try {
-            const formData = new FormData();
-            formData.append('title', blogData.title);
-            formData.append('content', blogData.content);
-            formData.append('category', blogData.category);
-            
-            // Handle single image upload (nếu có)
-            if (blogData.blogImages && blogData.blogImages.length > 0) {
-                formData.append('images', blogData.blogImages[0]?.originFileObj || blogData.blogImages[0]);
-            }
-
-            // Log all FormData entries for debugging
-            for (let pair of formData.entries()) {
-                console.log('FormData entry:', pair[0], pair[1]);
-            }
-
-            const response = await axiosInstance.put(`/Blog/${id}`, formData, {
-                headers: {
-                    // 'Content-Type': 'multipart/form-data',
-                    'Accept': 'application/json',
-                },
-                transformRequest: [(data) => data], // Prevent axios from transforming the FormData
+            const formData = buildBlogFormData(blogData);
+            const { data } = await axiosInstance.put(`/Blog/${id}`, formData, {
+                headers: { 'Accept': 'application/json' },
+                transformRequest: [(data) => data],
             });
-
-            // Log the response for debugging
-            console.log('Blog update response:', response.data);
-            
-            return response.data;
+            return data;
         } catch (error) {
-            console.error(`Error updating blog with id ${id}:`, error);
-            throw error;
+            handleError(error, `Error updating blog with id ${id}:`);
         }
     },
 }

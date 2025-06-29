@@ -147,6 +147,8 @@ const DividerSection = styled.div`
   margin: 0;
 `;
 
+const apiBase = "https://api-drug-be.purintech.id.vn"; // Base URL for static files
+
 export default function Home() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -312,7 +314,14 @@ export default function Home() {
                       cover={
                         <img
                           alt={blog.title}
-                          src={blog.blogImages && blog.blogImages.length > 0 ? blog.blogImages[0] : DEFAULT_BLOG_IMAGE}
+                          src={
+                            blog.blogImages && blog.blogImages.length > 0
+                              ? (blog.blogImages[0].startsWith('http')
+                                  ? blog.blogImages[0]
+                                  : `${apiBase}${blog.blogImages[0]}`)
+                              : DEFAULT_BLOG_IMAGE
+                          }
+                          onError={e => { e.target.onerror = null; e.target.src = DEFAULT_BLOG_IMAGE; }}
                         />
                       }
                       actions={[

@@ -71,8 +71,7 @@ export default function Navbar({ onToggleSidebar }) {
                 }}
             >
                 <div className="container-fluid py-0 px-3">
-                    {/* Mobile sidebar toggle */}
-                    <div className="sidenav-toggler sidenav-toggler-inner d-xl-block d-none me-3" style={{ cursor: 'pointer' }}>
+                    <div className="sidenav-toggler sidenav-toggler-inner d-block me-3" style={{ cursor: 'pointer' }}>
                         <a className="nav-link text-body p-0" onClick={e => { onToggleSidebar && onToggleSidebar(); }}>
                             <div className="sidenav-toggler-inner text-white">
                                 <i className="sidenav-toggler-line bg-white" />

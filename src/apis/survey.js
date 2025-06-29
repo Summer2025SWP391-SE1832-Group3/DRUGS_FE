@@ -1,41 +1,42 @@
 import axios from "axios";
 import apiBase from "./apiBase";
 
+const handleError = (error, msg) => {
+    console.error(msg, error);
+    throw error;
+};
+
 export const SurveyAPI = {
-    createSurvey: async (value) => {
-        try{
-            const response = await axios.post(`${apiBase}/Survey/create-survey`, value);
-            return response.data;
-        }catch (error) {
-            console.error("Error creating survey:", error);
-            throw error;
+    createSurvey: async (values) => {
+        try {
+            const { data } = await axios.post(`${apiBase}/Survey/create-survey`, values);
+            return data;
+        } catch (error) {
+            handleError(error, "Error creating survey:");
         }
     },
     getAllSurvey: async () => {
-        try{
-            const response = await axios.get(`${apiBase}/Survey/all_survey`);
-            return response.data;
-        }catch (error) {
-            console.error("Error fetching surveys:", error);
-            throw error;
+        try {
+            const { data } = await axios.get(`${apiBase}/Survey/all_survey`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching surveys:");
         }
     },
     deleteSurvey: async (id) => {
-        try{
-            const response = await axios.delete(`${apiBase}/Survey/${id}`);
-            return response.data;
-        }catch (error) {
-            console.error("Error deleting survey:", error);
-            throw error;
+        try {
+            const { data } = await axios.delete(`${apiBase}/Survey/${id}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error deleting survey:");
         }
     },
     getSurveyById: async (id) => {
         try {
-            const response = await axios.get(`${apiBase}/Survey/${id}`);
-            return response.data;
-        }catch (error) {
-            console.error("Error fetching survey:", error);
-            throw error;
+            const { data } = await axios.get(`${apiBase}/Survey/${id}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching survey:");
         }
     }
-}
+};

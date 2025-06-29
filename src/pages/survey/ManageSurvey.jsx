@@ -50,19 +50,20 @@ export default function ManageSurvey() {
             const values = await form.validateFields();
             console.log(values);
             const surveyData = {
-                surveyName: values.surveyName,
-                description: values.description,
-                surveyType: values.surveyType,
-                isActive: values.isActive,
-                questionsDto: values.questions.map(q => ({
-                    questionText: q.questionText,
-                    answersDto: q.answers.map(a => ({
-                        answerText: a.answerText,
-                        score: a.score,
-                        isCorrect: !!a.isCorrect
+                SurveyName: values.surveyName,
+                Description: values.description,
+                SurveyType: values.surveyType,
+                IsActive: values.isActive,
+                QuestionsDto: values.questions.map(q => ({
+                    QuestionText: q.questionText,
+                    AnswersDto: q.answers.map(a => ({
+                        AnswerText: a.answerText,
+                        Score: a.score,
+                        IsCorrect: !!a.isCorrect
                     }))
                 }))
             };
+            console.log('Survey body:', surveyData);
             await SurveyAPI.createSurvey(surveyData);
             message.success("Survey created successfully!");
             setCreateModal(false);
@@ -72,6 +73,15 @@ export default function ManageSurvey() {
             message.error("Failed to create survey");
             console.error(error);
         }
+    };
+
+    const handleOpenCreateModal = () => {
+        setCreateModal(true);
+        form.setFieldsValue({
+            questions: [
+                { questionText: '', answers: [{ answerText: '', score: 0, isCorrect: false }] }
+            ]
+        });
     };
 
     const columns = [
@@ -137,7 +147,7 @@ export default function ManageSurvey() {
                 Manage Surveys
             </Typography.Title>
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <CreateButton onClick={() => setCreateModal(true)}>Create Survey</CreateButton>
+                <CreateButton onClick={handleOpenCreateModal}>Create Survey</CreateButton>
             </div>
             <Table
                 columns={columns}
@@ -217,25 +227,52 @@ export default function ManageSurvey() {
             <Modal
                 open={createModal}
                 title="Create New Survey"
-                onCancel={() => setCreateModal(false)}
+                onCancel={() => {
+                    setCreateModal(false);
+                    form.resetFields();
+                }}
                 onOk={handleCreate}
                 width={800}
                 okText="Create"
-                destroyOnHidden
+                destroyOnClose
             >
-                <Form form={form} layout="vertical" initialValues={{
-                    surveyName: "",
-                    description: "",
-                    isActive: true,
-                    surveyType: "AddictionSurvey",
-                    questions: [
-                        { questionText: "", answers: [{ answerText: "", score: 0, isCorrect: false }] }
-                    ]
-                }}>
-                    <Form.Item label="Survey Name" name="surveyName" rules={[{ required: true }]}> <Input /> </Form.Item>
-                    <Form.Item label="Description" name="description" rules={[{ required: true }]}> <Input.TextArea rows={2} /> </Form.Item>
-                    <Form.Item label="Survey Type" name="surveyType" rules={[{ required: true }]}> <Select><Select.Option value="AddictionSurvey">Addiction Survey</Select.Option></Select> </Form.Item>
-                    <Form.Item label="Active" name="isActive" valuePropName="checked"> <Switch /> </Form.Item>
+                <Form form={form} layout="vertical">
+                    <Form.Item
+                        label="Survey Name"
+                        name="surveyName"
+                        rules={[{ required: true, message: "Survey name is required" }]}
+                    >
+                        <Input placeholder="Enter survey name" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Description"
+                        name="description"
+                        rules={[{ required: true, message: "Description is required" }]}
+                    >
+                        <Input.TextArea rows={3} placeholder="Enter description" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Survey Type"
+                        name="surveyType"
+                        rules={[{ required: true, message: "Survey type is required" }]}
+                        initialValue="AddictionSurvey"
+                    >
+                        <Select>
+                            <Select.Option value="AddictionSurvey">Addiction Survey</Select.Option>
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Active"
+                        name="isActive"
+                        valuePropName="checked"
+                        initialValue={true}
+                    >
+                        <Switch />
+                    </Form.Item>
+
                     <Divider />
                     <Form.List name="questions">
                         {(fields, { add, remove }) => (
@@ -300,4 +337,3 @@ export default function ManageSurvey() {
         </div>
     );
 }
-

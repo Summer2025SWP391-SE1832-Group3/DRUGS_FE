@@ -144,7 +144,7 @@ export default function ManageSurvey() {
             {/* Google Fonts */}
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
             <Typography.Title level={2} style={{ fontFamily: 'Inter, Roboto, Arial, sans-serif', fontWeight: 700, color: '#2c3e50', letterSpacing: '-1px' }}>
-                Manage Surveys
+                Manage Survey
             </Typography.Title>
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <CreateButton onClick={handleOpenCreateModal}>Create Survey</CreateButton>

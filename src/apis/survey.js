@@ -38,5 +38,13 @@ export const SurveyAPI = {
         } catch (error) {
             handleError(error, "Error fetching survey:");
         }
+    },
+    submitSurvey: async (id, answers) => {
+        try {
+            const { data } = await axios.post(`${apiBase}/Survey/submit/${id}`, { answers });
+            return data;
+        } catch (error) {
+            handleError(error, "Error submitting survey:");
+        }
     }
 };

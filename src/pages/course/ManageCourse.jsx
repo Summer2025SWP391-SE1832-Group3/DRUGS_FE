@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { CreateButton, ActionButton } from '../../components/ui/Buttons'
 import { Table, Modal, Form, Input, message, Space, Typography } from 'antd';
-import coursesData from '../../data/course'
 import { useNavigate } from 'react-router-dom';
+import { CourseAPI } from '../../apis/course';
 
 const { Title, Paragraph } = Typography;
 
 export default function ManageCourse() {
-    const [courses, setCourses] = useState(coursesData);
+    const [courses, setCourses] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -22,6 +22,19 @@ export default function ManageCourse() {
             isManager = user && user.role === "Manager";
         } catch { }
     }
+
+    useEffect(() => {
+        fetchCourses();
+    }, []);
+
+    const fetchCourses = async () => {
+        try {
+            const data = await CourseAPI.getAllCourses();
+            setCourses(data);
+        } catch (error) {
+            setCourses([]);
+        }
+    };
 
     const showCreateModal = () => {
         setIsEditMode(false);
@@ -44,9 +57,14 @@ export default function ManageCourse() {
             okText: 'Delete',
             okType: 'danger',
             cancelText: 'Cancel',
-            onOk: () => {
-                setCourses(courses.filter(c => c.id !== course.id));
-                message.success('Course deleted successfully');
+            onOk: async () => {
+                try {
+                    await CourseAPI.deleteCourse(course.id);
+                    message.success('Course deleted successfully');
+                    fetchCourses();
+                } catch {
+                    message.error('Failed to delete course');
+                }
             }
         });
     };
@@ -56,19 +74,23 @@ export default function ManageCourse() {
     };
 
     const handleModalOk = () => {
-        form.validateFields().then(values => {
+        form.validateFields().then(async values => {
             if (isEditMode && selectedCourse) {
-                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...selectedCourse, ...values } : c));
-                message.success('Course updated successfully');
+                try {
+                    await CourseAPI.updateCourse(selectedCourse.id, values);
+                    message.success('Course updated successfully');
+                    fetchCourses();
+                } catch {
+                    message.error('Failed to update course');
+                }
             } else {
-                const newCourse = {
-                    ...values,
-                    id: Date.now(),
-                    createdBy: 'Admin',
-                    createdAt: new Date().toISOString(),
-                };
-                setCourses([newCourse, ...courses]);
-                message.success('Course created successfully');
+                try {
+                    await CourseAPI.createCourse(values);
+                    message.success('Course created successfully');
+                    fetchCourses();
+                } catch {
+                    message.error('Failed to create course');
+                }
             }
             setIsModalVisible(false);
             form.resetFields();
@@ -91,18 +113,18 @@ export default function ManageCourse() {
             title: 'Description',
             dataIndex: 'description',
             key: 'description',
-            render: (text) => <Paragraph ellipsis={{ rows: 1 }}>{text}</Paragraph>,
+            render: (text) => {
+                if (!text) return '';
+                const words = text.split(' ');
+                return words.length > 20
+                    ? words.slice(0, 20).join(' ') + '...'
+                    : text;
+            },
         },
         {
-            title: 'Created By',
-            dataIndex: 'createdBy',
-            key: 'createdBy',
-        },
-        {
-            title: 'Created At',
-            dataIndex: 'createdAt',
-            key: 'createdAt',
-            render: (date) => new Date(date).toLocaleDateString(),
+            title: 'Topic',
+            dataIndex: 'topic',
+            key: 'topic',
         },
         {
             title: 'Actions',
@@ -188,6 +210,13 @@ export default function ManageCourse() {
                         rules={[{ required: true, message: 'Please input the course description!' }]}
                     >
                         <Input.TextArea rows={3} />
+                    </Form.Item>
+                    <Form.Item
+                        label="Topic"
+                        name="topic"
+                        rules={[{ required: true, message: 'Please input the course topic!' }]}
+                    >
+                        <Input />
                     </Form.Item>
                 </Form>
             </Modal>

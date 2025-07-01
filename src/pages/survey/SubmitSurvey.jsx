@@ -73,7 +73,7 @@ export default function SubmitSurvey() {
                   value={answers[q.questionId]}
                   style={{ display: 'block', marginTop: 8 }}
                 >
-                  {q.answersDto?.map(a => (
+                  {q.surveyAnswers?.map(a => (
                     <Radio key={a.answerId} value={a.answerId} style={{ display: 'block', margin: '6px 0' }}>
                       {a.answerText}
                     </Radio>

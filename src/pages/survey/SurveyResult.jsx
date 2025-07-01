@@ -44,7 +44,7 @@ export default function SurveyResult() {
     }
 
     if (!result) {
-        return (
+  return (
             <div style={{
                 textAlign: 'center',
                 marginTop: '10vh',

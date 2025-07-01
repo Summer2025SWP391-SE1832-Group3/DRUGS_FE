@@ -108,9 +108,9 @@ export default function Navbar({ onToggleSidebar }) {
                     </div>
                     {/* Centered Courses & Blogs navigation - absolute center */}
                     <div style={{ position: 'absolute', left: '50%', top: 0, height: '100%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', zIndex: 2 }}>
-                        <div style={{ display: 'flex', gap: 32, alignItems: 'center', maxWidth: 350 }}>
-                            <a
-                                onClick={() => navigate('/courseList')}
+                        <div style={{ display: 'flex', gap: 40, alignItems: 'center', maxWidth: 400 }}>
+                        <a
+                                onClick={() => navigate('/surveyList')}
                                 style={{
                                     minWidth: 110,
                                     fontWeight: 600,
@@ -119,7 +119,29 @@ export default function Navbar({ onToggleSidebar }) {
                                     background: 'transparent',
                                     border: '2px solid #fff',
                                     borderRadius: 30,
-                                    padding: '8px 28px',
+                                    padding: '8px 10px',
+                                    boxShadow: 'none',
+                                    transition: 'all 0.2s',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8
+                                }}
+                            >
+                                <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>dashboard</i>
+                                Survey
+                            </a>
+                            <a
+                                onClick={() => navigate('/courseList')}
+                                style={{
+                                    minWidth: 120,
+                                    fontWeight: 600,
+                                    fontSize: 16,
+                                    color: 'white',
+                                    background: 'transparent',
+                                    border: '2px solid #fff',
+                                    borderRadius: 30,
+                                    padding: '8px 10px',
                                     boxShadow: 'none',
                                     transition: 'all 0.2s',
                                     cursor: 'pointer',
@@ -141,7 +163,7 @@ export default function Navbar({ onToggleSidebar }) {
                                     background: 'transparent',
                                     border: '2px solid #fff',
                                     borderRadius: 30,
-                                    padding: '8px 28px',
+                                    padding: '8px 16px',
                                     boxShadow: 'none',
                                     transition: 'all 0.2s',
                                     cursor: 'pointer',

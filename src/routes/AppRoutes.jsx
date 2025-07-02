@@ -34,7 +34,6 @@ export default function AppRoutes() {
           <Route path="accountListAdmin" element={<AccountListAdmin/>}/>
           {/* Course */}
           <Route path="courseList" element={<CourseList/>}/>
-          <Route path="courseDetails/:id" element={<CourseDetails/>}/>
           <Route path="manageCourse" element={<ManageCourse/>}/>
           <Route path="courseDetails/:id" element={<CourseDetailsManager/>}/>
           <Route path="courseDetailsStaff/:id" element={<CourseDetailsStaff/>}/>

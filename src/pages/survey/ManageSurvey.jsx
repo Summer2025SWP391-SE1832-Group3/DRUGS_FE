@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { SurveyAPI } from "../../apis/survey";
 import { CourseAPI } from '../../apis/course';
-import { Table, Space, Typography, message, Tag, Modal, List, Form, Input, Switch, Button, Select, Divider } from "antd";
+import { Table, Space, Typography, message, Modal, List, Form, Input, Switch, Button, Select, Divider } from "antd";
 import { ActionButton, CreateButton } from "../../components/ui/Buttons";
+import StatusTag from "../../components/ui/StatusTag";
 
 export default function ManageSurvey() {
     const [surveys, setSurveys] = useState([]);
@@ -179,7 +180,7 @@ export default function ManageSurvey() {
             title: "Status",
             dataIndex: "isActive",
             key: "isActive",
-            render: (active) => active ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
+            render: (active) => active ? <StatusTag color="green">Active</StatusTag> : <StatusTag color="red">Inactive</StatusTag>,
             width: 100,
         },
         {
@@ -270,7 +271,7 @@ export default function ManageSurvey() {
                 width={600}
             >
                 <Typography.Paragraph><b>Description:</b> {selectedSurvey?.description}</Typography.Paragraph>
-                <Typography.Paragraph><b>Status:</b> {selectedSurvey?.isActive ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>}</Typography.Paragraph>
+                <Typography.Paragraph><b>Status:</b> {selectedSurvey?.isActive ? <StatusTag color="green">Active</StatusTag> : <StatusTag color="red">Inactive</StatusTag>}</Typography.Paragraph>
                 <Typography.Paragraph><b>Questions:</b></Typography.Paragraph>
                 <List
                     dataSource={selectedSurvey?.surveyQuestions || []}
@@ -285,7 +286,7 @@ export default function ManageSurvey() {
                                             <span style={{ color: '#888', marginLeft: 8 }}>(Score: {a.score})</span>
                                         )}
                                         {a.isCorrect && (
-                                            <Tag color="green" style={{ marginLeft: 8 }}>Correct</Tag>
+                                            <StatusTag color="green" style={{ marginLeft: 8 }}>Correct</StatusTag>
                                         )}
                                     </li>
                                 ))}

@@ -15,9 +15,10 @@ import BlogDetails from '../pages/blog/BlogDetails'
 import BlogByUserId from '../pages/blog/BlogByUserId'
 import ManageCourse from '../pages/course/ManageCourse'
 import ManageSurvey from '../pages/survey/ManageSurvey'
-import CourseDetails from '../pages/course/CourseDetails'
 import SurveyList from '../pages/survey/SurveyList'
 import SubmitSurvey from '../pages/survey/SubmitSurvey'
+import CourseDetailsManager from '../pages/course/CourseDetailsManager'
+import CourseDetailsStaff from '../pages/course/CourseDetailsStaff'
 import SurveyResult from '../pages/survey/SurveyResult'
 
 export default function AppRoutes() {
@@ -35,6 +36,8 @@ export default function AppRoutes() {
           <Route path="courseList" element={<CourseList/>}/>
           <Route path="courseDetails/:id" element={<CourseDetails/>}/>
           <Route path="manageCourse" element={<ManageCourse/>}/>
+          <Route path="courseDetails/:id" element={<CourseDetailsManager/>}/>
+          <Route path="courseDetailsStaff/:id" element={<CourseDetailsStaff/>}/>
           {/* Blog */}
           <Route path="blogManager" element={<BlogManager/>}/>
           <Route path="blogList" element={<BlogList/>}/>

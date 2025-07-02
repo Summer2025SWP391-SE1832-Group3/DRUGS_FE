@@ -26,6 +26,14 @@ export const SurveyAPI = {
             handleError(error, "Error fetching surveys:");
         }
     },
+    updateSurvey: async (id, values) => {
+        try {
+            const { data } = await axiosInstance.put(`${apiBase}/Survey/${id}`, values);
+            return data;
+        } catch (error) {
+            handleError(error, "Error updating survey:");
+        }
+    },
     deleteSurvey: async (id) => {
         try {
             const { data } = await axiosInstance.delete(`${apiBase}/Survey/${id}`);

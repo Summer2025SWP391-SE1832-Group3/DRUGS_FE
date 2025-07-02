@@ -3,6 +3,7 @@ import { CreateButton, ActionButton } from '../../components/ui/Buttons'
 import { Table, Modal, Form, Input, message, Space, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { CourseAPI } from '../../apis/course';
+import StatusTag from '../../components/ui/StatusTag';
 
 const { Title, Paragraph } = Typography;
 
@@ -109,6 +110,11 @@ export default function ManageCourse() {
 
     const columns = [
         {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
@@ -130,6 +136,16 @@ export default function ManageCourse() {
             title: 'Topic',
             dataIndex: 'topic',
             key: 'topic',
+        },
+        {
+            title: 'Status',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive) => (
+                <StatusTag color={isActive ? 'green' : 'red'}>
+                  {isActive ? 'Active' : 'Inactive'}
+                </StatusTag>
+            ),
         },
         {
             title: 'Actions',
@@ -223,6 +239,7 @@ export default function ManageCourse() {
                     >
                         <Input />
                     </Form.Item>
+                    
                 </Form>
             </Modal>
         </div>

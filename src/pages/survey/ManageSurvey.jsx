@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { SurveyAPI } from "../../apis/survey";
 import { CourseAPI } from '../../apis/course';
-import { Table, Space, Typography, message, Tag, Modal, List, Form, Input, Switch, Button, Select, Divider } from "antd";
+import { Table, Space, Typography, message, Modal, List, Form, Input, Switch, Button, Select, Divider } from "antd";
 import { ActionButton, CreateButton } from "../../components/ui/Buttons";
+import StatusTag from "../../components/ui/StatusTag";
 
 export default function ManageSurvey() {
     const [surveys, setSurveys] = useState([]);
@@ -11,6 +12,7 @@ export default function ManageSurvey() {
     const [modalVisible, setModalVisible] = useState(false);
     const [deleteModal, setDeleteModal] = useState({ visible: false, survey: null });
     const [createModal, setCreateModal] = useState(false);
+    const [updateModal, setUpdateModal] = useState({ visible: false, survey: null });
     const [form] = Form.useForm();
     const [surveyType, setSurveyType] = useState("AddictionSurvey");
     const [courses, setCourses] = useState([]);
@@ -103,6 +105,58 @@ export default function ManageSurvey() {
         });
     };
 
+    const handleOpenUpdateModal = (survey) => {
+        setUpdateModal({ visible: true, survey });
+        form.setFieldsValue({
+            surveyType: survey.surveyType || 'AddictionSurvey',
+            courseId: survey.courseId,
+            surveyName: survey.surveyName,
+            description: survey.description,
+            isActive: survey.isActive,
+            questions: (survey.surveyQuestions || []).map(q => ({
+                questionText: q.questionText,
+                answers: (q.surveyAnswers || []).map(a => ({
+                    answerText: a.answerText,
+                    score: a.score,
+                    isCorrect: !!a.isCorrect
+                }))
+            }))
+        });
+        setSurveyType(survey.surveyType || 'AddictionSurvey');
+    };
+
+    const handleUpdate = async () => {
+        try {
+            const values = await form.validateFields();
+            const surveyTypeValue = values.surveyType;
+            const courseIdValue = surveyTypeValue === "CourseTest" ? values.courseId : undefined;
+            const surveyData = {
+                surveyName: values.surveyName,
+                description: values.description,
+                surveyType: surveyTypeValue,
+                isActive: values.isActive,
+                questions: values.questions.map((q, qIdx) => ({
+                    questionId: updateModal.survey?.surveyQuestions?.[qIdx]?.questionId ?? 0,
+                    questionText: q.questionText,
+                    answersDTO: q.answers.map((a, aIdx) => ({
+                        answerId: updateModal.survey?.surveyQuestions?.[qIdx]?.surveyAnswers?.[aIdx]?.answerId ?? 0,
+                        answerText: a.answerText,
+                        score: a.score,
+                        isCorrect: !!a.isCorrect
+                    }))
+                }))
+            };
+            await SurveyAPI.updateSurvey(updateModal.survey.surveyId, surveyData);
+            message.success("Survey updated successfully!");
+            setUpdateModal({ visible: false, survey: null });
+            form.resetFields();
+            fetchSurveys();
+        } catch (error) {
+            message.error("Failed to update survey");
+            console.error(error);
+        }
+    };
+
     const columns = [
         {
             title: "ID",
@@ -126,7 +180,7 @@ export default function ManageSurvey() {
             title: "Status",
             dataIndex: "isActive",
             key: "isActive",
-            render: (active) => active ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
+            render: (active) => active ? <StatusTag color="green">Active</StatusTag> : <StatusTag color="red">Inactive</StatusTag>,
             width: 100,
         },
         {
@@ -143,6 +197,9 @@ export default function ManageSurvey() {
                 <Space>
                     <ActionButton className="view-btn" onClick={() => handleView(record)}>
                         View
+                    </ActionButton>
+                    <ActionButton className="edit-btn" onClick={() => handleOpenUpdateModal(record)}>
+                        Edit
                     </ActionButton>
                     <ActionButton
                         className="delete-btn"
@@ -214,7 +271,7 @@ export default function ManageSurvey() {
                 width={600}
             >
                 <Typography.Paragraph><b>Description:</b> {selectedSurvey?.description}</Typography.Paragraph>
-                <Typography.Paragraph><b>Status:</b> {selectedSurvey?.isActive ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>}</Typography.Paragraph>
+                <Typography.Paragraph><b>Status:</b> {selectedSurvey?.isActive ? <StatusTag color="green">Active</StatusTag> : <StatusTag color="red">Inactive</StatusTag>}</Typography.Paragraph>
                 <Typography.Paragraph><b>Questions:</b></Typography.Paragraph>
                 <List
                     dataSource={selectedSurvey?.surveyQuestions || []}
@@ -229,7 +286,7 @@ export default function ManageSurvey() {
                                             <span style={{ color: '#888', marginLeft: 8 }}>(Score: {a.score})</span>
                                         )}
                                         {a.isCorrect && (
-                                            <Tag color="green" style={{ marginLeft: 8 }}>Correct</Tag>
+                                            <StatusTag color="green" style={{ marginLeft: 8 }}>Correct</StatusTag>
                                         )}
                                     </li>
                                 ))}
@@ -266,6 +323,126 @@ export default function ManageSurvey() {
                 onOk={handleCreate}
                 width={800}
                 okText="Create"
+                destroyOnClose
+            >
+                <Form form={form} layout="vertical">
+                    <Form.Item
+                        label="Survey Type"
+                        name="surveyType"
+                        initialValue="AddictionSurvey"
+                        rules={[{ required: true, message: "Survey type is required" }]}
+                    >
+                        <Select onChange={value => setSurveyType(value)}>
+                            <Select.Option value="AddictionSurvey">Addiction Survey</Select.Option>
+                            <Select.Option value="CourseTest">Course Test</Select.Option>
+                        </Select>
+                    </Form.Item>
+                    {surveyType === "CourseTest" && (
+                        <Form.Item
+                            label="Course"
+                            name="courseId"
+                            rules={[{ required: true, message: "Please select a course" }]}
+                        >
+                            <Select placeholder="Select a course">
+                                {courses.map(course => (
+                                    <Select.Option key={course.id} value={course.id}>{course.title}</Select.Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                    )}
+                    <Form.Item
+                        label="Survey Name"
+                        name="surveyName"
+                        rules={[{ required: true, message: "Survey name is required" }]}
+                    >
+                        <Input placeholder="Enter survey name" />
+                    </Form.Item>
+                    <Form.Item
+                        label="Description"
+                        name="description"
+                        rules={[{ required: true, message: "Description is required" }]}
+                    >
+                        <Input.TextArea rows={3} placeholder="Enter description" />
+                    </Form.Item>
+                    <Form.Item
+                        label="Active"
+                        name="isActive"
+                        valuePropName="checked"
+                        initialValue={true}
+                    >
+                        <Switch />
+                    </Form.Item>
+                    <Divider />
+                    <Form.List name="questions">
+                        {(fields, { add, remove }) => (
+                            <>
+                                {fields.map((field, idx) => (
+                                    <div key={field.key} style={{ marginBottom: 24, border: "1px solid #eee", borderRadius: 8, padding: 16 }}>
+                                        <Form.Item
+                                            label={`Question ${idx + 1}`}
+                                            name={[field.name, "questionText"]}
+                                            rules={[{ required: true, message: "Please input question" }]}
+                                        >
+                                            <Input placeholder="Enter question..." />
+                                        </Form.Item>
+                                        <Form.List name={[field.name, "answers"]}>
+                                            {(ansFields, { add: addAns, remove: removeAns }) => (
+                                                <>
+                                                    {ansFields.map((ans, aidx) => (
+                                                        <div key={ans.key} style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
+                                                            <Form.Item
+                                                                name={[ans.name, "answerText"]}
+                                                                rules={[{ required: true, message: "Answer required" }]}
+                                                                style={{ flex: 1, marginBottom: 0 }}
+                                                            >
+                                                                <Input placeholder={`Answer ${aidx + 1}`} />
+                                                            </Form.Item>
+                                                            <Form.Item
+                                                                name={[ans.name, "score"]}
+                                                                rules={[{ required: true, message: "Score required" }]}
+                                                                style={{ width: 100, marginBottom: 0 }}
+                                                            >
+                                                                <Input type="number" placeholder="Score" style={{ width: 80 }} />
+                                                            </Form.Item>
+                                                            <Form.Item
+                                                                name={[ans.name, "isCorrect"]}
+                                                                valuePropName="checked"
+                                                                style={{ marginBottom: 0 }}
+                                                            >
+                                                                <Switch checkedChildren="Correct" unCheckedChildren="Wrong" />
+                                                            </Form.Item>
+                                                            <Button danger onClick={() => removeAns(ans.name)} disabled={ansFields.length <= 1} style={{ marginBottom: 0 }}>
+                                                                Delete
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: 0 })} block style={{ marginBottom: 8 }}>
+                                                        Add Answer
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </Form.List>
+                                        <Button danger onClick={() => remove(field.name)} style={{ marginTop: 8 }} disabled={fields.length <= 1}>Delete Question</Button>
+                                    </div>
+                                ))}
+                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: 0, isCorrect: false }] })} block>
+                                    Add Question
+                                </Button>
+                            </>
+                        )}
+                    </Form.List>
+                </Form>
+            </Modal>
+            <Modal
+                open={updateModal.visible}
+                title="Update Survey"
+                onCancel={() => {
+                    setUpdateModal({ visible: false, survey: null });
+                    form.resetFields();
+                }}
+                onOk={handleUpdate}
+                width={800}
+                okText="Update"
                 destroyOnClose
             >
                 <Form form={form} layout="vertical">

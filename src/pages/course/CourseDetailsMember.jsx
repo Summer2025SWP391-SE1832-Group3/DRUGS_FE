@@ -99,7 +99,7 @@ const mockCourse = {
   ]
 };
 
-export default function CourseDetailMember() {
+export default function CourseDetailsMember() {
   const course = mockCourse;
   const [lessonProgress, setLessonProgress] = useState(
     course.lessons.reduce((acc, lesson, idx) => {

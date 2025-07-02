@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SurveyAPI } from "../../apis/survey";
 import { CourseAPI } from '../../apis/course';
-import { Table, Space, Typography, message, Modal, List, Form, Input, Switch, Button, Select, Divider } from "antd";
+import { Table, Space, Typography, message, Modal, Tag, List, Form, Input, Switch, Button, Select, Divider } from "antd";
 import { ActionButton, CreateButton } from "../../components/ui/Buttons";
 import StatusTag from "../../components/ui/StatusTag";
 
@@ -79,7 +79,7 @@ export default function ManageSurvey() {
                     questionText: q.questionText,
                     answersDto: q.answers.map(a => ({
                         answerText: a.answerText,
-                        score: a.score,
+                        score: surveyTypeValue === "CourseTest" ? null : a.score,
                         isCorrect: !!a.isCorrect
                     }))
                 }))
@@ -100,7 +100,7 @@ export default function ManageSurvey() {
         setCreateModal(true);
         form.setFieldsValue({
             questions: [
-                { questionText: '', answers: [{ answerText: '', score: 0, isCorrect: false }] }
+                { questionText: '', answers: [{ answerText: '', score: surveyType === 'CourseTest' ? null : 0, isCorrect: false }] }
             ]
         });
     };
@@ -141,7 +141,7 @@ export default function ManageSurvey() {
                     answersDTO: q.answers.map((a, aIdx) => ({
                         answerId: updateModal.survey?.surveyQuestions?.[qIdx]?.surveyAnswers?.[aIdx]?.answerId ?? 0,
                         answerText: a.answerText,
-                        score: a.score,
+                        score: surveyTypeValue === "CourseTest" ? null : a.score,
                         isCorrect: !!a.isCorrect
                     }))
                 }))
@@ -205,7 +205,7 @@ export default function ManageSurvey() {
                         className="delete-btn"
                         danger
                         disabled={!record.isActive}
-                        style={!record.isActive ? { opacity: 0.9, pointerEvents: 'none' } : {}}
+                        style={!record.isActive ? { opacity: 0.4} : {}}
                         onClick={() => record.isActive && setDeleteModal({ visible: true, survey: record })}
                     >
                         Delete
@@ -271,7 +271,7 @@ export default function ManageSurvey() {
                 width={600}
             >
                 <Typography.Paragraph><b>Description:</b> {selectedSurvey?.description}</Typography.Paragraph>
-                <Typography.Paragraph><b>Status:</b> {selectedSurvey?.isActive ? <StatusTag color="green">Active</StatusTag> : <StatusTag color="red">Inactive</StatusTag>}</Typography.Paragraph>
+                <Typography.Paragraph><b>Status:</b> {selectedSurvey?.isActive ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>}</Typography.Paragraph>
                 <Typography.Paragraph><b>Questions:</b></Typography.Paragraph>
                 <List
                     dataSource={selectedSurvey?.surveyQuestions || []}
@@ -286,7 +286,7 @@ export default function ManageSurvey() {
                                             <span style={{ color: '#888', marginLeft: 8 }}>(Score: {a.score})</span>
                                         )}
                                         {a.isCorrect && (
-                                            <StatusTag color="green" style={{ marginLeft: 8 }}>Correct</StatusTag>
+                                            <Tag color="green" style={{ marginLeft: 8 }}>Correct</Tag>
                                         )}
                                     </li>
                                 ))}
@@ -399,10 +399,10 @@ export default function ManageSurvey() {
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "score"]}
-                                                                rules={[{ required: true, message: "Score required" }]}
+                                                                rules={surveyType === "CourseTest" ? [] : [{ required: true, message: "Score required" }]}
                                                                 style={{ width: 100, marginBottom: 0 }}
                                                             >
-                                                                <Input type="number" placeholder="Score" style={{ width: 80 }} />
+                                                                <Input type="number" placeholder="Score" style={{ width: 80 }} disabled={surveyType === "CourseTest"} />
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "isCorrect"]}
@@ -416,7 +416,7 @@ export default function ManageSurvey() {
                                                             </Button>
                                                         </div>
                                                     ))}
-                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: 0 })} block style={{ marginBottom: 8 }}>
+                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false })} block style={{ marginBottom: 8 }}>
                                                         Add Answer
                                                     </Button>
                                                 </>
@@ -425,7 +425,7 @@ export default function ManageSurvey() {
                                         <Button danger onClick={() => remove(field.name)} style={{ marginTop: 8 }} disabled={fields.length <= 1}>Delete Question</Button>
                                     </div>
                                 ))}
-                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: 0, isCorrect: false }] })} block>
+                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false }] })} block>
                                     Add Question
                                 </Button>
                             </>
@@ -519,10 +519,10 @@ export default function ManageSurvey() {
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "score"]}
-                                                                rules={[{ required: true, message: "Score required" }]}
+                                                                rules={surveyType === "CourseTest" ? [] : [{ required: true, message: "Score required" }]}
                                                                 style={{ width: 100, marginBottom: 0 }}
                                                             >
-                                                                <Input type="number" placeholder="Score" style={{ width: 80 }} />
+                                                                <Input type="number" placeholder="Score" style={{ width: 80 }} disabled={surveyType === "CourseTest"} />
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "isCorrect"]}
@@ -536,7 +536,7 @@ export default function ManageSurvey() {
                                                             </Button>
                                                         </div>
                                                     ))}
-                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: 0 })} block style={{ marginBottom: 8 }}>
+                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false })} block style={{ marginBottom: 8 }}>
                                                         Add Answer
                                                     </Button>
                                                 </>
@@ -545,7 +545,7 @@ export default function ManageSurvey() {
                                         <Button danger onClick={() => remove(field.name)} style={{ marginTop: 8 }} disabled={fields.length <= 1}>Delete Question</Button>
                                     </div>
                                 ))}
-                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: 0, isCorrect: false }] })} block>
+                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false }] })} block>
                                     Add Question
                                 </Button>
                             </>

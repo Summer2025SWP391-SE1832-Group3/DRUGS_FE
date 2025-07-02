@@ -73,7 +73,7 @@ export default function ManageCourse() {
     const handleViewCourse = (course) => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user && user.role === 'Manager') {
-            navigate(`/courseDetails/${course.id}`);
+            navigate(`/courseDetailsManager/${course.id}`);
         } else {
             navigate(`/courseDetailsStaff/${course.id}`);
         }
@@ -158,7 +158,12 @@ export default function ManageCourse() {
                     <ActionButton className="edit-btn" onClick={() => showEditModal(record)}>
                         Edit
                     </ActionButton>
-                    <ActionButton className="delete-btn" onClick={() => handleDelete(record)}>
+                    <ActionButton
+                        className="delete-btn"
+                        onClick={() => handleDelete(record)}
+                        disabled={!record.isActive}
+                        style={!record.isActive ? { opacity: 0.4 } : {}}
+                    >
                         Delete
                     </ActionButton>
                 </Space>

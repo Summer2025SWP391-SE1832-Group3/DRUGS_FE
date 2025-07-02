@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { CreateButton, ActionButton } from '../../components/ui/Buttons'
-import { Table, Modal, Form, Input, message, Space, Typography } from 'antd';
-import coursesData from '../../data/course'
+import { Table, Modal, Form, Input, message, Space, Typography, Select, Tag, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { getAllCourses, postCourse, updateCourse, deleteCourse } from '../../apis/course';
 
 const { Title, Paragraph } = Typography;
 
 export default function ManageCourse() {
-    const [courses, setCourses] = useState(coursesData);
+    const [courses, setCourses] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -22,6 +22,29 @@ export default function ManageCourse() {
             isManager = user && user.role === "Manager";
         } catch { }
     }
+
+    const fetchCourses = async () => {
+        try {
+            const res = await getAllCourses();
+            setCourses(
+              res.data.map((item, idx) => ({
+                id: item.id,
+                title: item.title || '',
+                description: item.description || '',
+                topic: item.topic || '',
+                createdBy: item.createdBy || '',
+                createdAt: item.createdAt || '',
+                isActive: item.isActive ?? true,
+              }))
+            );
+        } catch (error) {
+            message.error('Failed to fetch courses: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    useEffect(() => {
+        fetchCourses();
+    }, []);
 
     const showCreateModal = () => {
         setIsEditMode(false);
@@ -44,9 +67,14 @@ export default function ManageCourse() {
             okText: 'Delete',
             okType: 'danger',
             cancelText: 'Cancel',
-            onOk: () => {
-                setCourses(courses.filter(c => c.id !== course.id));
-                message.success('Course deleted successfully');
+            onOk: async () => {
+                try {
+                    await deleteCourse(course.id);
+                    message.success('Course deleted successfully');
+                    fetchCourses();
+                } catch (error) {
+                    message.error('Failed to delete course: ' + (error.response?.data?.message || error.message));
+                }
             }
         });
     };
@@ -60,20 +88,36 @@ export default function ManageCourse() {
         }
     };
 
+    const handleToggleStatus = async (course) => {
+        try {
+            await updateCourse(course.id, { ...course, isActive: !course.isActive });
+            message.success('Course status updated');
+            fetchCourses();
+        } catch (error) {
+            message.error('Failed to update status: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
     const handleModalOk = () => {
-        form.validateFields().then(values => {
+        form.validateFields().then(async values => {
             if (isEditMode && selectedCourse) {
-                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...selectedCourse, ...values } : c));
-                message.success('Course updated successfully');
+                try {
+                    await updateCourse(selectedCourse.id, values);
+                    message.success('Course updated successfully');
+                    fetchCourses();
+                } catch (error) {
+                    message.error('Failed to update course: ' + (error.response?.data?.message || error.message));
+                    return;
+                }
             } else {
-                const newCourse = {
-                    ...values,
-                    id: Date.now(),
-                    createdBy: 'Admin',
-                    createdAt: new Date().toISOString(),
-                };
-                setCourses([newCourse, ...courses]);
-                message.success('Course created successfully');
+                try {
+                    await postCourse(values);
+                    message.success('Course created successfully');
+                    fetchCourses();
+                } catch (error) {
+                    message.error('Failed to create course: ' + (error.response?.data?.message || error.message));
+                    return;
+                }
             }
             setIsModalVisible(false);
             form.resetFields();
@@ -96,18 +140,47 @@ export default function ManageCourse() {
             title: 'Description',
             dataIndex: 'description',
             key: 'description',
-            render: (text) => <Paragraph ellipsis={{ rows: 1 }}>{text}</Paragraph>,
+            render: (text) => (
+                <Paragraph
+                    style={{
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        maxWidth: 400,
+                        marginBottom: 0
+                    }}
+                    ellipsis={false}
+                >
+                    {text}
+                </Paragraph>
+            ),
+        },
+        {
+            title: 'Topic',
+            dataIndex: 'topic',
+            key: 'topic',
+            render: (text) => text || '',
         },
         {
             title: 'Created By',
             dataIndex: 'createdBy',
             key: 'createdBy',
+            render: (text) => text || '',
         },
         {
             title: 'Created At',
             dataIndex: 'createdAt',
             key: 'createdAt',
-            render: (date) => new Date(date).toLocaleDateString(),
+            render: (date) => date ? new Date(date).toLocaleDateString() : '',
+        },
+        {
+            title: 'Status',
+            dataIndex: 'isActive',
+            key: 'status',
+            render: (isActive) => (
+                <Tag color={isActive ? 'green' : 'red'}>
+                    {isActive ? 'Active' : 'Inactive'}
+                </Tag>
+            ),
         },
         {
             title: 'Actions',
@@ -123,6 +196,11 @@ export default function ManageCourse() {
                     <ActionButton className="delete-btn" onClick={() => handleDelete(record)}>
                         Delete
                     </ActionButton>
+                    {isManager && (
+                        <Button size="small" onClick={() => handleToggleStatus(record)}>
+                            {record.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                    )}
                 </Space>
             ),
         },
@@ -193,6 +271,19 @@ export default function ManageCourse() {
                         rules={[{ required: true, message: 'Please input the course description!' }]}
                     >
                         <Input.TextArea rows={3} />
+                    </Form.Item>
+                    <Form.Item
+                        label="Topic"
+                        name="topic"
+                        initialValue="Awareness"
+                        rules={[{ required: true, message: 'Please select the course topic!' }]}
+                    >
+                        <Select>
+                            <Select.Option value="Awareness">Awareness</Select.Option>
+                            <Select.Option value="Prevention">Prevention</Select.Option>
+                            <Select.Option value="Refusal">Refusal</Select.Option>
+                            <Select.Option value="CommunityEducation">CommunityEducation</Select.Option>
+                        </Select>
                     </Form.Item>
                 </Form>
             </Modal>

@@ -1,6 +1,6 @@
-import React from 'react'
-import { useParams } from 'react-router-dom'
-import courses from '../../data/course'
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import courses from '../../data/course';
 import { Typography, Card, Collapse, List, Row, Col, Tag, Space } from 'antd';
 import { PlayCircleOutlined, BookOutlined, ClockCircleOutlined, UserOutlined, StarFilled } from '@ant-design/icons';
 import { ActionButton, CreateButton } from '../../components/ui/Buttons';
@@ -8,9 +8,19 @@ import { ActionButton, CreateButton } from '../../components/ui/Buttons';
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
 
-export default function CourseDetailsStaff() {
+export default function CourseDetailsManage() {
   const { id } = useParams();
   const course = courses.find(c => c.id === Number(id));
+
+  // Lấy role user
+  let isManager = false;
+  const userdata = localStorage.getItem('user');
+  if (userdata) {
+    try {
+      const user = JSON.parse(userdata);
+      isManager = user && user.role === 'Manager';
+    } catch {}
+  }
 
   // Nội dung mẫu cho phần chào mời, tác giả, type, thời gian
   const welcomeText = 'Take a look at the science of how addictive drugs affect your body and why substance addiction can be so difficult to treat.';
@@ -25,8 +35,15 @@ export default function CourseDetailsStaff() {
     <div style={{ 
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       minHeight: '100vh',
-      padding: '0'
+      padding: '0',
+      position: 'relative'
     }}>
+      {/* Nút Edit Course chỉ cho Manager */}
+      {isManager && (
+        <div style={{ position: 'absolute', top: 32, right: 48, zIndex: 10 }}>
+          <ActionButton className="edit-btn" size="large" onClick={() => alert('Edit course (not implemented)')}>Edit Course</ActionButton>
+        </div>
+      )}
       {/* Hero Section */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%)',
@@ -191,12 +208,8 @@ export default function CourseDetailsStaff() {
               </Col>
             </Row>
           </Card>
-          {/* Create Lesson Button */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            marginBottom: '24px' 
-          }}>
+          {/* Nút Create Lesson đúng vị trí */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px', marginTop: 0 }}>
             <CreateButton>
               + Create Lesson
             </CreateButton>
@@ -428,5 +441,5 @@ export default function CourseDetailsStaff() {
         </div>
       </div>
     </div>
-  )
+  );
 } 

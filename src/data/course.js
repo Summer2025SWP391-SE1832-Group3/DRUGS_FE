@@ -9,6 +9,7 @@ const courses = [
         lessons: [
             {
                 title: 'Introduction to Course 1',
+                content: 'Đây là kiến thức trọng tâm của bài học 1. Bạn sẽ hiểu về khái niệm cơ bản và nền tảng của chủ đề.',
                 videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
                 questions: [
                     {
@@ -25,6 +26,7 @@ const courses = [
             },
             {
                 title: 'Fundamental Concepts',
+                content: 'Bài học này giúp bạn nắm vững các khái niệm nền tảng và ứng dụng thực tiễn.',
                 videoUrl: 'https://www.youtube.com/embed/9bZkp7q19f0',
                 questions: [
                     {
@@ -46,6 +48,7 @@ const courses = [
         lessons: [
             {
                 title: 'Core Skills Overview',
+                content: 'Tổng quan về các kỹ năng cốt lõi cần thiết cho chủ đề này.',
                 videoUrl: 'https://www.youtube.com/embed/3JZ_D3ELwOQ',
                 questions: [
                     {
@@ -57,6 +60,7 @@ const courses = [
             },
             {
                 title: 'Knowledge Development',
+                content: 'Phát triển kiến thức thông qua thực hành và lý thuyết.',
                 videoUrl: 'https://www.youtube.com/embed/L_jWHffIx5E',
                 questions: [
                     {
@@ -78,6 +82,7 @@ const courses = [
         lessons: [
             {
                 title: 'Intermediate Concepts',
+                content: 'Các khái niệm trung cấp và ứng dụng nâng cao.',
                 videoUrl: 'https://www.youtube.com/embed/tVj0ZTS4WF4',
                 questions: [
                     {
@@ -99,6 +104,7 @@ const courses = [
         lessons: [
             {
                 title: 'Advanced Topics',
+                content: 'Chủ đề nâng cao và các bài tập thực hành chuyên sâu.',
                 videoUrl: 'https://www.youtube.com/embed/ZZ5LpwO-An4',
                 questions: [
                     {
@@ -120,6 +126,7 @@ const courses = [
         lessons: [
             {
                 title: 'Specialized Training',
+                content: 'Đào tạo chuyên sâu và phát triển nghề nghiệp.',
                 videoUrl: 'https://www.youtube.com/embed/OPf0YbXqDm0',
                 questions: [
                     {
@@ -141,6 +148,7 @@ const courses = [
         lessons: [
             {
                 title: 'Career Learning',
+                content: 'Học tập hướng nghiệp và nâng cao kỹ năng.',
                 videoUrl: 'https://www.youtube.com/embed/2Vv-BfVoq4g',
                 questions: [
                     {
@@ -162,6 +170,7 @@ const courses = [
         lessons: [
             {
                 title: 'Leadership Skills',
+                content: 'Kỹ năng lãnh đạo và phát triển bản thân.',
                 videoUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
                 questions: [
                     {
@@ -183,6 +192,7 @@ const courses = [
         lessons: [
             {
                 title: 'Expert Mastery',
+                content: 'Nội dung bài học :Làm chủ kiến thức chuyên sâu và kỹ năng đặc biệt.',
                 videoUrl: 'https://www.youtube.com/embed/60ItHLz5WEA',
                 questions: [
                     {

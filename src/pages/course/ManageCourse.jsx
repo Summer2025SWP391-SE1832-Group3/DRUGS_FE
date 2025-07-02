@@ -70,7 +70,12 @@ export default function ManageCourse() {
     };
 
     const handleViewCourse = (course) => {
-        navigate(`/courseDetails/${course.id}`);
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.role === 'Manager') {
+            navigate(`/courseDetails/${course.id}`);
+        } else {
+            navigate(`/courseDetailsStaff/${course.id}`);
+        }
     };
 
     const handleModalOk = () => {

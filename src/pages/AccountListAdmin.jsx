@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Popconfirm, message, Space, ConfigProvider, Flex, Tag, Modal, Form, Select, DatePicker, Input, Row, Col } from "antd";
 import { AccountAdminAPI } from "../apis/accountadmin";
+import axiosInstance from "../apis/axiosInstance";
 import dayjs from "dayjs";
 import CreateAccountAdmin from "./CreateAccountAdmin";
 
@@ -11,30 +12,57 @@ export default function AccountListAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('active');
 
   useEffect(() => {
     const fetchAccounts = async () => {
       setLoading(true);
       try {
-        const data = await AccountAdminAPI.getAllAccounts();
-        setAccounts(data);
+        const data = await axiosInstance.get(`/Account/admin/all-account?status=${statusFilter}`);
+        setAccounts(data.data);
       } catch (err) {
         message.error("Failed to fetch account list!");
       }
       setLoading(false);
     };
     fetchAccounts();
-  }, []);
+  }, [statusFilter]);
 
   const handleDelete = async (userId) => {
     setLoading(true);
     try {
       await AccountAdminAPI.deleteAccount(userId);
       message.success("Deleted successfully!");
-      const data = await AccountAdminAPI.getAllAccounts();
-      setAccounts(data);
+      const data = await axiosInstance.get(`/Account/admin/all-account?status=${statusFilter}`);
+      setAccounts(data.data);
     } catch {
       message.error("Delete failed!");
+    }
+    setLoading(false);
+  };
+
+  const handleActivate = async (userId) => {
+    setLoading(true);
+    try {
+      await axiosInstance.post(`/Account/activate/${userId}`);
+      message.success("Account activated!");
+      const data = await axiosInstance.get(`/Account/admin/all-account?status=${statusFilter}`);
+      setAccounts(data.data);
+    } catch {
+      message.error("Activate failed!");
+    }
+    setLoading(false);
+  };
+
+  const handleDeactivate = async (userId) => {
+    setLoading(true);
+    try {
+      await axiosInstance.post(`/Account/deactivate/${userId}`);
+      message.success("Account deactivated!");
+      const data = await axiosInstance.get(`/Account/admin/all-account?status=${statusFilter}`);
+      setAccounts(data.data);
+    } catch {
+      message.error("Deactivate failed!");
     }
     setLoading(false);
   };
@@ -56,7 +84,7 @@ export default function AccountListAdmin() {
   };
 
   const handleSaveUpdate = async () => {
-    if (!editingAccount || !editingAccount.userId) {
+    if (!editingAccount || !editingAccount.id) {
       message.error("Cannot update: userId is missing!");
       return;
     }
@@ -75,15 +103,15 @@ export default function AccountListAdmin() {
         data.password = values.newPassword;
       }
       await AccountAdminAPI.updateAccountRole(
-        editingAccount.userId,
+        editingAccount.id,
         values.newRole,
         data
       );
       message.success("Account updated successfully!");
       setIsModalOpen(false);
       setEditingAccount(null);
-      const accounts = await AccountAdminAPI.getAllAccounts();
-      setAccounts(accounts);
+      const accounts = await axiosInstance.get(`/Account/admin/all-account?status=${statusFilter}`);
+      setAccounts(accounts.data);
     } catch (err) {
       message.error("Update failed!");
     }
@@ -113,10 +141,16 @@ export default function AccountListAdmin() {
           <Button onClick={() => handleOpenUpdate(record)} type="primary">Update</Button>
           <Popconfirm
             title="Are you sure to delete?"
-            onConfirm={() => handleDelete(record.userId)}
+            onConfirm={() => handleDelete(record.id)}
           >
             <Button danger>Delete</Button>
           </Popconfirm>
+          {statusFilter === 'active' && (
+            <Button onClick={() => handleDeactivate(record.id)} type="default" danger>Deactivate</Button>
+          )}
+          {statusFilter === 'inactive' && (
+            <Button onClick={() => handleActivate(record.id)} type="default">Activate</Button>
+          )}
         </Flex>
       ),
     },
@@ -127,6 +161,15 @@ export default function AccountListAdmin() {
       <div style={{ padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h2 style={{ margin: 0 }}>Account List</h2>
+          <Select
+            value={statusFilter}
+            onChange={value => setStatusFilter(value)}
+            style={{ width: 160 }}
+            options={[
+              { label: 'Active', value: 'active' },
+              { label: 'Inactive', value: 'inactive' },
+            ]}
+          />
           <Button
             type="primary"
             style={{
@@ -143,7 +186,7 @@ export default function AccountListAdmin() {
         <Table
           columns={columns}
           dataSource={accounts}
-          rowKey="userId"
+          rowKey="id"
           loading={loading}
           pagination={{ pageSize: 6 }}
           bordered

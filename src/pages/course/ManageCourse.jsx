@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { CreateButton, ActionButton } from '../../components/ui/Buttons'
-import { Table, Modal, Form, Input, message, Space, Typography } from 'antd';
+import { Table, Modal, Form, Input, message, Space, Typography, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { CourseAPI } from '../../apis/course';
 import StatusTag from '../../components/ui/StatusTag';
@@ -72,10 +72,20 @@ export default function ManageCourse() {
 
     const handleViewCourse = (course) => {
         const user = JSON.parse(localStorage.getItem('user'));
-        if (user && user.role === 'Manager') {
-            navigate(`/courseDetailsManager/${course.id}`);
+        if (user && user.role === 'Manager' || user.role === 'Staff') {
+            navigate(`/courseDetailsManage/${course.id}`);
         } else {
-            navigate(`/courseDetailsStaff/${course.id}`);
+            navigate(`/`);
+        }
+    };
+
+    const handleToggleStatus = async (course) => {
+        try {
+            await updateCourse(course.id, { ...course, isActive: !course.isActive });
+            message.success('Course status updated');
+            fetchCourses();
+        } catch (error) {
+            message.error('Failed to update status: ' + (error.response?.data?.message || error.message));
         }
     };
 
@@ -166,6 +176,11 @@ export default function ManageCourse() {
                     >
                         Delete
                     </ActionButton>
+                    {isManager && (
+                        <Button size="small" onClick={() => handleToggleStatus(record)}>
+                            {record.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                    )}
                 </Space>
             ),
         },

@@ -17,10 +17,9 @@ import ManageCourse from '../pages/course/ManageCourse'
 import ManageSurvey from '../pages/survey/ManageSurvey'
 import SurveyList from '../pages/survey/SurveyList'
 import SubmitSurvey from '../pages/survey/SubmitSurvey'
-import CourseDetailsManager from '../pages/course/CourseDetailsManager'
-import CourseDetailsStaff from '../pages/course/CourseDetailsStaff'
 import SurveyResult from '../pages/survey/SurveyResult'
-import CourseDetails from '../pages/course/CourseDetails'
+import CourseDetailsMember from '../pages/course/CourseDetailsMember'
+import CourseDetailsManage from '../pages/course/CourseDetailsManage'
 
 export default function AppRoutes() {
   return (
@@ -36,9 +35,8 @@ export default function AppRoutes() {
           {/* Course */}
           <Route path="courseList" element={<CourseList/>}/>
           <Route path="manageCourse" element={<ManageCourse/>}/>
-          <Route path="courseDetails/:id" element={<CourseDetails/>}/>
-          <Route path="courseDetailsManager/:id" element={<CourseDetailsManager/>}/>
-          <Route path="courseDetailsStaff/:id" element={<CourseDetailsStaff/>}/>
+          <Route path="courseDetailsMember/:id" element={<CourseDetailsMember/>}/>
+          <Route path="courseDetailsManage/:id" element={<CourseDetailsManage/>}/>
           {/* Blog */}
           <Route path="blogManager" element={<BlogManager/>}/>
           <Route path="blogList" element={<BlogList/>}/>

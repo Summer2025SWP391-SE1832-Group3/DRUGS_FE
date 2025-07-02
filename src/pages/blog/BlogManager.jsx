@@ -68,6 +68,14 @@ export default function BlogManager() {
   };
 
   const getStatusText = (status) => {
+    if (typeof status === 'string') {
+      // Normalize string status
+      const s = status.toLowerCase();
+      if (s === 'pending' || s === 'processing') return 'Pending';
+      if (s === 'approved') return 'Approved';
+      if (s === 'rejected') return 'Rejected';
+      return status;
+    }
     switch (status) {
       case 0:
         return "Pending";
@@ -76,7 +84,7 @@ export default function BlogManager() {
       case 2:
         return "Rejected";
       default:
-        return "Unknown";
+        return status;
     }
   };
 
@@ -214,14 +222,41 @@ export default function BlogManager() {
           onCancel={handleCloseModal}
           footer={null}
           title={selectedBlog ? selectedBlog.title : "Blog Details"}
+          width={700}
         >
           {selectedBlog && (
-            <div>
-              <p><b>Title:</b> {selectedBlog.title}</p>
-              <p><b>Content:</b> {selectedBlog.content}</p>
-              <p><b>Posted At:</b> {selectedBlog.postedAt}</p>
-              <p><b>Posted By:</b> {selectedBlog.postedBy}</p>
-              <p><b>Status:</b> {getStatusText(selectedBlog.status)}</p>
+            <div style={{ padding: 8 }}>
+              <div style={{ marginBottom: 16 }}>
+                <b>Title:</b> {selectedBlog.title}
+              </div>
+              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+                <span><b>Posted By:</b> {selectedBlog.postedBy}</span>
+                <span><b>Posted At:</b> {selectedBlog.postedAt}</span>
+                <StatusTag color={
+                  getStatusText(selectedBlog.status) === 'Pending' ? 'orange' :
+                  getStatusText(selectedBlog.status) === 'Approved' ? 'green' :
+                  getStatusText(selectedBlog.status) === 'Rejected' ? 'red' : 'default'
+                }>
+                  {getStatusText(selectedBlog.status)}
+                </StatusTag>
+              </div>
+              {selectedBlog.blogImages && selectedBlog.blogImages.length > 0 ? (
+                <img
+                  src={`https://api-drug-be.purintech.id.vn${selectedBlog.blogImages[0]}`}
+                  alt={selectedBlog.title}
+                  style={{ width: '100%', maxHeight: 350, objectFit: 'contain', borderRadius: 8, marginBottom: 16 }}
+                />
+              ) : (
+                <img
+                  src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000"
+                  alt="Default blog image"
+                  style={{ width: '100%', maxHeight: 350, objectFit: 'contain', borderRadius: 8, marginBottom: 16 }}
+                />
+              )}
+              <div style={{ marginBottom: 16 }}>
+                <b>Content:</b>
+                <div style={{ fontSize: 16, lineHeight: 1.7, marginTop: 8 }}>{selectedBlog.content}</div>
+              </div>
             </div>
           )}
         </Modal>

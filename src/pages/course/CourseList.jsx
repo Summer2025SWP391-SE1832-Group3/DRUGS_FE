@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Row, Col, Empty, Typography, Input, Button, message } from 'antd'
+import { Card, Row, Col, Empty, Typography, Input, Button, message, Select } from 'antd'
 import { CourseAPI } from '../../apis/course';
 import { ActionButton } from '../../components/ui/Buttons';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,8 @@ export default function CourseList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [searching, setSearching] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState('All');
+  const [topics, setTopics] = useState(['All', 'Awareness', 'Prevention', 'Refusal', 'CommunityEducation']); // Có thể lấy động từ API nếu cần
   const navigate = useNavigate();
 
   
@@ -43,6 +45,24 @@ export default function CourseList() {
     }
   };
 
+  const handleFilter = async (topic) => {
+    setSelectedTopic(topic);
+    setLoading(true);
+    try {
+      if (topic === 'All') {
+        const data = await CourseAPI.getAllCourses();
+        setCourses(data);
+      } else {
+        const data = await CourseAPI.filterByTopic(topic);
+        setCourses(data);
+      }
+    } catch {
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEnroll = async (courseId) => {
     const isLoggedIn = Boolean(localStorage.getItem('accessToken'));
     if (!isLoggedIn) {
@@ -72,7 +92,7 @@ export default function CourseList() {
       {/* Header Section với improved spacing */}
       <div style={{
         textAlign: 'center',
-        padding: '30px 20px 40px 20px',
+        padding: '30px 20px 20px 20px',
         color: '#222',
         background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
         backdropFilter: 'blur(10px)',
@@ -82,7 +102,7 @@ export default function CourseList() {
         <Typography.Title level={1} style={{
           fontSize: '3.2rem',
           fontWeight: 800,
-          margin: '0 0 16px 0',
+          margin: '0 0 10px 0',
           letterSpacing: '-0.02em',
           textShadow: '0 4px 12px rgba(0,0,0,0.08)',
           fontFamily: 'inherit',
@@ -95,7 +115,6 @@ export default function CourseList() {
           fontSize: '1.2rem',
           color: '#666',
           fontWeight: 500,
-          marginBottom: '20px',
           display: 'block',
           fontFamily: 'inherit',
           maxWidth: '600px',
@@ -105,13 +124,13 @@ export default function CourseList() {
           Discover knowledge, skills, and support for a better future
         </Typography.Text>
 
-        {/* Improved Search Bar */}
+        {/* Improved Search Bar + Filter */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center',
           gap: '12px',
-          maxWidth: '500px',
+          maxWidth: '700px',
           margin: '0 auto'
         }}>
           <Input
@@ -167,11 +186,134 @@ export default function CourseList() {
           >
             Search
           </Button>
+          <Select
+            value={selectedTopic}
+            onChange={handleFilter}
+            style={{ 
+              width: 180, 
+              height: 52,
+              fontSize: '16px',
+              fontWeight: 500,
+              fontFamily: 'inherit'
+            }}
+            dropdownStyle={{
+              borderRadius: '16px',
+              overflow: 'hidden',
+              background: 'rgba(255,255,255,0.95)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
+            }}
+            options={topics.map(t => ({ 
+              label: (
+                <span style={{
+                  fontSize: '15px',
+                  fontWeight: 500,
+                  color: '#333',
+                  fontFamily: 'inherit'
+                }}>
+                  {t}
+                </span>
+              ), 
+              value: t 
+            }))}
+            placeholder="Filter by topic"
+            suffixIcon={
+              <div style={{
+                width: '20px',
+                height: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#666'
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            }
+            // Custom styles for Select component
+            styles={{
+              selector: (provided) => ({
+                ...provided,
+                height: '52px !important',
+                borderRadius: '16px !important',
+                border: '2px solid rgba(255,255,255,0.3) !important',
+                background: 'rgba(255,255,255,0.9) !important',
+                backdropFilter: 'blur(10px) !important',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.08) !important',
+                transition: 'all 0.3s ease !important',
+                fontSize: '16px !important',
+                fontWeight: '500 !important',
+                color: '#333 !important',
+                display: 'flex !important',
+                alignItems: 'center !important',
+                cursor: 'pointer !important'
+              }),
+              control: (provided, state) => ({
+                ...provided,
+                height: '52px',
+                borderRadius: '16px',
+                border: state.isFocused 
+                  ? '2px solid #1890ff' 
+                  : '2px solid rgba(255,255,255,0.3)',
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                boxShadow: state.isFocused 
+                  ? '0 8px 32px rgba(24,144,255,0.15)' 
+                  : '0 8px 24px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                fontSize: '16px',
+                fontWeight: '500',
+                color: '#333',
+                cursor: 'pointer',
+                '&:hover': {
+                  borderColor: '#1890ff',
+                  boxShadow: '0 8px 32px rgba(24,144,255,0.15)',
+                  transform: 'translateY(-1px)'
+                }
+              }),
+              singleValue: (provided) => ({
+                ...provided,
+                fontSize: '16px',
+                fontWeight: '500',
+                color: '#333',
+                fontFamily: 'inherit'
+              }),
+              placeholder: (provided) => ({
+                ...provided,
+                fontSize: '16px',
+                fontWeight: '400',
+                color: '#999',
+                fontFamily: 'inherit'
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontSize: '15px',
+                fontWeight: '500',
+                color: state.isSelected ? '#fff' : '#333',
+                backgroundColor: state.isSelected 
+                  ? 'linear-gradient(135deg, #1890ff, #722ed1)' 
+                  : state.isFocused 
+                    ? 'rgba(24,144,255,0.1)' 
+                    : 'transparent',
+                padding: '12px 20px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: 'inherit',
+                '&:hover': {
+                  backgroundColor: state.isSelected 
+                    ? 'linear-gradient(135deg, #1890ff, #722ed1)' 
+                    : 'rgba(24,144,255,0.1)'
+                }
+              })
+            }}
+          />
         </div>
       </div>
 
       {/* Main Content với improved spacing */}
-      <div style={{ padding: '40px 20px 60px 20px' }}>
+      <div style={{ padding: '20px 20px 60px 20px' }}>
         <Row gutter={[24, 32]} justify="center">
           {courses.length === 0 && !loading && (
             <Col span={24} style={{ textAlign: 'center', marginTop: '60px' }}>

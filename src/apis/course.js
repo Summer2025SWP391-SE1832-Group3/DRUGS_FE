@@ -72,5 +72,29 @@ export const CourseAPI = {
         } catch (error) {
             handleError(error, "Error fething member courses");
         }
+    },
+    getCourseProgress: async (courseId) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/progress/${courseId}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching course progress");
+        }
+    },
+    updateLessonProgress: async (lessonId, isCompleted) => {
+        try {
+            const { data } = await axiosInstance.put(`${apiBase}/Course/progress/${lessonId}?isCompleted=${isCompleted}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error updating lesson progress");
+        }
+    },
+    filterByTopic: async (topic) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/topic/${topic}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error filtering course by topic");
+        }
     }
 };

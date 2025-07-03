@@ -307,10 +307,31 @@ export default function SurveyList() {
               renderItem={q => (
                 <List.Item style={{ display: 'block' }}>
                   <div style={{ marginBottom: 4 }}><b>{q.questionText}</b></div>
+                  {/* Hiển thị đáp án user đã chọn */}
+                  {q.userAnswer && (
+                    <div style={{ marginLeft: 16, marginBottom: 8 }}>
+                      <Text type="success" style={{ fontWeight: 600 }}>
+                        Your answer: {q.userAnswer}
+                      </Text>
+                    </div>
+                  )}
                   <ul style={{ marginLeft: 16, marginBottom: 0 }}>
-                    {q.answers?.map(a => (
-                      <li key={a.answerId}>
-                        <span>{a.answerText}</span>
+                    {q.answers?.map((a, cidx) => (
+                      <li
+                        key={a.answerId}
+                        style={{
+                          background: q.userAnswer === a.answerText ? '#e6f7ff' : '#fff',
+                          border: q.userAnswer === a.answerText ? '2px solid #1890ff' : '1px solid #e2e8e0',
+                          borderRadius: 6,
+                          margin: '8px 0',
+                          padding: '10px 16px',
+                          fontWeight: q.userAnswer === a.answerText ? 600 : 400,
+                          color: '#4a5568',
+                          listStyle: 'none',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <span>{String.fromCharCode(65 + cidx)}. {a.answerText}</span>
                         {typeof a.score === 'number' && (
                           <span style={{ color: '#888', marginLeft: 8 }}>(Score: {a.score})</span>
                         )}

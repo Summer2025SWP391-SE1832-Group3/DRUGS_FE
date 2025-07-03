@@ -219,6 +219,15 @@ export default function SurveyResult() {
                                 </Text>
                             </div>
 
+                            {/* Hiển thị đáp án user đã chọn */}
+                            {q.userAnswer && (
+                              <div style={{ marginLeft: '1rem', marginBottom: 8 }}>
+                                <Text type="success" style={{ fontWeight: 600 }}>
+                                  Your answer: {q.userAnswer}
+                                </Text>
+                              </div>
+                            )}
+
                             <div style={{ marginLeft: '1rem' }}>
                                 {q.answers?.map((a, answerIndex) => (
                                     <div
@@ -226,8 +235,8 @@ export default function SurveyResult() {
                                         style={{
                                             marginBottom: '0.75rem',
                                             padding: '0.75rem',
-                                            background: '#fff',
-                                            border: '1px solid #e8e8e8',
+                                            background: q.userAnswer === a.answerText ? '#e6f7ff' : '#fff',
+                                            border: q.userAnswer === a.answerText ? '2px solid #1890ff' : '1px solid #e8e8e8',
                                             borderRadius: '6px',
                                             display: 'flex',
                                             alignItems: 'center',
@@ -237,7 +246,7 @@ export default function SurveyResult() {
                                         }}
                                     >
                                         <div style={{ flex: 1 }}>
-                                            <Text style={{ fontSize: '1rem', lineHeight: '1.5' }}>
+                                            <Text style={{ fontSize: '1rem', lineHeight: '1.5', fontWeight: q.userAnswer === a.answerText ? 600 : 400 }}>
                                                 {String.fromCharCode(65 + answerIndex)}. {a.answerText}
                                             </Text>
                                         </div>

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typography, Card, Collapse, List, Divider, Row, Col, Tag, Space, Checkbox, Progress } from 'antd';
 import { PlayCircleOutlined, BookOutlined, ClockCircleOutlined, UserOutlined, StarFilled, CheckCircleOutlined, ExclamationCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { useParams } from 'react-router-dom';
+import { CourseAPI } from '../../apis/course';
 
 const { Title, Paragraph, Text } = Typography;
 const { Panel } = Collapse;
@@ -47,66 +49,35 @@ const CreateButton = ({ children, ...props }) => (
   </button>
 );
 
-// Mock data
-const mockCourse = {
-  id: 1,
-  title: "What causes addiction, and why is it so hard to treat?",
-  description: "Take a deep dive into the science of addiction and explore evidence-based treatment approaches that are reshaping modern healthcare.",
-  lessons: [
-    {
-      title: "Understanding Addiction: The Brain Science",
-      content: "Explore how addictive substances interact with brain chemistry and alter neural pathways, leading to dependency and compulsive behavior patterns.",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      progress: {
-        contentCompleted: true,
-        videoCompleted: false,
-        quizCompleted: true,
-        quizScore: 85,
-        quizStatus: 'pass' // 'pass', 'not_pass', 'not_taken'
-      },
-      questions: [
-        {
-          question: "What is the primary neurotransmitter affected by most addictive substances?",
-          choices: ["Serotonin", "Dopamine", "GABA", "Acetylcholine"],
-          answer: 1
-        },
-        {
-          question: "Which brain region is most associated with addiction?",
-          choices: ["Hippocampus", "Amygdala", "Nucleus Accumbens", "Prefrontal Cortex"],
-          answer: 2
-        }
-      ]
-    },
-    {
-      title: "The Cycle of Addiction",
-      content: "Learn about the three-stage cycle of addiction: binge/intoxication, withdrawal/negative affect, and preoccupation/anticipation.",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      progress: {
-        contentCompleted: false,
-        videoCompleted: true,
-        quizCompleted: false,
-        quizScore: 0,
-        quizStatus: 'not_taken'
-      },
-      questions: [
-        {
-          question: "What characterizes the withdrawal stage of addiction?",
-          choices: ["Euphoria", "Negative emotional states", "Enhanced focus", "Increased energy"],
-          answer: 1
-        }
-      ]
-    }
-  ]
-};
-
 export default function CourseDetailsMember() {
-  const course = mockCourse;
-  const [lessonProgress, setLessonProgress] = useState(
-    course.lessons.reduce((acc, lesson, idx) => {
-      acc[idx] = lesson.progress;
-      return acc;
-    }, {})
-  );
+  const { id } = useParams();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [lessonProgress, setLessonProgress] = useState({});
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      setLoading(true);
+      try {
+        const data = await CourseAPI.getCourseById(id);
+        setCourse(data);
+        // Nếu có lessions, khởi tạo progress cho từng lesson
+        if (data.lessions && Array.isArray(data.lessions)) {
+          setLessonProgress(
+            data.lessions.reduce((acc, lesson, idx) => {
+              acc[idx] = lesson.progress || {};
+              return acc;
+            }, {})
+          );
+        }
+      } catch {
+        setCourse(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourse();
+  }, [id]);
 
   const handleProgressChange = (lessonIdx, type, checked) => {
     setLessonProgress(prev => ({
@@ -120,11 +91,35 @@ export default function CourseDetailsMember() {
 
   const welcomeText = 'Take a look at the science of how addictive drugs affect your body and why substance addiction can be so difficult to treat.';
   const author = 'Judy Grisel From TED Ed';
-  const type = 'Awareness';
+  const type = course?.topic || '';
   const duration = '30 minutes to complete';
-  const lessonCount = course?.lessons?.length || 0;
+  const lessonCount = course?.lessions?.length || 0;
 
+  if (loading) return <div style={{textAlign:'center',padding:'80px 0'}}>Loading...</div>;
   if (!course) return <div>Course not found</div>;
+
+  // Nếu chưa đăng ký hoặc không có bài học
+  if (!course.lessions || !Array.isArray(course.lessions) || course.lessions.length === 0) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        fontSize: 20
+      }}>
+        <Title level={2} style={{color:'white',marginBottom:16}}>{course.title}</Title>
+        <Paragraph style={{color:'white',fontSize:18,maxWidth:600,textAlign:'center'}}>{course.message || 'No lessons available.'}</Paragraph>
+        <Paragraph style={{color:'white',fontSize:16,maxWidth:600,textAlign:'center', marginTop: 8}}>{course.description}</Paragraph>
+        <Paragraph style={{color:'white',fontSize:16,maxWidth:600,textAlign:'center', marginTop: 8}}>Topic: {course.topic}</Paragraph>
+        
+        
+      </div>
+    );
+  }
 
   return (
     <div style={{ 
@@ -311,17 +306,6 @@ export default function CourseDetailsMember() {
             </Row>
           </Card>
 
-          {/* Create Lesson Button */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            marginBottom: '24px' 
-          }}>
-            <CreateButton>
-              + Create Lesson
-            </CreateButton>
-          </div>
-
           {/* Lessons Section */}
           <Card style={{ 
             borderRadius: '16px',
@@ -352,7 +336,7 @@ export default function CourseDetailsMember() {
               }}
               expandIconPosition="end"
             >
-              {course.lessons.map((lesson, idx) => (
+              {course.lessions.map((lesson, idx) => (
                 <Panel 
                   header={
                     <div style={{ 
@@ -395,26 +379,6 @@ export default function CourseDetailsMember() {
                           </Text>
                         </div>
                       </div>
-                      <Space>
-                        <ActionButton
-                          className="edit-btn"
-                          onClick={e => { 
-                            e.stopPropagation(); 
-                            alert('Edit lesson (not implemented)'); 
-                          }}
-                        >
-                          Edit
-                        </ActionButton>
-                        <ActionButton
-                          className="delete-btn"
-                          onClick={e => { 
-                            e.stopPropagation(); 
-                            alert('Delete lesson (not implemented)'); 
-                          }}
-                        >
-                          Delete
-                        </ActionButton>
-                      </Space>
                     </div>
                   }
                   key={idx}
@@ -448,8 +412,7 @@ export default function CourseDetailsMember() {
                           <div style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>
                               {Math.round(((lessonProgress[idx]?.contentCompleted ? 1 : 0) + 
-                                          (lessonProgress[idx]?.videoCompleted ? 1 : 0) + 
-                                          (lessonProgress[idx]?.quizCompleted ? 1 : 0)) / 3 * 100)}%
+                                          (lessonProgress[idx]?.videoCompleted ? 1 : 0)) / 2 * 100)}%
                             </div>
                             <div style={{ fontSize: '12px', opacity: 0.9 }}>Overall</div>
                           </div>
@@ -465,12 +428,6 @@ export default function CourseDetailsMember() {
                             <Text style={{ color: 'white', fontSize: '14px' }}>Video: </Text>
                             <Text style={{ color: 'white', fontWeight: '600' }}>
                               {lessonProgress[idx]?.videoCompleted ? '✓ Watched' : '○ Not watched'}
-                            </Text>
-                          </div>
-                          <div>
-                            <Text style={{ color: 'white', fontSize: '14px' }}>Quiz: </Text>
-                            <Text style={{ color: 'white', fontWeight: '600' }}>
-                              {lessonProgress[idx]?.quizCompleted ? '✓ Completed' : '○ Not completed'}
                             </Text>
                           </div>
                         </Col>
@@ -533,138 +490,6 @@ export default function CourseDetailsMember() {
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>
-                      </div>
-                    </div>
-                    
-                    {/* Quiz Section for Members */}
-                    <div style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      padding: '20px',
-                      borderRadius: '12px',
-                      marginBottom: '20px'
-                    }}>
-                      <Title level={4} style={{
-                        color: 'white',
-                        marginBottom: '16px',
-                        fontSize: '18px',
-                        fontWeight: '600'
-                      }}>
-                        📝 Quiz Assessment
-                      </Title>
-                      <Row gutter={16} align="middle">
-                        <Col span={12}>
-                          <div style={{ color: 'white' }}>
-                            <div style={{ fontSize: '14px', marginBottom: '4px' }}>
-                              Questions: {lesson.questions.length}
-                            </div>
-                            <div style={{ fontSize: '14px' }}>
-                              Passing Score: 70%
-                            </div>
-                          </div>
-                        </Col>
-                        <Col span={12}>
-                          <div style={{ textAlign: 'right' }}>
-                            {lessonProgress[idx]?.quizStatus === 'pass' && (
-                              <div>
-                                <CheckCircleOutlined style={{ color: '#48bb78', fontSize: '20px', marginRight: '8px' }} />
-                                <Text style={{ color: 'white', fontWeight: '600' }}>
-                                  PASSED ({lessonProgress[idx]?.quizScore}%)
-                                </Text>
-                              </div>
-                            )}
-                            {lessonProgress[idx]?.quizStatus === 'not_pass' && (
-                              <div>
-                                <ExclamationCircleOutlined style={{ color: '#f56565', fontSize: '20px', marginRight: '8px' }} />
-                                <Text style={{ color: 'white', fontWeight: '600' }}>
-                                  NOT PASSED ({lessonProgress[idx]?.quizScore}%)
-                                </Text>
-                              </div>
-                            )}
-                            {lessonProgress[idx]?.quizStatus === 'not_taken' && (
-                              <div>
-                                <MinusCircleOutlined style={{ color: '#a0aec0', fontSize: '20px', marginRight: '8px' }} />
-                                <Text style={{ color: 'white', fontWeight: '600' }}>
-                                  NOT TAKEN
-                                </Text>
-                              </div>
-                            )}
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-
-                    {/* Quiz Questions for Members (without showing correct answers) */}
-                    <div style={{
-                      backgroundColor: '#fff',
-                      padding: '24px',
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                    }}>
-                      <div style={{ marginBottom: '16px' }}>
-                        <Text style={{ fontSize: '16px', fontWeight: '600', color: '#2d3748' }}>
-                          Practice Questions (Member View)
-                        </Text>
-                        <Text style={{ fontSize: '14px', color: '#718096', display: 'block' }}>
-                          This is how members see the quiz - no correct answers shown
-                        </Text>
-                      </div>
-                      
-                      {lesson.questions.map((q, qidx) => (
-                        <div key={qidx} style={{ 
-                          marginBottom: '20px',
-                          padding: '20px',
-                          backgroundColor: '#f8fafc',
-                          borderRadius: '8px',
-                          border: '1px solid #e2e8f0'
-                        }}>
-                          <Text style={{ 
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            color: '#1a202c',
-                            display: 'block',
-                            marginBottom: '12px'
-                          }}>
-                            Question {qidx + 1}: {q.question}
-                          </Text>
-                          <div>
-                            {q.choices.map((choice, cidx) => (
-                              <div 
-                                key={cidx} 
-                                style={{ 
-                                  padding: '12px 16px',
-                                  margin: '8px 0',
-                                  borderRadius: '6px',
-                                  backgroundColor: '#fff',
-                                  border: '1px solid #e2e8f0',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s ease'
-                                }}
-                                onMouseOver={(e) => {
-                                  e.target.style.backgroundColor = '#edf2f7';
-                                  e.target.style.borderColor = '#cbd5e0';
-                                }}
-                                onMouseOut={(e) => {
-                                  e.target.style.backgroundColor = '#fff';
-                                  e.target.style.borderColor = '#e2e8f0';
-                                }}
-                              >
-                                <Text style={{ color: '#4a5568' }}>
-                                  {String.fromCharCode(65 + cidx)}. {choice}
-                                </Text>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                      
-                      <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                        <CreateButton style={{ 
-                          backgroundColor: lessonProgress[idx]?.quizCompleted ? '#48bb78' : '#1890ff',
-                          padding: '12px 24px'
-                        }}>
-                          {lessonProgress[idx]?.quizCompleted ? 'Retake Quiz' : 'Start Quiz'}
-                        </CreateButton>
                       </div>
                     </div>
                   </div>

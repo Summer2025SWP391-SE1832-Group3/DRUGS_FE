@@ -12,6 +12,7 @@ export default function SurveyList() {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(false);
   const [resultModal, setResultModal] = useState({ visible: false, result: null });
+  const [currentSurveyId, setCurrentSurveyId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function SurveyList() {
 
   const handleViewResult = async (surveyId) => {
     try {
+      setCurrentSurveyId(surveyId);
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user?.id && !user?.userId) {
         Modal.info({ title: 'Not logged in', content: 'Please log in to view your survey result.' });
@@ -287,11 +289,11 @@ export default function SurveyList() {
       <Modal
         open={resultModal.visible}
         title="Survey Result"
-        onCancel={() => setResultModal({ visible: false, result: null })}
+        onCancel={() => { setResultModal({ visible: false, result: null }); setCurrentSurveyId(null); }}
         footer={null}
         width={700}
       >
-        {resultModal.result ? (
+        {resultModal.result && resultModal.result.surveyId === currentSurveyId ? (
           <div>
             <Title level={4}>{resultModal.result.surveyName}</Title>
             <Paragraph><b>Executed By:</b> {resultModal.result.excutedBy}</Paragraph>
@@ -324,7 +326,31 @@ export default function SurveyList() {
             />
           </div>
         ) : (
-          <Spin />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '32px 0',
+              background: 'linear-gradient(90deg, #f8fafc 0%, #e0e7ef 100%)',
+              borderRadius: '12px',
+              margin: '24px 0'
+            }}
+          >
+            <span style={{ fontSize: 40, marginBottom: 12, color: '#bfbfbf' }}>😶</span>
+            <Typography.Paragraph
+              style={{
+                fontSize: 18,
+                color: '#888',
+                fontWeight: 500,
+                textAlign: 'center',
+                margin: 0
+              }}
+            >
+              You haven't taken this survey yet.
+            </Typography.Paragraph>
+          </div>
         )}
       </Modal>
     </div>

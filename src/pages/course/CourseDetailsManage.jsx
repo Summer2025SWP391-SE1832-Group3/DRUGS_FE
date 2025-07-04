@@ -48,7 +48,7 @@ export default function CourseDetailsManage() {
   useEffect(() => {
     async function fetchCourseDetail() {
       try {
-        const data = await CourseAPI.getCourseDetail(id);
+        const data = await CourseAPI.getCourseById(id);
         setCourseDetail(data);
       } catch (error) {
         setCourseDetail(null);

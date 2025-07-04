@@ -521,6 +521,31 @@ export default function BlogByUserId() {
   };
 
   useEffect(() => {
+    // Tạo thẻ style
+    const style = document.createElement('style');
+    style.innerHTML = `
+      body.modal-open {
+        overflow: hidden !important;
+      }
+    `;
+    document.head.appendChild(style);
+  
+    // Cleanup khi unmount
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isModalVisible || isCreateModalVisible) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => document.body.classList.remove('modal-open');
+  }, [isModalVisible, isCreateModalVisible]);
+  
+  useEffect(() => {
     fetchUserBlogs();
   }, [userId]);
 
@@ -667,6 +692,8 @@ export default function BlogByUserId() {
       </StyledContainer>
     );
   }
+
+  
 
   return (
     <StyledContainer>

@@ -80,6 +80,7 @@ export default function Login() {
           message.success('Login successfully!');
           setIsLoggedIn(true);
           localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('accessToken', response.token);
           console.log('Stored user data:', userData);
           navigate('/profile');
         } else {

@@ -9,6 +9,7 @@ export default function Sidebar({ open }) {
     let isStaff = false;
     let isManager = false;
     let isAdmin = false;
+    let isMember = false;
     const userData = localStorage.getItem('user');
     if (userData) {
         try {
@@ -16,6 +17,7 @@ export default function Sidebar({ open }) {
             isStaff = user && user.role === "Staff";
             isManager = user && user.role === "Manager";
             isAdmin = user && user.role === "Admin";
+            isMember = user && user.role === "Member";
         } catch { }
     }
 
@@ -29,6 +31,26 @@ export default function Sidebar({ open }) {
             const user = JSON.parse(userData);
             if (user && user.userId) {
                 navigate(`/blogByUserId/${user.userId}`);
+            } else {
+                message.error('Unable to find user information');
+                navigate('/');
+            }
+        } catch (error) {
+            message.error('Error accessing user data');
+            navigate('/');
+        }
+    };
+
+    const handleMyCoursesClick = () => {
+        if (!userData) {
+            message.warning('Please login to view your enrolled courses');
+            navigate('/');
+            return;
+        }
+        try {
+            const user = JSON.parse(userData);
+            if (user && user.userId) {
+                navigate(`/memberCourses/${user.userId}`);
             } else {
                 message.error('Unable to find user information');
                 navigate('/');
@@ -93,6 +115,12 @@ export default function Sidebar({ open }) {
                     <a onClick={handlePersonalBlogsClick} className="nav-link text-white d-flex align-items-center px-3 py-2" style={{ cursor: 'pointer' }}>
                         <i className="material-symbols-rounded me-2">post</i>
                         <span style={{ fontSize: 15 }}>Personal Blogs</span>
+                    </a>
+                )}
+                {isMember && (
+                    <a onClick={handleMyCoursesClick} className="nav-link text-white d-flex align-items-center px-3 py-2" style={{ cursor: 'pointer' }}>
+                        <i className="material-symbols-rounded me-2">school</i>
+                        <span style={{ fontSize: 15 }}>My Courses</span>
                     </a>
                 )}
             </nav>

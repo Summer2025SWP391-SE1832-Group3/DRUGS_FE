@@ -344,7 +344,7 @@ export default function CourseDetailsMember() {
                 >
                   <div style={{ padding: '0 16px 16px 16px' }}>
                     <Paragraph style={{ fontSize: '16px', color: '#4a5568', lineHeight: '1.6', marginBottom: 16 }}>
-                      {lesson.content || 'No content'}
+                      {lesson.content || ''}
                     </Paragraph>
                     {lesson.videoUrl && (
                       <div style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 20px rgba(0,0,0,0.1)', marginBottom: 16 }}>

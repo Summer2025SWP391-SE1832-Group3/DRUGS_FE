@@ -46,5 +46,13 @@ export const CourseAPI = {
         } catch (error) {
             handleError(error, "Error deleting course:");
         }
+    },
+    getCourseDetail: async (courseId) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/Detail/${courseId}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching course detail:");
+        }
     }
 };

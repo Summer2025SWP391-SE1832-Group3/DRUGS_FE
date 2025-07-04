@@ -31,7 +31,11 @@ export default function ManageCourse() {
     const fetchCourses = async () => {
         try {
             const data = await CourseAPI.getAllCourses();
-            setCourses(data);
+            setCourses(
+                Array.isArray(data)
+                    ? data.map(item => ({ ...item.course, status: item.status }))
+                    : []
+            );
         } catch (error) {
             setCourses([]);
         }

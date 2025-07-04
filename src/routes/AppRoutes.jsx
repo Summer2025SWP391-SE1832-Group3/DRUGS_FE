@@ -20,6 +20,7 @@ import SubmitSurvey from '../pages/survey/SubmitSurvey'
 import SurveyResult from '../pages/survey/SurveyResult'
 import CourseDetailsMember from '../pages/course/CourseDetailsMember'
 import CourseDetailsManage from '../pages/course/CourseDetailsManage'
+import MemberCourses from '../pages/course/MemberCourses'
 
 export default function AppRoutes() {
   return (
@@ -37,6 +38,7 @@ export default function AppRoutes() {
           <Route path="manageCourse" element={<ManageCourse/>}/>
           <Route path="courseDetailsMember/:id" element={<CourseDetailsMember/>}/>
           <Route path="courseDetailsManage/:id" element={<CourseDetailsManage/>}/>
+          <Route path="memberCourses/:userId" element={<MemberCourses/>}/>
           {/* Blog */}
           <Route path="blogManager" element={<BlogManager/>}/>
           <Route path="blogList" element={<BlogList/>}/>

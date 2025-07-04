@@ -25,7 +25,7 @@ export const CourseAPI = {
     },
     getCourseById: async (id) => {
         try {
-            const { data } = await axiosInstance.get(`${apiBase}/Course/${id}`);
+            const { data } = await axiosInstance.get(`${apiBase}/Course/Detail/${id}`);
             return data;
         } catch (error) {
             handleError(error, "Error fetching course:");
@@ -45,6 +45,56 @@ export const CourseAPI = {
             return data;
         } catch (error) {
             handleError(error, "Error deleting course:");
+        }
+    },
+    searchCourseByTitle: async (searchTerm) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/searchTitle`, {
+                params: { searchTerm }
+            });
+            return data;
+        } catch (error) {
+            handleError(error, "Error searching course by title:");
+        }
+    },
+    enrollCourse: async (id) => {
+        try {
+            const { data } = await axiosInstance.post(`${apiBase}/Course/enroll/${id}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error enrolling course");
+        }
+    },
+    memberCourses: async () => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/user/courses`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fething member courses");
+        }
+    },
+    getCourseProgress: async (courseId) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/progress/${courseId}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching course progress");
+        }
+    },
+    updateLessonProgress: async (lessonId, isCompleted) => {
+        try {
+            const { data } = await axiosInstance.put(`${apiBase}/Course/progress/${lessonId}?isCompleted=${isCompleted}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error updating lesson progress");
+        }
+    },
+    filterByTopic: async (topic) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/topic/${topic}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error filtering course by topic");
         }
     }
 };

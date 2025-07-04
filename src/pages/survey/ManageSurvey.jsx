@@ -17,6 +17,14 @@ export default function ManageSurvey() {
     const [surveyType, setSurveyType] = useState("AddictionSurvey");
     const [courses, setCourses] = useState([]);
 
+    let isManager = false;
+    const userdata = localStorage.getItem('user');
+    if (userdata) {
+        try {
+            const user = JSON.parse(userdata);
+            isManager = user && user.role === "Manager";
+        } catch { }
+    }
     const fetchSurveys = async () => {
         setLoading(true);
         try {
@@ -84,7 +92,7 @@ export default function ManageSurvey() {
                     }))
                 }))
             };
-            
+
             await SurveyAPI.createSurvey(surveyData, courseIdValue);
             message.success("Survey created successfully!");
             setCreateModal(false);
@@ -205,7 +213,7 @@ export default function ManageSurvey() {
                         className="delete-btn"
                         danger
                         disabled={!record.isActive}
-                        style={!record.isActive ? { opacity: 0.4} : {}}
+                        style={!record.isActive ? { opacity: 0.4 } : {}}
                         onClick={() => record.isActive && setDeleteModal({ visible: true, survey: record })}
                     >
                         Delete
@@ -411,9 +419,11 @@ export default function ManageSurvey() {
                                                             >
                                                                 <Switch checkedChildren="Correct" unCheckedChildren="Wrong" />
                                                             </Form.Item>
-                                                            <Button danger onClick={() => removeAns(ans.name)} disabled={ansFields.length <= 1} style={{ marginBottom: 0 }}>
-                                                                Delete
-                                                            </Button>
+                                                            {isManager && (
+                                                                <Button danger onClick={() => removeAns(ans.name)} disabled={ansFields.length <= 1} style={{ marginBottom: 0 }}>
+                                                                    Delete
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     ))}
                                                     <Button type="dashed" onClick={() => addAns({ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false })} block style={{ marginBottom: 8 }}>

@@ -108,8 +108,8 @@ export default function Navbar({ onToggleSidebar }) {
                         </div>
                     </div>
                     {/* Centered Courses & Blogs navigation - absolute center */}
-                    <div style={{ position: 'absolute', left: '50%', top: 0, height: '100%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', zIndex: 2 }}>
-                        <div style={{ display: 'flex', gap: 40, alignItems: 'center', maxWidth: 400 }}>
+                    <div style={{ position: 'absolute', left:'65%', right: '10%', top: 0, height: '100%', transform: 'translateX(-165%)', display: 'flex', alignItems: '', zIndex: 2 }}>
+                        <div style={{ display: 'flex', gap: 10, alignItems: 'center', maxWidth: 400 }}>
                         <a
                                 onClick={() => navigate('/surveyList')}
                                 style={{
@@ -118,18 +118,18 @@ export default function Navbar({ onToggleSidebar }) {
                                     fontSize: 16,
                                     color: 'white',
                                     background: 'transparent',
-                                    border: '2px solid #fff',
-                                    borderRadius: 30,
+                                    // border: '2px solid #fff',
+                                    // borderRadius: 30,
                                     padding: '8px 10px',
                                     boxShadow: 'none',
                                     transition: 'all 0.2s',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 8
+                                    gap: 2
                                 }}
                             >
-                                <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>dashboard</i>
+                                <i className="material-symbols-rounded" style={{ fontSize: 20}}>dashboard</i>
                                 Survey
                             </a>
                             <a
@@ -140,18 +140,18 @@ export default function Navbar({ onToggleSidebar }) {
                                     fontSize: 16,
                                     color: 'white',
                                     background: 'transparent',
-                                    border: '2px solid #fff',
-                                    borderRadius: 30,
+                                    // border: '2px solid #fff',
+                                    // borderRadius: 30,
                                     padding: '8px 10px',
                                     boxShadow: 'none',
                                     transition: 'all 0.2s',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 8
+                                    gap: 2
                                 }}
                             >
-                                <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>dashboard</i>
+                                <i className="material-symbols-rounded" style={{ fontSize: 20}}>dashboard</i>
                                 Courses
                             </a>
                             <a
@@ -162,18 +162,18 @@ export default function Navbar({ onToggleSidebar }) {
                                     fontSize: 16,
                                     color: 'white',
                                     background: 'transparent',
-                                    border: '2px solid #fff',
-                                    borderRadius: 30,
+                                    // border: '2px solid #fff',
+                                    // borderRadius: 30,
                                     padding: '8px 16px',
                                     boxShadow: 'none',
                                     transition: 'all 0.2s',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 8
+                                    gap: 2
                                 }}
                             >
-                                <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>post</i>
+                                <i className="material-symbols-rounded" style={{ fontSize: 20 }}>post</i>
                                 Blogs
                             </a>
                         </div>

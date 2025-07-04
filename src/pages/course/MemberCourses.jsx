@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Typography, Row, Col, Empty, Tag, Spin } from 'antd';
+import { Card, Typography, Row, Col, Empty, Tag, Spin, Button } from 'antd';
 import { CourseAPI } from '../../apis/course';
+import { useNavigate } from 'react-router-dom';
 
 export default function MemberCourses() {
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState({ inProgress: [], completed: [] });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -51,6 +53,13 @@ export default function MemberCourses() {
                         <Tag color="green">{course.topic}</Tag>
                         {course.isActive ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
                       </div>
+                      <Button
+                        type="primary"
+                        style={{ marginTop: 16 }}
+                        onClick={() => navigate(`/CourseDetailsMember/${course.id}`)}
+                      >
+                        View Course Details
+                      </Button>
                     </Card>
                   </Col>
                 ))}
@@ -78,6 +87,13 @@ export default function MemberCourses() {
                         <Tag color="green">{course.topic}</Tag>
                         {course.isActive ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
                       </div>
+                      <Button
+                        type="primary"
+                        style={{ marginTop: 16 }}
+                        onClick={() => navigate(`/CourseDetailsMember/${course.id}`)}
+                      >
+                        View Course Details
+                      </Button>
                     </Card>
                   </Col>
                 ))}

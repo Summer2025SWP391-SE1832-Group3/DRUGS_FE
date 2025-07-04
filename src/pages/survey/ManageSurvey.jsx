@@ -58,7 +58,7 @@ export default function ManageSurvey() {
 
     const fetchCourses = async () => {
         try {
-            const data = await CourseAPI.getAllCourses();
+            const data = await CourseAPI.coursesWithoutSurvey();
             setCourses(data);
         } catch (error) {
             setCourses([]);

@@ -96,5 +96,13 @@ export const CourseAPI = {
         } catch (error) {
             handleError(error, "Error filtering course by topic");
         }
+    },
+    coursesWithoutSurvey: async () => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/courses_without_survey`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching courses without survey");
+        }
     }
 };

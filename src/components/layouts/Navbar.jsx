@@ -9,6 +9,7 @@ export default function Navbar({ onToggleSidebar }) {
     const handleLogout = () => {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
         navigate('/login');
         window.location.reload();
     };
@@ -56,7 +57,7 @@ export default function Navbar({ onToggleSidebar }) {
     return (
         <>
             <nav
-                className="d-flex navbar navbar-main navbar-expand-lg shadow-lg z-index-sticky"
+                className="container-fluid d-flex navbar navbar-main navbar-expand-lg shadow-lg z-index-sticky"
                 id="navbarBlur"
                 data-scroll="true"
                 style={{ 

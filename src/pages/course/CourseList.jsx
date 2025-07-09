@@ -29,11 +29,13 @@ export default function CourseList() {
   }, []);
 
   let isMember = false;
+  let isStaffOrManager = false;
   const userdata = localStorage.getItem('user');
   if (userdata) {
     try {
       const user = JSON.parse(userdata);
       isMember = user && user.role === "Member";
+      isStaffOrManager = user && (user.role === "Staff" || user.role === "Manager");
     } catch { }
   }
 
@@ -491,7 +493,24 @@ export default function CourseList() {
                       </div>
                     </div>
 
-                    {item.status === "NotEnrolled" ? (
+                    {/* Nút action */}
+                    {isStaffOrManager ? (
+                      <ActionButton
+                        className="edit-btn"
+                        block
+                        style={{
+                          height: '50px',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          borderRadius: '16px',
+                          letterSpacing: '0.02em',
+                          fontFamily: 'inherit'
+                        }}
+                        onClick={() => navigate(`/CourseDetailsManage/${item.course.id}`)}
+                      >
+                        View Course Details
+                      </ActionButton>
+                    ) : item.status === "NotEnrolled" ? (
                       <ActionButton
                         className="edit-btn"
                         block
@@ -507,6 +526,22 @@ export default function CourseList() {
                       >
                         Enroll
                       </ActionButton>
+                    ) : item.status === "Completed" ? (
+                      <ActionButton
+                        className="edit-btn"
+                        block
+                        style={{
+                          height: '50px',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          borderRadius: '16px',
+                          letterSpacing: '0.02em',
+                          fontFamily: 'inherit'
+                        }}
+                        onClick={() => navigate(`/CompletedCourse/${item.course.id}`)}
+                      >
+                        View Course Details
+                      </ActionButton>
                     ) : (
                       <ActionButton
                         className="edit-btn"
@@ -521,7 +556,7 @@ export default function CourseList() {
                         }}
                         onClick={() => navigate(`/CourseDetailsMember/${item.course.id}`)}
                       >
-                        View Course Details
+                        Continue studying
                       </ActionButton>
                     )}
                   </div>

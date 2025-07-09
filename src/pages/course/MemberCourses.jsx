@@ -58,7 +58,7 @@ export default function MemberCourses() {
                         style={{ marginTop: 16 }}
                         onClick={() => navigate(`/courseDetailsMember/${course.id}`)}
                       >
-                        View Course Details
+                        Continue learning
                       </Button>
                     </Card>
                   </Col>

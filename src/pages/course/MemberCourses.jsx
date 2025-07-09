@@ -51,12 +51,12 @@ export default function MemberCourses() {
                       </Typography.Paragraph>
                       <div style={{ marginTop: 12 }}>
                         <Tag color="green">{course.topic}</Tag>
-                        {course.isActive ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
+                        {course.status ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
                       </div>
                       <Button
                         type="primary"
                         style={{ marginTop: 16 }}
-                        onClick={() => navigate(`/CourseDetailsMember/${course.id}`)}
+                        onClick={() => navigate(`/courseDetailsMember/${course.id}`)}
                       >
                         View Course Details
                       </Button>
@@ -85,12 +85,12 @@ export default function MemberCourses() {
                       </Typography.Paragraph>
                       <div style={{ marginTop: 12 }}>
                         <Tag color="green">{course.topic}</Tag>
-                        {course.isActive ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
+                        {course.status ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
                       </div>
                       <Button
                         type="primary"
                         style={{ marginTop: 16 }}
-                        onClick={() => navigate(`/CourseDetailsMember/${course.id}`)}
+                        onClick={() => navigate(`/completedCourse/${course.id}`)}
                       >
                         View Course Details
                       </Button>

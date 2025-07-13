@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { CreateButton, ActionButton } from '../../components/ui/Buttons'
-import { Table, Modal, Form, Input, message, Space, Typography, Button } from 'antd';
+import { Table, Modal, Form, Input, message, Space, Typography, Button, Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { CourseManagementAPI } from '../../apis/courseManagement';
 import { CourseAPI } from '../../apis/course';
 import StatusTag from '../../components/ui/StatusTag';
 
@@ -14,6 +15,7 @@ export default function ManageCourse() {
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [form] = Form.useForm();
     const navigate = useNavigate();
+    const [statusFilter, setStatusFilter] = useState('');
 
     let isManager = false;
     const userdata = localStorage.getItem('user');
@@ -25,17 +27,36 @@ export default function ManageCourse() {
     }
 
     useEffect(() => {
-        fetchCourses();
+        fetchCourses(statusFilter);
+        
+    }, [statusFilter]);
+
+    useEffect(() => {
+        
+        fetchCourses('');
+        
     }, []);
 
-    const fetchCourses = async () => {
+    const fetchCourses = async (status) => {
         try {
-            const data = await CourseAPI.getAllCourses();
-            setCourses(
-                Array.isArray(data)
-                    ? data.map(item => ({ ...item.course, status: item.status }))
-                    : []
-            );
+            let data = [];
+            if (isManager) {
+                data = await CourseManagementAPI.getAllCoursesManager(status);
+            } else {
+                // Staff: lấy draft và active
+                const draftCourses = await CourseManagementAPI.getDraftCourses();
+                const activeCourses = await CourseAPI.getAllCourses();
+                // Lọc activeCourses chỉ lấy status === 'Active'
+                const activeOnly = Array.isArray(activeCourses) ? activeCourses.filter(c => c.status === 'Active') : [];
+                data = [
+                    ...(Array.isArray(draftCourses) ? draftCourses : []),
+                    ...activeOnly
+                ];
+            }
+            const sortedData = Array.isArray(data)
+                ? [...data].sort((a, b) => a.id - b.id)
+                : [];
+            setCourses(sortedData);
         } catch (error) {
             setCourses([]);
         }
@@ -55,25 +76,6 @@ export default function ManageCourse() {
         setIsModalVisible(true);
     };
 
-    const handleDelete = (course) => {
-        Modal.confirm({
-            title: 'Delete Course',
-            content: `Are you sure you want to delete "${course.title}"?`,
-            okText: 'Delete',
-            okType: 'danger',
-            cancelText: 'Cancel',
-            onOk: async () => {
-                try {
-                    await CourseAPI.deleteCourse(course.id);
-                    message.success('Course deleted successfully');
-                    fetchCourses();
-                } catch {
-                    message.error('Failed to delete course');
-                }
-            }
-        });
-    };
-
     const handleViewCourse = (course) => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user && user.role === 'Manager' || user.role === 'Staff') {
@@ -85,11 +87,24 @@ export default function ManageCourse() {
 
     const handleToggleStatus = async (course) => {
         try {
-            await updateCourse(course.id, { ...course, isActive: !course.isActive });
-            message.success('Course status updated');
-            fetchCourses();
+            if (course.status === 'Draft' || course.status === 'Inactive') {
+                await CourseManagementAPI.approveCourse(course.id);
+                message.success('Course has been activated.');
+            } else if (course.status === 'Active') {
+                message.info('This course is already active.');
+            } else {
+                message.info('You can only approve a course to Active status.');
+            }
+            fetchCourses(statusFilter);
         } catch (error) {
-            message.error('Failed to update status: ' + (error.response?.data?.message || error.message));
+            const apiMsg = error?.response?.data;
+            if (typeof apiMsg === 'string') {
+                message.error(apiMsg);
+            } else if (apiMsg?.message) {
+                message.error(apiMsg.message);
+            } else {
+                message.error('Failed to activate course.');
+            }
         }
     };
 
@@ -97,17 +112,17 @@ export default function ManageCourse() {
         form.validateFields().then(async values => {
             if (isEditMode && selectedCourse) {
                 try {
-                    await CourseAPI.updateCourse(selectedCourse.id, values);
+                    await CourseManagementAPI.updateCourse(selectedCourse.id, values);
                     message.success('Course updated successfully');
-                    fetchCourses();
+                    fetchCourses(statusFilter);
                 } catch {
                     message.error('Failed to update course');
                 }
             } else {
                 try {
-                    await CourseAPI.createCourse(values);
+                    await CourseManagementAPI.createCourse(values);
                     message.success('Course created successfully');
-                    fetchCourses();
+                    fetchCourses(statusFilter);
                 } catch {
                     message.error('Failed to create course');
                 }
@@ -120,6 +135,36 @@ export default function ManageCourse() {
     const handleModalCancel = () => {
         setIsModalVisible(false);
         form.resetFields();
+    };
+
+    const handleDeactivate = (course) => {
+        if (course.status === 'Inactive') {
+            message.info('Course has been already deactivated.');
+            return;
+        }
+        Modal.confirm({
+            title: 'Deactivate Course',
+            content: `Are you sure you want to deactivate "${course.title}"?`,
+            okText: 'Deactivate',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: async () => {
+                try {
+                    await CourseManagementAPI.deactivateCourse(course.id);
+                    message.success('Course deactivated successfully');
+                    fetchCourses(statusFilter);
+                } catch (error) {
+                    const apiMsg = error?.response?.data;
+                    if (typeof apiMsg === 'string') {
+                        message.error(apiMsg);
+                    } else if (apiMsg?.message) {
+                        message.error(apiMsg.message);
+                    } else {
+                        message.error('Failed to deactivate course.');
+                    }
+                }
+            }
+        });
     };
 
     const columns = [
@@ -153,13 +198,24 @@ export default function ManageCourse() {
         },
         {
             title: 'Status',
-            dataIndex: 'isActive',
-            key: 'isActive',
-            render: (isActive) => (
-                <StatusTag color={isActive ? 'green' : 'red'}>
-                  {isActive ? 'Active' : 'Inactive'}
-                </StatusTag>
-            ),
+            dataIndex: 'status',
+            key: 'status',
+            render: (status) => {
+                let color = 'red';
+                let text = 'INACTIVE';
+                if (status === 'Active') {
+                    color = 'green';
+                    text = 'ACTIVE';
+                } else if (status === 'Draft') {
+                    color = 'gold';
+                    text = 'DRAFT';
+                }
+                return (
+                    <StatusTag color={color}>
+                        {text}
+                    </StatusTag>
+                );
+            },
         },
         {
             title: 'Actions',
@@ -172,17 +228,19 @@ export default function ManageCourse() {
                     <ActionButton className="edit-btn" onClick={() => showEditModal(record)}>
                         Edit
                     </ActionButton>
-                    <ActionButton
-                        className="delete-btn"
-                        onClick={() => handleDelete(record)}
-                        disabled={!record.isActive}
-                        style={!record.isActive ? { opacity: 0.4 } : {}}
-                    >
-                        Delete
-                    </ActionButton>
+                    {isManager && (
+                        <ActionButton
+                            className="deactivate-btn"
+                            onClick={() => handleDeactivate(record)}
+                            disabled={record.status === 'Active'}
+                            style={{ background: '#ff4d4f', color: 'white', border: 'none', opacity: record.status === 'Active' ? 0.4 : 1, cursor: record.status === 'Active' ? 'not-allowed' : 'pointer' }}
+                        >
+                            Deactivate
+                        </ActionButton>
+                    )}
                     {isManager && (
                         <Button size="small" onClick={() => handleToggleStatus(record)}>
-                            {record.isActive ? 'Deactivate' : 'Activate'}
+                            Activate
                         </Button>
                     )}
                 </Space>
@@ -195,11 +253,23 @@ export default function ManageCourse() {
             {/* Google Fonts */}
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
             <Title level={2} style={{ marginBottom: 0, fontFamily: 'Inter, Roboto, Arial, sans-serif', fontWeight: 700, color: '#2c3e50', letterSpacing: '-1px' }}>Manage Course</Title>
-            {isManager && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                {isManager && (
+                    <Select
+                        value={statusFilter}
+                        onChange={value => setStatusFilter(value)}
+                        style={{ width: 180 }}
+                    >
+                        <Select.Option value="">All</Select.Option>
+                        <Select.Option value="Active">Active</Select.Option>
+                        <Select.Option value="Inactive">Inactive</Select.Option>
+                        <Select.Option value="Draft">Draft</Select.Option>
+                    </Select>
+                )}
+                {isManager && (
                     <CreateButton onClick={showCreateModal} style={{ fontFamily: 'Inter, Roboto, Arial, sans-serif', fontWeight: 600, fontSize: 16 }}>Create New Course</CreateButton>
-                </div>
-            )}
+                )}
+            </div>
             <Table
                 columns={columns}
                 dataSource={courses}
@@ -259,11 +329,14 @@ export default function ManageCourse() {
                     <Form.Item
                         label="Topic"
                         name="topic"
-                        rules={[{ required: true, message: 'Please input the course topic!' }]}
+                        rules={[{ required: true, message: 'Please select the course topic!' }]}
                     >
-                        <Input />
+                        <Select placeholder="Select topic">
+                            <Select.Option value="Awareness">Awareness</Select.Option>
+                            <Select.Option value="Prevention">Prevention</Select.Option>
+                            <Select.Option value="Refusal">Refusal</Select.Option>
+                        </Select>
                     </Form.Item>
-                    
                 </Form>
             </Modal>
         </div>

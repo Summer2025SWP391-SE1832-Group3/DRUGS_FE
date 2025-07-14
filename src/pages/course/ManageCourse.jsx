@@ -16,6 +16,9 @@ export default function ManageCourse() {
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const [statusFilter, setStatusFilter] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searching, setSearching] = useState(false);
+    const [topicFilter, setTopicFilter] = useState('All');
 
     let isManager = false;
     const userdata = localStorage.getItem('user');
@@ -78,8 +81,8 @@ export default function ManageCourse() {
 
     const handleViewCourse = (course) => {
         const user = JSON.parse(localStorage.getItem('user'));
-        if (user && user.role === 'Manager' || user.role === 'Staff') {
-            navigate(`/courseDetailsManage/${course.id}`);
+        if (user && (user.role === 'Manager' || user.role === 'Staff')) {
+            navigate(`/courseDetailsManage/${course.id}`, { state: { status: course.status } });
         } else {
             navigate(`/`);
         }
@@ -165,6 +168,36 @@ export default function ManageCourse() {
                 }
             }
         });
+    };
+
+    const handleSearch = async () => {
+        setSearching(true);
+        try {
+            if (searchTerm.trim() === "") {
+                fetchCourses(statusFilter);
+            } else if (isManager) {
+                const data = await CourseManagementAPI.searchCourseByTitle(searchTerm, statusFilter);
+                setCourses(Array.isArray(data) ? data : []);
+            }
+        } catch {
+            setCourses([]);
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const handleTopicFilter = async (topic) => {
+        setTopicFilter(topic);
+        if (topic === 'All') {
+            fetchCourses(statusFilter);
+        } else {
+            try {
+                const data = await CourseManagementAPI.filterCourseByTopic(topic, statusFilter);
+                setCourses(Array.isArray(data) ? data : []);
+            } catch {
+                setCourses([]);
+            }
+        }
     };
 
     const columns = [
@@ -253,19 +286,41 @@ export default function ManageCourse() {
             {/* Google Fonts */}
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
             <Title level={2} style={{ marginBottom: 0, fontFamily: 'Inter, Roboto, Arial, sans-serif', fontWeight: 700, color: '#2c3e50', letterSpacing: '-1px' }}>Manage Course</Title>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                {isManager && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {isManager && (
+                        <Select
+                            value={statusFilter}
+                            onChange={value => setStatusFilter(value)}
+                            style={{ width: 120 }}
+                        >
+                            <Select.Option value="">All</Select.Option>
+                            <Select.Option value="Active">Active</Select.Option>
+                            <Select.Option value="Inactive">Inactive</Select.Option>
+                            <Select.Option value="Draft">Draft</Select.Option>
+                        </Select>
+                    )}
                     <Select
-                        value={statusFilter}
-                        onChange={value => setStatusFilter(value)}
-                        style={{ width: 180 }}
+                        value={topicFilter}
+                        onChange={handleTopicFilter}
+                        style={{ width: 150 }}
                     >
-                        <Select.Option value="">All</Select.Option>
-                        <Select.Option value="Active">Active</Select.Option>
-                        <Select.Option value="Inactive">Inactive</Select.Option>
-                        <Select.Option value="Draft">Draft</Select.Option>
+                        <Select.Option value="All">All Topics</Select.Option>
+                        <Select.Option value="Awareness">Awareness</Select.Option>
+                        <Select.Option value="Prevention">Prevention</Select.Option>
+                        <Select.Option value="Refusal">Refusal</Select.Option>
                     </Select>
-                )}
+                    <Input
+                        placeholder="Search course by title..."
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        onPressEnter={handleSearch}
+                        style={{ width: 300 }}
+                        allowClear
+                        disabled={searching}
+                    />
+                    <Button type="primary" onClick={handleSearch} loading={searching}>Search</Button>
+                </div>
                 {isManager && (
                     <CreateButton onClick={showCreateModal} style={{ fontFamily: 'Inter, Roboto, Arial, sans-serif', fontWeight: 600, fontSize: 16 }}>Create New Course</CreateButton>
                 )}

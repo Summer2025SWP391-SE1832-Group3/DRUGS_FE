@@ -22,6 +22,7 @@ import CourseDetailsMember from '../pages/course/CourseDetailsMember'
 import CourseDetailsManage from '../pages/course/CourseDetailsManage'
 import MemberCourses from '../pages/course/MemberCourses'
 import CompletedCourse from '../pages/course/CompletedCourse'
+import SurveyHistory from '../pages/survey/SurveyHistory'
 
 export default function AppRoutes() {
   return (
@@ -51,6 +52,7 @@ export default function AppRoutes() {
           <Route path="surveyList" element={<SurveyList/>}/>
           <Route path="survey/do/:id" element={<SubmitSurvey/>}/>
           <Route path="survey/result/:id" element={<SurveyResult/>}/>
+          <Route path="surveyHistory/:userId" element={<SurveyHistory/>}/>
         </Route>
 
       </Routes>

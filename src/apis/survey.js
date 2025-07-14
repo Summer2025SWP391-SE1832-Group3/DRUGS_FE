@@ -65,5 +65,21 @@ export const SurveyAPI = {
         } catch (error) {
             handleError(error, "Error fetching survey result:");
         }
+    },
+    surveyType: async (surveyType) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Survey/surveys/surveyType?surveyType=${surveyType}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching surveys by surveyType");
+        }
+    },
+    userAddictionSurvey: async (userId) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Survey/user/${userId}/addiction-surveys`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching surveys by userId");
+        }
     }
 };

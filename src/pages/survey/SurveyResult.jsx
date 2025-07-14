@@ -88,7 +88,13 @@ export default function SurveyResult() {
                             type="default"
                             size="large"
                             icon={<LeftOutlined />}
-                            onClick={() => navigate('/surveyList')}
+                            onClick={() => {
+                              if (result.surveyType === 'CourseTest' && result.courseId) {
+                                navigate(`/courseDetailsMember/${result.courseId}`);
+                              } else {
+                                navigate('/surveyList');
+                              }
+                            }}
                             style={{
                                 height: '40px',
                                 paddingLeft: '2rem',
@@ -98,7 +104,7 @@ export default function SurveyResult() {
                                 fontWeight: 500
                             }}
                         >
-                            Back to Survey List
+                            {result.surveyType === 'CourseTest' ? 'Back to Course' : 'Back to Survey List'}
                         </Button>
                     </div>
                     <Title
@@ -162,9 +168,9 @@ export default function SurveyResult() {
                         <Space align="start" style={{ width: '100%' }}>
                             <BulbOutlined style={{ color: '#722ed1', fontSize: '1.1rem' }} />
                             <div>
-                                <Text strong style={{ color: '#595959' }}>Recommendation</Text>
+                                <Text strong style={{ color: '#595959' }}>{result.surveyType === 'CourseTest' ? 'Result' : 'Recommendation'}</Text>
                                 <br />
-                                <Text style={{ fontSize: '1rem' }}>{result.recommendation}</Text>
+                                <Text style={{ fontSize: '1rem' }}>{result.surveyType === "CourseTest" ? result.resultStatus : result.recommendation}</Text>
                             </div>
                         </Space>
                     </Col>

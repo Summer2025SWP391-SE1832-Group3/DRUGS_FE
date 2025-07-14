@@ -38,7 +38,7 @@ export default function MemberCourses() {
               <Empty description="No courses in progress" />
             ) : (
               <Row gutter={[24, 24]}>
-                {courses.inProgress.map(course => (
+                {courses.inProgress.filter(course => course.status === "Active").map(course => (
                   <Col xs={24} sm={12} md={8} lg={6} key={course.id}>
                     <Card
                       title={course.title}
@@ -51,7 +51,6 @@ export default function MemberCourses() {
                       </Typography.Paragraph>
                       <div style={{ marginTop: 12 }}>
                         <Tag color="green">{course.topic}</Tag>
-                        {course.status ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
                       </div>
                       <Button
                         type="primary"
@@ -72,7 +71,7 @@ export default function MemberCourses() {
               <Empty description="No completed courses" />
             ) : (
               <Row gutter={[24, 24]}>
-                {courses.completed.map(course => (
+                {courses.completed.filter(course => course.status === "Active").map(course => (
                   <Col xs={24} sm={12} md={8} lg={6} key={course.id}>
                     <Card
                       title={course.title}
@@ -85,7 +84,6 @@ export default function MemberCourses() {
                       </Typography.Paragraph>
                       <div style={{ marginTop: 12 }}>
                         <Tag color="green">{course.topic}</Tag>
-                        {course.status ? <Tag color="success">Active</Tag> : <Tag color="default">Inactive</Tag>}
                       </div>
                       <Button
                         type="primary"

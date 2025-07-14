@@ -129,7 +129,7 @@ export default function Navbar({ onToggleSidebar }) {
                                     gap: 2
                                 }}
                             >
-                                <i className="material-symbols-rounded" style={{ fontSize: 20}}>assignment_turned_in</i>
+                                <i className="material-symbols-rounded" style={{ fontSize: 20}}>quiz</i>
                                 Survey
                             </a>
                             <a

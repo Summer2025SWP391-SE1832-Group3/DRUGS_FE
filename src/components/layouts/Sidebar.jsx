@@ -61,6 +61,26 @@ export default function Sidebar({ open }) {
         }
     };
 
+    const handleSurveyHistoryClick = () => {
+        if (!userData) {
+            message.warning("Please login to view survey history");
+            navigate('/');
+            return;
+        }
+        try {
+            const user = JSON.parse(userData);
+            if (user && user.userId) {
+                navigate(`/surveyHistory/${user.userId}`);
+            } else {
+                message.error('Unable to find user information');
+                navigate('/');
+            }
+        } catch (error) {
+            message.error('Error accessing user data');
+            navigate('/');
+        }
+    }
+
     return (
         <aside
             className="sidebar position-fixed h-100 shadow-lg"
@@ -121,6 +141,12 @@ export default function Sidebar({ open }) {
                     <a onClick={handleMyCoursesClick} className="nav-link text-white d-flex align-items-center px-3 py-2" style={{ cursor: 'pointer' }}>
                         <i className="material-symbols-rounded me-2">school</i>
                         <span style={{ fontSize: 15 }}>My Courses</span>
+                    </a>
+                )}
+                {isMember && (
+                    <a onClick={handleSurveyHistoryClick} className="nav-link text-white d-flex align-items-center px-3 py-2" style={{ cursor: 'pointer' }}>
+                        <i className="material-symbols-rounded me-2">history</i>
+                        <span style={{ fontSize: 15 }}>Survey History</span>
                     </a>
                 )}
             </nav>

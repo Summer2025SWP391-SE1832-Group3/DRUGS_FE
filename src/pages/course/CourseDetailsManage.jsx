@@ -164,7 +164,12 @@ export default function CourseDetailsManage() {
       setLessons(Array.isArray(lessonRes) ? lessonRes : []);
     } catch (err) {
       setUploading(false);
-      message.error('Failed to create lesson');
+      const apiMsg = err?.response?.data;
+      if (typeof apiMsg === 'string' && apiMsg.toLowerCase().includes('active')) {
+        message.error('You cannot create lessons because this course is active.');
+      } else {
+        message.error('Failed to create lesson');
+      }
     }
   };
 
@@ -206,7 +211,12 @@ export default function CourseDetailsManage() {
       setLessons(Array.isArray(lessonRes) ? lessonRes : []);
     } catch (err) {
       setLessonUploading(false);
-      message.error('Failed to update lesson');
+      const apiMsg = err?.response?.data;
+      if (typeof apiMsg === 'string' && apiMsg.toLowerCase().includes('active')) {
+        message.error('You cannot edit lessons because this course is active.');
+      } else {
+        message.error('Failed to update lesson');
+      }
     }
   };
 
@@ -232,14 +242,23 @@ export default function CourseDetailsManage() {
           // Reload lessons
           const lessonRes = await LessonAPI.getLessonsByCourseId(courseDetail.id);
           setLessons(Array.isArray(lessonRes) ? lessonRes : []);
-        } catch {
-          message.error('Failed to delete lesson');
+        } catch (err) {
+          const apiMsg = err?.response?.data;
+          if (typeof apiMsg === 'string' && apiMsg.toLowerCase().includes('active')) {
+            message.error('You cannot delete lessons because this course is active.');
+          } else {
+            message.error('Failed to delete lesson');
+          }
         }
       }
     });
   };
 
   const showCreateExamModal = () => {
+    if (courseDetail && courseDetail.finalExamSurvey) {
+      message.error("Each course can only have one test.");
+      return;
+    }
     createExamForm.setFieldsValue({
       examType: 'CourseTest',
       isActive: true,
@@ -276,8 +295,15 @@ export default function CourseDetailsManage() {
       message.success('Exam created successfully!');
       setIsCreateExamModalVisible(false);
       createExamForm.resetFields();
+      const updatedCourse = await CourseAPI.getCourseById(courseDetail.id);
+      setCourseDetail(updatedCourse);
     } catch (err) {
-      message.error('Failed to create exam');
+      const apiMsg = err?.response?.data;
+      if (typeof apiMsg === 'string' && apiMsg.includes('already has an active survey')) {
+        message.error("Each course can only have one test.");
+      } else {
+        message.error('Failed to create exam');
+      }
     }
   };
 

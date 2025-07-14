@@ -258,9 +258,11 @@ export default function ManageCourse() {
                     <ActionButton className="view-btn" onClick={() => handleViewCourse(record)}>
                         View
                     </ActionButton>
-                    <ActionButton className="edit-btn" onClick={() => showEditModal(record)}>
-                        Edit
-                    </ActionButton>
+                    {isManager && (
+                        <ActionButton className="edit-btn" onClick={() => showEditModal(record)}>
+                            Edit
+                        </ActionButton>
+                    )}
                     {isManager && (
                         <ActionButton
                             className="deactivate-btn"

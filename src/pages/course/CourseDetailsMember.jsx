@@ -7,7 +7,8 @@ import {
   Col,
   Tag,
   message,
-  Checkbox
+  Checkbox,
+  Spin
 } from 'antd';
 import {
   PlayCircleOutlined,
@@ -78,7 +79,7 @@ export default function CourseDetailsMember() {
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '80px 0' }}>Loading...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: '80px 0' }}><Spin size="large" /></div>;
   if (!course) return <div>Course not found</div>;
 
   const welcomeText = 'Take a look at the science of how addictive drugs affect your body and why substance addiction can be so difficult to treat.';
@@ -294,7 +295,7 @@ export default function CourseDetailsMember() {
               style={{ backgroundColor: 'transparent' }}
               expandIconPosition="end"
             >
-              {course.lessions.map((lesson, idx) => (
+              {(course.lessions || []).map((lesson, idx) => (
                 <Panel
                   header={
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', paddingRight: '16px' }}>

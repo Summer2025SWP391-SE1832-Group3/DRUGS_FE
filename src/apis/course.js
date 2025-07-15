@@ -104,5 +104,13 @@ export const CourseAPI = {
         } catch (error) {
             handleError(error, "Error fetching courses without survey");
         }
+    },
+    completedCourse: async (id) => {
+        try {
+            const { data } = await axiosInstance.get(`${apiBase}/Course/completed-course/${id}`);
+            return data;
+        } catch (error) {
+            handleError(error, "Error fetching completed course");
+        }
     }
 };

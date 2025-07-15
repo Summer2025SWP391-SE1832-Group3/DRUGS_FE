@@ -56,7 +56,7 @@ export default function Header() {
                             Drug Use Prevention Support System
                         </h6>
                     </div>
-                    <div className="d-flex align-items-center justify-content-between" style={{ width: '100%', maxWidth: 350 }}>
+                    <div className="d-flex align-items-center justify-content-between" style={{position: 'absolute', left:'65%', right: '10%', transform: 'translateX(-180%)', width: '100%', gap: 2, zIndex: 2, alignItems: 'center', maxWidth: 300 }}>
                         <a
                             onClick={() => navigate('/courseList')}
                             style={{
@@ -65,18 +65,18 @@ export default function Header() {
                                 fontSize: 16,
                                 color: 'white',
                                 background: 'transparent',
-                                border: '2px solid #fff',
-                                borderRadius: 30,
-                                padding: '8px 28px',
+                                // border: '2px solid #fff',
+                                // borderRadius: 30,
+                                padding: '8px 20px',
                                 boxShadow: 'none',
                                 transition: 'all 0.2s',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 8
+                                gap: 2
                             }}
                         >
-                            <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>dashboard</i>
+                            <i className="material-symbols-rounded" style={{ fontSize: 20 }}>dashboard</i>
                             Courses
                         </a>
                         <a
@@ -87,18 +87,18 @@ export default function Header() {
                                 fontSize: 16,
                                 color: 'white',
                                 background: 'transparent',
-                                border: '2px solid #fff',
-                                borderRadius: 30,
+                                // border: '2px solid #fff',
+                                // borderRadius: 30,
                                 padding: '8px 28px',
                                 boxShadow: 'none',
                                 transition: 'all 0.2s',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 8
+                                gap: 2
                             }}
                         >
-                            <i className="material-symbols-rounded" style={{ fontSize: 20, marginRight: 6 }}>post</i>
+                            <i className="material-symbols-rounded" style={{ fontSize: 20 }}>post</i>
                             Blogs
                         </a>
                     </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Row, Col, Empty, Typography, Input, Button, message, Select } from 'antd'
+import { Card, Row, Col, Empty, Typography, Input, Button, message, Select, Spin } from 'antd'
 import { CourseAPI } from '../../apis/course';
 import { ActionButton } from '../../components/ui/Buttons';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,7 @@ export default function CourseList() {
   const [topics, setTopics] = useState(['All', 'Awareness', 'Prevention', 'Refusal', 'CommunityEducation']); // Có thể lấy động từ API nếu cần
   const navigate = useNavigate();
 
-  
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -27,6 +27,17 @@ export default function CourseList() {
     };
     fetchCourses();
   }, []);
+
+  let isMember = false;
+  let isStaffOrManager = false;
+  const userdata = localStorage.getItem('user');
+  if (userdata) {
+    try {
+      const user = JSON.parse(userdata);
+      isMember = user && user.role === "Member";
+      isStaffOrManager = user && (user.role === "Staff" || user.role === "Manager");
+    } catch { }
+  }
 
   const handleSearch = async () => {
     setSearching(true);
@@ -62,6 +73,7 @@ export default function CourseList() {
       setLoading(false);
     }
   };
+
 
   const handleEnroll = async (courseId) => {
     const isLoggedIn = Boolean(localStorage.getItem('accessToken'));
@@ -110,7 +122,7 @@ export default function CourseList() {
         }}>
           Explore Our Courses
         </Typography.Title>
-        
+
         <Typography.Text style={{
           fontSize: '1.2rem',
           color: '#666',
@@ -125,9 +137,9 @@ export default function CourseList() {
         </Typography.Text>
 
         {/* Improved Search Bar + Filter */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
           alignItems: 'center',
           gap: '12px',
           maxWidth: '700px',
@@ -138,7 +150,7 @@ export default function CourseList() {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             onPressEnter={handleSearch}
-            style={{ 
+            style={{
               height: '52px',
               fontSize: '16px',
               borderRadius: '16px',
@@ -164,7 +176,7 @@ export default function CourseList() {
             type="primary"
             onClick={handleSearch}
             loading={searching}
-            style={{ 
+            style={{
               height: '52px',
               padding: '0 28px',
               fontSize: '16px',
@@ -189,8 +201,8 @@ export default function CourseList() {
           <Select
             value={selectedTopic}
             onChange={handleFilter}
-            style={{ 
-              width: 180, 
+            style={{
+              width: 180,
               height: 52,
               fontSize: '16px',
               fontWeight: 500,
@@ -204,7 +216,7 @@ export default function CourseList() {
               border: '1px solid rgba(255,255,255,0.2)',
               boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
             }}
-            options={topics.map(t => ({ 
+            options={topics.map(t => ({
               label: (
                 <span style={{
                   fontSize: '15px',
@@ -214,8 +226,8 @@ export default function CourseList() {
                 }}>
                   {t}
                 </span>
-              ), 
-              value: t 
+              ),
+              value: t
             }))}
             placeholder="Filter by topic"
             suffixIcon={
@@ -228,7 +240,7 @@ export default function CourseList() {
                 color: '#666'
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
             }
@@ -254,13 +266,13 @@ export default function CourseList() {
                 ...provided,
                 height: '52px',
                 borderRadius: '16px',
-                border: state.isFocused 
-                  ? '2px solid #1890ff' 
+                border: state.isFocused
+                  ? '2px solid #1890ff'
                   : '2px solid rgba(255,255,255,0.3)',
                 background: 'rgba(255,255,255,0.9)',
                 backdropFilter: 'blur(10px)',
-                boxShadow: state.isFocused 
-                  ? '0 8px 32px rgba(24,144,255,0.15)' 
+                boxShadow: state.isFocused
+                  ? '0 8px 32px rgba(24,144,255,0.15)'
                   : '0 8px 24px rgba(0,0,0,0.08)',
                 transition: 'all 0.3s ease',
                 fontSize: '16px',
@@ -292,18 +304,18 @@ export default function CourseList() {
                 fontSize: '15px',
                 fontWeight: '500',
                 color: state.isSelected ? '#fff' : '#333',
-                backgroundColor: state.isSelected 
-                  ? 'linear-gradient(135deg, #1890ff, #722ed1)' 
-                  : state.isFocused 
-                    ? 'rgba(24,144,255,0.1)' 
+                backgroundColor: state.isSelected
+                  ? 'linear-gradient(135deg, #1890ff, #722ed1)'
+                  : state.isFocused
+                    ? 'rgba(24,144,255,0.1)'
                     : 'transparent',
                 padding: '12px 20px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 fontFamily: 'inherit',
                 '&:hover': {
-                  backgroundColor: state.isSelected 
-                    ? 'linear-gradient(135deg, #1890ff, #722ed1)' 
+                  backgroundColor: state.isSelected
+                    ? 'linear-gradient(135deg, #1890ff, #722ed1)'
                     : 'rgba(24,144,255,0.1)'
                 }
               })
@@ -313,204 +325,247 @@ export default function CourseList() {
       </div>
 
       {/* Main Content với improved spacing */}
-      <div style={{ padding: '20px 20px 60px 20px' }}>
-        <Row gutter={[24, 32]} justify="center">
-          {courses.length === 0 && !loading && (
-            <Col span={24} style={{ textAlign: 'center', marginTop: '60px' }}>
-              <div style={{
-                background: 'rgba(255,255,255,0.95)',
-                borderRadius: '24px',
-                padding: '60px 40px',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                maxWidth: '500px',
-                margin: '0 auto'
-              }}>
-                <Empty
-                  description={
-                    <span style={{
-                      fontSize: '18px',
-                      color: '#666',
-                      fontWeight: '500'
-                    }}>
-                      No courses available at the moment
-                    </span>
-                  }
-                />
-              </div>
-            </Col>
-          )}
-
-          {courses.map((item) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={item.course.id}>
-              <Card
-                hoverable
-                style={{
-                  height: '100%',
-                  borderRadius: '20px',
-                  overflow: 'hidden',
-                  background: 'rgba(255,255,255,0.97)',
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <Spin size="large" />
+        </div>
+      ) : (
+        <div style={{ padding: '20px 20px 60px 20px' }}>
+          <Row gutter={[24, 32]} justify="center">
+            {courses.length === 0 && !loading && (
+              <Col span={24} style={{ textAlign: 'center', marginTop: '60px' }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '24px',
+                  padding: '60px 40px',
                   backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-                styles={{
-                  body: {
-                    padding: '32px 28px 24px 28px',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                  maxWidth: '500px',
+                  margin: '0 auto'
+                }}>
+                  <Empty
+                    description={
+                      <span style={{
+                        fontSize: '18px',
+                        color: '#666',
+                        fontWeight: '500'
+                      }}>
+                        No courses available at the moment
+                      </span>
+                    }
+                  />
+                </div>
+              </Col>
+            )}
+
+            {courses.map((item) => (
+              <Col xs={24} sm={12} md={8} lg={6} key={item.course.id}>
+                <Card
+                  hoverable
+                  style={{
+                    height: '100%',
+                    borderRadius: '20px',
+                    overflow: 'hidden',
+                    background: 'rgba(255,255,255,0.97)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                  styles={{
+                    body: {
+                      padding: '32px 28px 24px 28px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      flex: 1,
+                      fontFamily: 'inherit'
+                    }
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-8px)';
+                    e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
+                  }}
+                >
+                  <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     flex: 1,
+                    justifyContent: 'space-between',
                     fontFamily: 'inherit'
-                  }
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flex: 1,
-                  justifyContent: 'space-between',
-                  fontFamily: 'inherit'
-                }}>
-                  <div>
-                    <Typography.Title level={4} style={{
-                      fontSize: '1.3rem',
-                      color: '#1a1a1a',
-                      fontWeight: 700,
-                      lineHeight: '1.3',
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'inherit',
-                      height: 60
-                    }}>
-                      {item.course.title}
-                    </Typography.Title>
+                  }}>
+                    <div>
+                      <Typography.Title level={4} style={{
+                        fontSize: '1.3rem',
+                        color: '#1a1a1a',
+                        fontWeight: 700,
+                        lineHeight: '1.3',
+                        letterSpacing: '-0.01em',
+                        fontFamily: 'inherit',
+                        height: 60
+                      }}>
+                        {item.course.title}
+                      </Typography.Title>
 
-                    <Typography.Paragraph style={{
-                      color: '#555',
-                      fontSize: '1rem',
-                      lineHeight: '1.7',
-                      marginBottom: '24px',
-                      fontWeight: 400,
-                      fontFamily: 'inherit'
-                    }}
-                      ellipsis={{rows: 5}}
-                    >
-                      {item.course.description}
-                    </Typography.Paragraph>
+                      <Typography.Paragraph style={{
+                        color: '#555',
+                        fontSize: '1rem',
+                        lineHeight: '1.7',
+                        marginBottom: '24px',
+                        fontWeight: 400,
+                        fontFamily: 'inherit',
+                        height: 140
+                      }}
+                        ellipsis={{ rows: 5 }}
+                      >
+                        {item.course.description}
+                      </Typography.Paragraph>
 
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '14px',
-                      marginBottom: '24px',
-                      fontFamily: 'inherit'
-                    }}>
                       <div style={{
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px'
+                        flexDirection: 'column',
+                        gap: '14px',
+                        marginBottom: '24px',
+                        fontFamily: 'inherit'
                       }}>
-                        <Typography.Text style={{
-                          background: 'linear-gradient(135deg, #52c41a, #389e0d)',
-                          color: 'white',
-                          padding: '6px 14px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          fontFamily: 'inherit'
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px'
                         }}>
-                          Topic
-                        </Typography.Text>
-                        <Typography.Text style={{
-                          fontSize: '14px',
-                          fontWeight: 500,
-                          color: '#333',
-                          fontFamily: 'inherit'
-                        }}>
-                          {item.course.topic || 'General'}
-                        </Typography.Text>
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px'
-                      }}>
-                        <Typography.Text style={{
-                          background: 'linear-gradient(135deg, #1890ff, #722ed1)',
-                          color: 'white',
-                          padding: '6px 14px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          fontFamily: 'inherit'
-                        }}>
-                          Status
-                        </Typography.Text>
-                        <Typography.Text style={{
-                          fontSize: '14px',
-                          fontWeight: 500,
-                          color: '#333',
-                          fontFamily: 'inherit'
-                        }}>
-                          {item.status}
-                        </Typography.Text>
+                          <Typography.Text style={{
+                            background: 'linear-gradient(135deg, #52c41a, #389e0d)',
+                            color: 'white',
+                            padding: '6px 14px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                            fontFamily: 'inherit'
+                          }}>
+                            Topic
+                          </Typography.Text>
+                          <Typography.Text style={{
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            color: '#333',
+                            fontFamily: 'inherit'
+                          }}>
+                            {item.course.topic || 'General'}
+                          </Typography.Text>
+                        </div>
+                        {isMember && (
+
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}>
+                            <Typography.Text style={{
+                              background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                              color: 'white',
+                              padding: '6px 14px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                              fontFamily: 'inherit'
+                            }}>
+                              Status
+                            </Typography.Text>
+                            <Typography.Text style={{
+                              fontSize: '14px',
+                              fontWeight: 500,
+                              color: '#333',
+                              fontFamily: 'inherit'
+                            }}>
+                              {item.status}
+                            </Typography.Text>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
 
-                  {item.status === "NotEnrolled" ? (
-                    <ActionButton
-                      className="edit-btn"
-                      block
-                      style={{
-                        height: '50px',
-                        fontSize: '1.1rem',
-                        fontWeight: 700,
-                        borderRadius: '16px',
-                        letterSpacing: '0.02em',
-                        fontFamily: 'inherit'
-                      }}
-                      onClick={() => handleEnroll(item.course.id)}
-                    >
-                      Enroll
-                    </ActionButton>
-                  ) : (
-                    <ActionButton
-                      className="edit-btn"
-                      block
-                      style={{
-                        height: '50px',
-                        fontSize: '1.1rem',
-                        fontWeight: 700,
-                        borderRadius: '16px',
-                        letterSpacing: '0.02em',
-                        fontFamily: 'inherit'
-                      }}
-                      onClick={() => navigate(`/CourseDetailsMember/${item.course.id}`)}
-                    >
-                      View Course Details
-                    </ActionButton>
-                  )}
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </div>
+                    {/* Nút action */}
+                    {isStaffOrManager ? (
+                      <ActionButton
+                        className="edit-btn"
+                        block
+                        style={{
+                          height: '50px',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          borderRadius: '16px',
+                          letterSpacing: '0.02em',
+                          fontFamily: 'inherit'
+                        }}
+                        onClick={() => navigate(`/CourseDetailsManage/${item.course.id}`)}
+                      >
+                        View Course Details
+                      </ActionButton>
+                    ) : item.status === "NotEnrolled" ? (
+                      <ActionButton
+                        className="edit-btn"
+                        block
+                        style={{
+                          height: '50px',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          borderRadius: '16px',
+                          letterSpacing: '0.02em',
+                          fontFamily: 'inherit'
+                        }}
+                        onClick={() => handleEnroll(item.course.id)}
+                      >
+                        Enroll
+                      </ActionButton>
+                    ) : item.status === "Completed" ? (
+                      <ActionButton
+                        className="edit-btn"
+                        block
+                        style={{
+                          height: '50px',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          borderRadius: '16px',
+                          letterSpacing: '0.02em',
+                          fontFamily: 'inherit'
+                        }}
+                        onClick={() => navigate(`/CompletedCourse/${item.course.id}`)}
+                      >
+                        View Course Details
+                      </ActionButton>
+                    ) : (
+                      <ActionButton
+                        className="edit-btn"
+                        block
+                        style={{
+                          height: '50px',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          borderRadius: '16px',
+                          letterSpacing: '0.02em',
+                          fontFamily: 'inherit'
+                        }}
+                        onClick={() => navigate(`/CourseDetailsMember/${item.course.id}`)}
+                      >
+                        Continue studying
+                      </ActionButton>
+                    )}
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SurveyAPI } from '../../apis/survey';
-import { Card, List, Typography, Spin, Space, Divider, Modal, Button } from 'antd';
+import { Card, List, Typography, Spin, Space, Divider, Modal, Button, Collapse } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { FileTextOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import StatusTag from '../../components/ui/StatusTag';
@@ -15,12 +15,23 @@ export default function SurveyList() {
   const [currentSurveyId, setCurrentSurveyId] = useState(null);
   const navigate = useNavigate();
 
+  // Lấy role user
+  const user = JSON.parse(localStorage.getItem('user'));
+  let isMember = false;
+  if (user) {
+    if (Array.isArray(user.roles)) {
+      isMember = user.roles.includes('Member');
+    } else if (typeof user.role === 'string') {
+      isMember = user.role === 'Member';
+    }
+  }
+
   useEffect(() => {
     const fetchSurveys = async () => {
       setLoading(true);
       try {
-        const data = await SurveyAPI.getAllSurvey();
-        setSurveys(data.filter(s => s.isActive));
+        const data = await SurveyAPI.surveyType('AddictionSurvey');
+        setSurveys((data || []).filter(s => s.isActive));
       } catch (e) {
         setSurveys([]);
       } finally {
@@ -53,8 +64,11 @@ export default function SurveyList() {
       }
       const userId = user.id || user.userId;
       const resultArr = await SurveyAPI.getSurveyResult(surveyId, userId);
-      const result = Array.isArray(resultArr) ? resultArr[0] : resultArr;
-      setResultModal({ visible: true, result });
+      // resultArr có thể là mảng nhiều kết quả
+      let results = Array.isArray(resultArr) ? resultArr : [resultArr];
+      // Sắp xếp theo submittedAt mới nhất lên đầu
+      results = results.filter(Boolean).sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      setResultModal({ visible: true, result: results });
     } catch (error) {
       Modal.error({ title: 'Error', content: 'Could not fetch survey result.' });
     }
@@ -225,31 +239,34 @@ export default function SurveyList() {
                   </Space>
                   
                   <div style={{ display: 'flex', gap: 12 }}>
-                    <CreateButton 
-                      onClick={() => navigate(`/survey/do/${survey.surveyId}`)}
-                      style={{ 
-                        color: 'white',
-                        height: '44px', 
-                        padding: '0 32px',
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 8px rgba(24, 144, 255, 0.2)',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = '#0284c7';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(24, 144, 255, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = 'white';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(24, 144, 255, 0.2)';
-                      }}
-                    >
-                      Take Survey
-                    </CreateButton>
+                    {isMember && (
+                      <CreateButton 
+                        onClick={() => navigate(`/survey/do/${survey.surveyId}`)}
+                        style={{ 
+                          color: 'white',
+                          height: '44px', 
+                          padding: '0 32px',
+                          fontSize: '15px',
+                          fontWeight: '600',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(24, 144, 255, 0.2)',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#0284c7';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 16px rgba(24, 144, 255, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'white';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(24, 144, 255, 0.2)';
+                        }}
+                      >
+                        Take Survey
+                      </CreateButton>
+                    )}
+                    {isMember && (
                     <CreateButton 
                       onClick={() => handleViewResult(survey.surveyId)}
                       style={{
@@ -278,6 +295,7 @@ export default function SurveyList() {
                     >
                       View Result
                     </CreateButton>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -293,58 +311,65 @@ export default function SurveyList() {
         footer={null}
         width={700}
       >
-        {resultModal.result && resultModal.result.surveyId === currentSurveyId ? (
-          <div>
-            <Title level={4}>{resultModal.result.surveyName}</Title>
-            <Paragraph><b>Executed By:</b> {resultModal.result.excutedBy}</Paragraph>
-            <Paragraph><b>Submitted At:</b> {resultModal.result.submittedAt ? new Date(resultModal.result.submittedAt).toLocaleString() : ''}</Paragraph>
-            <Paragraph><b>Total Score:</b> {resultModal.result.totalScore}</Paragraph>
-            <Paragraph><b>Recommendation:</b> {resultModal.result.recommendation}</Paragraph>
-            <Divider />
-            <Title level={5}>Questions & Answers</Title>
-            <List
-              dataSource={resultModal.result.questions || []}
-              renderItem={q => (
-                <List.Item style={{ display: 'block' }}>
-                  <div style={{ marginBottom: 4 }}><b>{q.questionText}</b></div>
-                  {/* Hiển thị đáp án user đã chọn */}
-                  {q.userAnswer && (
-                    <div style={{ marginLeft: 16, marginBottom: 8 }}>
-                      <Text type="success" style={{ fontWeight: 600 }}>
-                        Your answer: {q.userAnswer}
-                      </Text>
-                    </div>
-                  )}
-                  <ul style={{ marginLeft: 16, marginBottom: 0 }}>
-                    {q.answers?.map((a, cidx) => (
-                      <li
-                        key={a.answerId}
-                        style={{
-                          background: q.userAnswer === a.answerText ? '#e6f7ff' : '#fff',
-                          border: q.userAnswer === a.answerText ? '2px solid #1890ff' : '1px solid #e2e8e0',
-                          borderRadius: 6,
-                          margin: '8px 0',
-                          padding: '10px 16px',
-                          fontWeight: q.userAnswer === a.answerText ? 600 : 400,
-                          color: '#4a5568',
-                          listStyle: 'none',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <span>{String.fromCharCode(65 + cidx)}. {a.answerText}</span>
-                        {typeof a.score === 'number' && (
-                          <span style={{ color: '#888', marginLeft: 8 }}>(Score: {a.score})</span>
-                        )}
-                        {a.isCorrect && (
-                          <StatusTag color="green" style={{ marginLeft: 8 }}>Correct</StatusTag>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </List.Item>
-              )}
-              locale={{ emptyText: 'No questions' }}
-            />
+        {Array.isArray(resultModal.result) && resultModal.result.length > 0 && resultModal.result[0].surveyId === currentSurveyId ? (
+          <div style={{ maxHeight: 600, overflowY: 'auto', paddingRight: 8 }}>
+            {resultModal.result.map((res, idx) => (
+              <Card key={res.surveyResultId} style={{ marginBottom: 24, borderRadius: 12, boxShadow: '0 2px 8px #eee' }}>
+                <Title level={4}>{res.surveyName}</Title>
+                <Paragraph><b>Executed By:</b> {res.excutedBy}</Paragraph>
+                <Paragraph><b>Submitted At:</b> {res.submittedAt ? new Date(res.submittedAt).toLocaleString() : ''}</Paragraph>
+                <Paragraph><b>Total Score:</b> {res.totalScore}</Paragraph>
+                <Paragraph><b>Recommendation:</b> {res.recommendation}</Paragraph>
+                <Divider />
+                <Collapse ghost>
+                  <Collapse.Panel header="View Questions & Answers" key="1">
+                    <List
+                      dataSource={res.questions || []}
+                      renderItem={q => (
+                        <List.Item style={{ display: 'block' }}>
+                          <div style={{ marginBottom: 4 }}><b>{q.questionText}</b></div>
+                          {/* Hiển thị đáp án user đã chọn */}
+                          {q.userAnswer && (
+                            <div style={{ marginLeft: 16, marginBottom: 8 }}>
+                              <Text type="success" style={{ fontWeight: 600 }}>
+                                Your answer: {q.userAnswer}
+                              </Text>
+                            </div>
+                          )}
+                          <ul style={{ marginLeft: 16, marginBottom: 0 }}>
+                            {q.answers?.map((a, cidx) => (
+                              <li
+                                key={a.answerId}
+                                style={{
+                                  background: q.userAnswer === a.answerText ? '#e6f7ff' : '#fff',
+                                  border: q.userAnswer === a.answerText ? '2px solid #1890ff' : '1px solid #e2e8e0',
+                                  borderRadius: 6,
+                                  margin: '8px 0',
+                                  padding: '10px 16px',
+                                  fontWeight: q.userAnswer === a.answerText ? 600 : 400,
+                                  color: '#4a5568',
+                                  listStyle: 'none',
+                                  transition: 'all 0.2s'
+                                }}
+                              >
+                                <span>{String.fromCharCode(65 + cidx)}. {a.answerText}</span>
+                                {typeof a.score === 'number' && (
+                                  <span style={{ color: '#888', marginLeft: 8 }}>(Score: {a.score})</span>
+                                )}
+                                {a.isCorrect && (
+                                  <StatusTag color="green" style={{ marginLeft: 8 }}>Correct</StatusTag>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </List.Item>
+                      )}
+                      locale={{ emptyText: 'No questions' }}
+                    />
+                  </Collapse.Panel>
+                </Collapse>
+              </Card>
+            ))}
           </div>
         ) : (
           <div

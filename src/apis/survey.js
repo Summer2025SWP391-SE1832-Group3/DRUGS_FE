@@ -34,12 +34,12 @@ export const SurveyAPI = {
             handleError(error, "Error updating survey:");
         }
     },
-    deleteSurvey: async (id) => {
+    updateStatus: async (id, isActive) => {
         try {
-            const { data } = await axiosInstance.delete(`${apiBase}/Survey/${id}`);
+            const { data } = await axiosInstance.put(`${apiBase}/Survey/${id}/Status?isActive=${isActive}`);
             return data;
         } catch (error) {
-            handleError(error, "Error deleting survey:");
+            handleError(error, "Error updating survey status:");
         }
     },
     getSurveyById: async (id) => {

@@ -10,11 +10,11 @@ export default function ManageSurvey() {
     const [loading, setLoading] = useState(false);
     const [selectedSurvey, setSelectedSurvey] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [deleteModal, setDeleteModal] = useState({ visible: false, survey: null });
+    const [updateStatusModal, setUpdateStatusModal] = useState({ visible: false, survey: null });
     const [createModal, setCreateModal] = useState(false);
     const [updateModal, setUpdateModal] = useState({ visible: false, survey: null });
     const [form] = Form.useForm();
-    const [surveyType, setSurveyType] = useState("AddictionSurvey");
+    const [surveyType] = useState("AddictionSurvey");
     const [courses, setCourses] = useState([]);
 
     let isManager = false;
@@ -28,8 +28,8 @@ export default function ManageSurvey() {
     const fetchSurveys = async () => {
         setLoading(true);
         try {
-            const data = await SurveyAPI.getAllSurvey();
-            setSurveys(data);
+            const data = await SurveyAPI.surveyType('AddictionSurvey');
+            setSurveys((data || []));
         } catch (error) {
             message.error("Failed to fetch surveys");
         } finally {
@@ -41,15 +41,15 @@ export default function ManageSurvey() {
         fetchSurveys();
     }, []);
 
-    const handleDelete = async () => {
-        if (!deleteModal.survey) return;
+    const handleUpdateStatus = async (isActive) => {
+        if (!updateStatusModal.survey) return;
         try {
-            await SurveyAPI.deleteSurvey(deleteModal.survey.surveyId);
-            message.success("Survey deleted successfully");
-            setDeleteModal({ visible: false, survey: null });
+            await SurveyAPI.updateStatus(updateStatusModal.survey.surveyId, isActive);
+            message.success("Survey status updated successfully");
+            setUpdateStatusModal({ visible: false, survey: null });
             fetchSurveys();
         } catch (error) {
-            message.error("Failed to delete survey");
+            message.error("Failed to update survey status");
         }
     };
 
@@ -59,41 +59,38 @@ export default function ManageSurvey() {
     };
 
     useEffect(() => {
-        if (createModal && surveyType === "CourseTest") {
-            fetchCourses();
+        if (createModal) {
+            // Không cần fetchCourses vì chỉ có AddictionSurvey
         }
-    }, [createModal, surveyType]);
+    }, [createModal]);
 
-    const fetchCourses = async () => {
-        try {
-            const data = await CourseAPI.coursesWithoutSurvey();
-            setCourses(data);
-        } catch (error) {
-            setCourses([]);
-        }
-    };
+    // const fetchCourses = async () => {
+    //     try {
+    //         const data = await CourseAPI.coursesWithoutSurvey();
+    //         setCourses(data);
+    //     } catch (error) {
+    //         setCourses([]);
+    //     }
+    // };
 
     const handleCreate = async () => {
         try {
             const values = await form.validateFields();
-            const surveyTypeValue = values.surveyType;
-            const courseIdValue = surveyTypeValue === "CourseTest" ? values.courseId : undefined;
             const surveyData = {
                 surveyName: values.surveyName,
                 description: values.description,
-                surveyType: surveyTypeValue,
+                surveyType: "AddictionSurvey",
                 isActive: values.isActive,
                 questionsDto: values.questions.map(q => ({
                     questionText: q.questionText,
                     answersDto: q.answers.map(a => ({
                         answerText: a.answerText,
-                        score: surveyTypeValue === "CourseTest" ? null : a.score,
+                        score: a.score,
                         isCorrect: !!a.isCorrect
                     }))
                 }))
             };
-
-            await SurveyAPI.createSurvey(surveyData, courseIdValue);
+            await SurveyAPI.createSurvey(surveyData);
             message.success("Survey created successfully!");
             setCreateModal(false);
             form.resetFields();
@@ -107,8 +104,9 @@ export default function ManageSurvey() {
     const handleOpenCreateModal = () => {
         setCreateModal(true);
         form.setFieldsValue({
+            surveyType: "AddictionSurvey",
             questions: [
-                { questionText: '', answers: [{ answerText: '', score: surveyType === 'CourseTest' ? null : 0, isCorrect: false }] }
+                { questionText: '', answers: [{ answerText: '', score: 0, isCorrect: false }] }
             ]
         });
     };
@@ -116,7 +114,7 @@ export default function ManageSurvey() {
     const handleOpenUpdateModal = (survey) => {
         setUpdateModal({ visible: true, survey });
         form.setFieldsValue({
-            surveyType: survey.surveyType || 'AddictionSurvey',
+            surveyType: "AddictionSurvey",
             courseId: survey.courseId,
             surveyName: survey.surveyName,
             description: survey.description,
@@ -130,18 +128,15 @@ export default function ManageSurvey() {
                 }))
             }))
         });
-        setSurveyType(survey.surveyType || 'AddictionSurvey');
     };
 
     const handleUpdate = async () => {
         try {
             const values = await form.validateFields();
-            const surveyTypeValue = values.surveyType;
-            const courseIdValue = surveyTypeValue === "CourseTest" ? values.courseId : undefined;
             const surveyData = {
                 surveyName: values.surveyName,
                 description: values.description,
-                surveyType: surveyTypeValue,
+                surveyType: "AddictionSurvey",
                 isActive: values.isActive,
                 questions: values.questions.map((q, qIdx) => ({
                     questionId: updateModal.survey?.surveyQuestions?.[qIdx]?.questionId ?? 0,
@@ -149,7 +144,7 @@ export default function ManageSurvey() {
                     answersDTO: q.answers.map((a, aIdx) => ({
                         answerId: updateModal.survey?.surveyQuestions?.[qIdx]?.surveyAnswers?.[aIdx]?.answerId ?? 0,
                         answerText: a.answerText,
-                        score: surveyTypeValue === "CourseTest" ? null : a.score,
+                        score: a.score,
                         isCorrect: !!a.isCorrect
                     }))
                 }))
@@ -210,13 +205,11 @@ export default function ManageSurvey() {
                         Edit
                     </ActionButton>
                     <ActionButton
-                        className="delete-btn"
-                        danger
-                        disabled={!record.isActive}
-                        style={!record.isActive ? { opacity: 0.4 } : {}}
-                        onClick={() => record.isActive && setDeleteModal({ visible: true, survey: record })}
+                        className="status-btn"
+                        style={{ background: record.isActive ? '#f59e42' : '#22c55e', color: 'white' }}
+                        onClick={() => setUpdateStatusModal({ visible: true, survey: record })}
                     >
-                        Delete
+                        {record.isActive ? 'Deactivate' : 'Activate'}
                     </ActionButton>
                 </Space>
             ),
@@ -306,19 +299,23 @@ export default function ManageSurvey() {
             </Modal>
             {/* Delete confirmation modal */}
             <Modal
-                open={deleteModal.visible}
-                title="Delete Confirmation"
-                onCancel={() => setDeleteModal({ visible: false, survey: null })}
-                onOk={handleDelete}
-                okText="Delete"
-                okType="danger"
-                cancelText="Cancel"
+                open={updateStatusModal.visible}
+                title="Update Survey Status"
+                onCancel={() => setUpdateStatusModal({ visible: false, survey: null })}
+                footer={null}
                 centered
             >
                 <div>
-                    <p>Are you sure you want to delete this survey?</p>
-                    <Typography.Text strong>{deleteModal.survey?.surveyName}</Typography.Text>
-                    <p style={{ marginTop: 8, color: '#ef4444' }}>This action cannot be undone.</p>
+                    <p>Change status for survey:</p>
+                    <Typography.Text strong>{updateStatusModal.survey?.surveyName}</Typography.Text>
+                    <div style={{ marginTop: 16 }}>
+                        <Switch
+                            checked={updateStatusModal.survey?.isActive}
+                            checkedChildren="Active"
+                            unCheckedChildren="Inactive"
+                            onChange={checked => handleUpdateStatus(checked)}
+                        />
+                    </div>
                 </div>
             </Modal>
             <Modal
@@ -340,10 +337,7 @@ export default function ManageSurvey() {
                         initialValue="AddictionSurvey"
                         rules={[{ required: true, message: "Survey type is required" }]}
                     >
-                        <Select onChange={value => setSurveyType(value)}>
-                            <Select.Option value="AddictionSurvey">Addiction Survey</Select.Option>
-                            <Select.Option value="CourseTest">Course Test</Select.Option>
-                        </Select>
+                        <Input value="AddictionSurvey" disabled />
                     </Form.Item>
                     {surveyType === "CourseTest" && (
                         <Form.Item
@@ -462,10 +456,7 @@ export default function ManageSurvey() {
                         initialValue="AddictionSurvey"
                         rules={[{ required: true, message: "Survey type is required" }]}
                     >
-                        <Select onChange={value => setSurveyType(value)}>
-                            <Select.Option value="AddictionSurvey">Addiction Survey</Select.Option>
-                            <Select.Option value="CourseTest">Course Test</Select.Option>
-                        </Select>
+                        <Input value="AddictionSurvey" disabled />
                     </Form.Item>
                     {surveyType === "CourseTest" && (
                         <Form.Item

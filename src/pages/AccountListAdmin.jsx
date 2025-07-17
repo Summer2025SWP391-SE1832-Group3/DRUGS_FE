@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Popconfirm, message, Space, ConfigProvider, Flex, Tag, Modal, Form, Select, DatePicker, Input, Row, Col } from "antd";
+import { Table, Button, Popconfirm, message, ConfigProvider, Flex, Tag, Modal, Select, Input } from "antd";
 import { AccountAdminAPI } from "../apis/accountadmin";
 import axiosInstance from "../apis/axiosInstance";
-import dayjs from "dayjs";
 import CreateAccountAdmin from "./CreateAccountAdmin";
+import { SearchOutlined } from '@ant-design/icons';
 
 export default function AccountListAdmin() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [editingAccount, setEditingAccount] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form] = Form.useForm();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('active');
+  const [searchFields, setSearchFields] = useState({ email: '', username: '', role: '' });
+  const [editingAccount, setEditingAccount] = useState(null);
+  const [isChangeRoleModalOpen, setIsChangeRoleModalOpen] = useState(false);
+  const [roleToChange, setRoleToChange] = useState('');
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -69,51 +70,38 @@ export default function AccountListAdmin() {
 
   const handleOpenUpdate = (account) => {
     setEditingAccount(account);
-    setIsModalOpen(true);
-    form.setFieldsValue({
-      ...account,
-      newRole: account.role,
-      dateOfBirth: account.dateOfBirth ? dayjs(account.dateOfBirth) : null,
-    });
+    setRoleToChange(account.role || '');
+    setIsChangeRoleModalOpen(true);
   };
 
-  const handleCancelModal = () => {
-    setIsModalOpen(false);
-    setEditingAccount(null);
-    form.resetFields();
-  };
-
-  const handleSaveUpdate = async () => {
-    if (!editingAccount || !editingAccount.id) {
-      message.error("Cannot update: userId is missing!");
-      return;
-    }
+  const handleChangeRole = async () => {
+    if (!editingAccount || !editingAccount.id) return;
+    setLoading(true);
     try {
-      const values = await form.validateFields();
-      setLoading(true);
-      const data = {
-        userName: values.userName,
-        email: values.email,
-        fullName: values.fullName,
-        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.toISOString() : null,
-        gender: values.gender,
-        phoneNumber: values.phoneNumber,
-      };
-      if (values.newPassword) {
-        data.password = values.newPassword;
-      }
-      await AccountAdminAPI.updateAccountRole(
-        editingAccount.id,
-        values.newRole,
-        data
-      );
-      message.success("Account updated successfully!");
-      setIsModalOpen(false);
+      await AccountAdminAPI.changeRole(editingAccount.id, roleToChange);
+      message.success('Role updated successfully!');
+      setIsChangeRoleModalOpen(false);
       setEditingAccount(null);
-      const accounts = await axiosInstance.get(`/Account/admin/all-account?status=${statusFilter}`);
-      setAccounts(accounts.data);
+      const accounts = await AccountAdminAPI.getAllAccounts();
+      setAccounts(accounts.data || accounts);
+    } catch {
+      message.error('Change role failed!');
+    }
+    setLoading(false);
+  };
+
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      if (!searchFields.email && !searchFields.username && !searchFields.role) {
+        const data = await AccountAdminAPI.getAllAccounts();
+        setAccounts(data.data || data);
+      } else {
+        const data = await AccountAdminAPI.searchAccounts(searchFields);
+        setAccounts(data.data || data);
+      }
     } catch (err) {
-      message.error("Update failed!");
+      message.error('Search failed!');
     }
     setLoading(false);
   };
@@ -161,15 +149,52 @@ export default function AccountListAdmin() {
       <div style={{ padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h2 style={{ margin: 0 }}>Account List</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'center' }}>
+            <Input
+              placeholder="Email"
+              value={searchFields.email}
+              onChange={e => setSearchFields(f => ({ ...f, email: e.target.value }))}
+              style={{ width: 160 }}
+              allowClear
+            />
+            <Input
+              placeholder="Username"
+              value={searchFields.username}
+              onChange={e => setSearchFields(f => ({ ...f, username: e.target.value }))}
+              style={{ width: 140 }}
+              allowClear
+            />
+            <Select
+              placeholder="Role"
+              value={searchFields.role}
+              onChange={value => setSearchFields(f => ({ ...f, role: value }))}
+              style={{ width: 120 }}
+              allowClear
+              options={[
+                { value: '', label: 'All Roles' },
+                { value: 'Manager', label: 'Manager' },
+                { value: 'Staff', label: 'Staff' },
+                { value: 'Consultant', label: 'Consultant' },
+              ]}
+            />
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleSearch}
+              style={{ borderRadius: 6 }}
+            >
+              Search
+            </Button>
           <Select
             value={statusFilter}
             onChange={value => setStatusFilter(value)}
-            style={{ width: 160 }}
+            style={{ width: 120, marginLeft: 8 }}
             options={[
               { label: 'Active', value: 'active' },
               { label: 'Inactive', value: 'inactive' },
             ]}
           />
+          </div>
           <Button
             type="primary"
             style={{
@@ -192,120 +217,22 @@ export default function AccountListAdmin() {
           bordered
         />
         <Modal
-          title="Update Account"
-          open={isModalOpen}
-          onCancel={handleCancelModal}
-          onOk={handleSaveUpdate}
+          title="Change Role"
+          open={isChangeRoleModalOpen}
+          onCancel={() => setIsChangeRoleModalOpen(false)}
+          onOk={handleChangeRole}
           okText="Save"
         >
-          <Form
-            form={form}
-            layout="vertical"
-            initialValues={editingAccount ? {
-              ...editingAccount,
-              newRole: editingAccount.role,
-              dateOfBirth: editingAccount.dateOfBirth ? dayjs(editingAccount.dateOfBirth) : null,
-            } : {}}
-          >
-            <Row gutter={12}>
-              <Col span={12}>
-                <Form.Item
-                  label="User Name"
-                  name="userName"
-                  rules={[
-                    { required: true, message: "Please enter username!" },
-                    { pattern: /^[a-zA-Z0-9_]+$/, message: "Username can only contain letters, numbers and underscore!" },
-                    { min: 4, message: "Username must be at least 4 characters!" }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Email"
-                  name="email"
-                  rules={[
-                    { required: true, message: "Please enter your email!" },
-                    { type: 'email', message: 'Please enter a valid email address!' }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Full Name"
-                  name="fullName"
-                  rules={[
-                    { required: true, message: "Please enter your full name!" },
-                    { min: 2, message: "Full name must be at least 2 characters!" }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Phone Number"
-                  name="phoneNumber"
-                  rules={[
-                    { required: true, message: "Please enter your phone number!" },
-                    { pattern: /^[0-9]{10}$/, message: "Phone number must be 10 digits!" }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Date of Birth"
-                  name="dateOfBirth"
-                  rules={[{ required: true, message: "Please select date of birth!" }]}
-                >
-                  <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY"/>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Gender"
-                  name="gender"
-                  rules={[{ required: true, message: "Please select gender!" }]}
-                >
-                  <Select options={[
-                    { value: "Male", label: "Male" },
-                    { value: "Female", label: "Female" },
-                    { value: "Other", label: "Other" },
-                  ]} />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item
-                  label="Role"
-                  name="newRole"
-                  rules={[{ required: true, message: "Please select role!" }]}
-                >
-                  <Select options={[
-                    { value: "Manager", label: "Manager" },
-                    { value: "Staff", label: "Staff" },
-                    { value: "Consultant", label: "Consultant" },
-                  ]} />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item
-                  label="New Password"
-                  name="newPassword"
-                  rules={[
-                    { min: 8, message: "Password must be at least 8 characters!" },
-                    { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/, message: "Password must contain at least one uppercase letter, one lowercase letter, and one number!" }
-                  ]}
-                >
-                  <Input.Password placeholder="Enter new password (optional)" />
-                </Form.Item>
-              </Col>
-            </Row>
-          </Form>
+          <Select
+            value={roleToChange}
+            onChange={setRoleToChange}
+            style={{ width: '100%' }}
+            options={[
+              { value: 'Manager', label: 'Manager' },
+              { value: 'Staff', label: 'Staff' },
+              { value: 'Consultant', label: 'Consultant' },
+            ]}
+          />
         </Modal>
         <Modal
           open={isCreateModalOpen}

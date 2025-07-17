@@ -49,5 +49,18 @@ export const AccountAPI =  {
         } catch (error) {
             handleError(error, "Error updating profile:");
         }
+    },
+
+    changePassword: async (passwordData, token) => {
+        try {
+            const { data } = await axios.post(`${apiBase}/Account/change-password`, passwordData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return data;
+        } catch (error) {
+            handleError(error, "Error changing password:");
+        }
     }
 }

@@ -108,11 +108,21 @@ export default function Profile() {
   const handlePasswordChange = async () => {
     try {
       const values = await passwordForm.validateFields();
+      const token = localStorage.getItem('accessToken');
+      
+      const passwordData = {
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword
+      };
+      
+      await AccountAPI.changePassword(passwordData, token);
       message.success('Password changed successfully!');
       setIsPasswordModalVisible(false);
       passwordForm.resetFields();
     } catch (error) {
-      console.log('Password validation failed:', error);
+      message.error('Failed to change password!');
+      console.log('Password change failed:', error);
     }
   };
 

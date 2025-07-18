@@ -46,18 +46,11 @@ export default function ManageCourse() {
             if (isManager) {
                 data = await CourseManagementAPI.getAllCoursesManager(status);
             } else {
-                // Staff: lấy draft và active
-                const draftCourses = await CourseManagementAPI.getDraftCourses();
-                const activeCourses = await CourseAPI.getAllCourses();
-                // Lọc activeCourses chỉ lấy status === 'Active'
-                const activeOnly = Array.isArray(activeCourses) ? activeCourses.filter(c => c.status === 'Active') : [];
-                data = [
-                    ...(Array.isArray(draftCourses) ? draftCourses : []),
-                    ...activeOnly
-                ];
+                // Staff: chỉ lấy draft
+                data = await CourseManagementAPI.getDraftCourses();
             }
             const sortedData = Array.isArray(data)
-                ? [...data].sort((a, b) => a.id - b.id)
+                ? [...data].sort((a, b) => b.id - a.id)
                 : [];
             setCourses(sortedData);
         } catch (error) {
@@ -123,15 +116,19 @@ export default function ManageCourse() {
                 }
             } else {
                 try {
-                    await CourseManagementAPI.createCourse(values);
+                    const response = await CourseManagementAPI.createCourse(values);
                     message.success('Course created successfully');
-                    fetchCourses(statusFilter);
+                    setIsModalVisible(false);
+                    form.resetFields();
+                    if (response && response.courseId) {
+                        navigate(`/courseDetailsManage/${response.courseId}`, { state: { status: 'Draft' } });
+                    } else {
+                        fetchCourses(statusFilter);
+                    }
                 } catch {
                     message.error('Failed to create course');
                 }
             }
-            setIsModalVisible(false);
-            form.resetFields();
         });
     };
 
@@ -178,6 +175,10 @@ export default function ManageCourse() {
             } else if (isManager) {
                 const data = await CourseManagementAPI.searchCourseByTitle(searchTerm, statusFilter);
                 setCourses(Array.isArray(data) ? data : []);
+            } else {
+                
+                const data = await CourseManagementAPI.searchCourseByTitle(searchTerm, 'Draft');
+                setCourses(Array.isArray(data) ? data : []);
             }
         } catch {
             setCourses([]);
@@ -192,8 +193,14 @@ export default function ManageCourse() {
             fetchCourses(statusFilter);
         } else {
             try {
-                const data = await CourseManagementAPI.filterCourseByTopic(topic, statusFilter);
-                setCourses(Array.isArray(data) ? data : []);
+                if (isManager) {
+                    const data = await CourseManagementAPI.filterCourseByTopic(topic, statusFilter);
+                    setCourses(Array.isArray(data) ? data : []);
+                } else {
+                    
+                    const data = await CourseManagementAPI.filterCourseByTopic(topic, 'Draft');
+                    setCourses(Array.isArray(data) ? data : []);
+                }
             } catch {
                 setCourses([]);
             }

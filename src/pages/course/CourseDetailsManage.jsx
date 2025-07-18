@@ -168,7 +168,7 @@ export default function CourseDetailsManage() {
       if (typeof apiMsg === 'string' && apiMsg.toLowerCase().includes('active')) {
         message.error('You cannot create lessons because this course is active.');
       } else {
-        message.error('Failed to create lesson');
+      message.error('Failed to create lesson');
       }
     }
   };
@@ -215,7 +215,7 @@ export default function CourseDetailsManage() {
       if (typeof apiMsg === 'string' && apiMsg.toLowerCase().includes('active')) {
         message.error('You cannot edit lessons because this course is active.');
       } else {
-        message.error('Failed to update lesson');
+      message.error('Failed to update lesson');
       }
     }
   };
@@ -247,7 +247,7 @@ export default function CourseDetailsManage() {
           if (typeof apiMsg === 'string' && apiMsg.toLowerCase().includes('active')) {
             message.error('You cannot delete lessons because this course is active.');
           } else {
-            message.error('Failed to delete lesson');
+          message.error('Failed to delete lesson');
           }
         }
       }
@@ -302,7 +302,7 @@ export default function CourseDetailsManage() {
       if (typeof apiMsg === 'string' && apiMsg.includes('already has an active survey')) {
         message.error("Each course can only have one test.");
       } else {
-        message.error('Failed to create exam');
+      message.error('Failed to create exam');
       }
     }
   };
@@ -871,7 +871,7 @@ export default function CourseDetailsManage() {
                             }}
                           >
                             Deactivate
-                          </ActionButton>
+                        </ActionButton>
                         ) : (
                           <ActionButton
                             className="activate-btn"
@@ -1094,7 +1094,7 @@ export default function CourseDetailsManage() {
           </Form.Item>
         </Form>
       </Modal>
-      {/* Modal tạo exam */}
+      {/* Modal create exam */}
       <Modal
         title="Create Exam"
         open={isCreateExamModalVisible}
@@ -1164,12 +1164,6 @@ export default function CourseDetailsManage() {
                                 style={{ flex: 1, marginBottom: 0 }}
                               >
                                 <Input placeholder={`Answer ${aidx + 1}`} />
-                              </Form.Item>
-                              <Form.Item
-                                name={[ans.name, "score"]}
-                                style={{ width: 80, marginBottom: 0 }}
-                              >
-                                <Input placeholder="Score" type="number" />
                               </Form.Item>
                               <Form.Item
                                 name={[ans.name, "isCorrect"]}
@@ -1257,12 +1251,6 @@ export default function CourseDetailsManage() {
                                 style={{ flex: 1, marginBottom: 0 }}
                               >
                                 <Input placeholder={`Answer ${aidx + 1}`} />
-                              </Form.Item>
-                              <Form.Item
-                                name={[ans.name, "score"]}
-                                style={{ width: 80, marginBottom: 0 }}
-                              >
-                                <Input placeholder="Score" type="number" />
                               </Form.Item>
                               <Form.Item
                                 name={[ans.name, "isCorrect"]}

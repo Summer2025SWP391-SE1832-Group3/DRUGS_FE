@@ -89,8 +89,10 @@ export default function SurveyResult() {
                             size="large"
                             icon={<LeftOutlined />}
                             onClick={() => {
-                              if (result.surveyType === 'CourseTest' && result.courseId) {
-                                navigate(`/courseDetailsMember/${result.courseId}`);
+                              if (result.surveyType === 'CourseTest') {
+                                const user = JSON.parse(localStorage.getItem('user'));
+                                const userId = user?.id || user?.userId;
+                                navigate(`/memberCourses/${userId}`);
                               } else {
                                 navigate('/surveyList');
                               }
@@ -104,7 +106,7 @@ export default function SurveyResult() {
                                 fontWeight: 500
                             }}
                         >
-                            {result.surveyType === 'CourseTest' ? 'Back to Course' : 'Back to Survey List'}
+                            {result.surveyType === 'CourseTest' ? 'Back to My Courses' : 'Back to Survey List'}
                         </Button>
                     </div>
                     <Title

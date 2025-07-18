@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SurveyAPI } from "../../apis/survey";
 import { CourseAPI } from '../../apis/course';
-import { Table, Space, Typography, message, Modal, Tag, List, Form, Input, Switch, Button, Select, Divider } from "antd";
+import { Table, Space, Typography, message, Modal, Tag, List, Form, Input, Switch, Button, Select, Divider, InputNumber } from "antd";
 import { ActionButton, CreateButton } from "../../components/ui/Buttons";
 import StatusTag from "../../components/ui/StatusTag";
 
@@ -86,7 +86,7 @@ export default function ManageSurvey() {
                     answersDto: q.answers.map(a => ({
                         answerText: a.answerText,
                         score: a.score,
-                        isCorrect: !!a.isCorrect
+                        isCorrect: false // luôn là false với AddictionSurvey
                     }))
                 }))
             };
@@ -106,7 +106,7 @@ export default function ManageSurvey() {
         form.setFieldsValue({
             surveyType: "AddictionSurvey",
             questions: [
-                { questionText: '', answers: [{ answerText: '', score: 0, isCorrect: false }] }
+                { questionText: '', answers: [{ answerText: '', score: 0 }] }
             ]
         });
     };
@@ -118,13 +118,12 @@ export default function ManageSurvey() {
             courseId: survey.courseId,
             surveyName: survey.surveyName,
             description: survey.description,
-            isActive: survey.isActive,
             questions: (survey.surveyQuestions || []).map(q => ({
                 questionText: q.questionText,
                 answers: (q.surveyAnswers || []).map(a => ({
                     answerText: a.answerText,
                     score: a.score,
-                    isCorrect: !!a.isCorrect
+                    isCorrect: false // luôn là false với AddictionSurvey
                 }))
             }))
         });
@@ -137,7 +136,6 @@ export default function ManageSurvey() {
                 surveyName: values.surveyName,
                 description: values.description,
                 surveyType: "AddictionSurvey",
-                isActive: values.isActive,
                 questions: values.questions.map((q, qIdx) => ({
                     questionId: updateModal.survey?.surveyQuestions?.[qIdx]?.questionId ?? 0,
                     questionText: q.questionText,
@@ -145,7 +143,7 @@ export default function ManageSurvey() {
                         answerId: updateModal.survey?.surveyQuestions?.[qIdx]?.surveyAnswers?.[aIdx]?.answerId ?? 0,
                         answerText: a.answerText,
                         score: a.score,
-                        isCorrect: !!a.isCorrect
+                        isCorrect: false // luôn là false với AddictionSurvey
                     }))
                 }))
             };
@@ -194,14 +192,29 @@ export default function ManageSurvey() {
             width: 100,
         },
         {
+            title: "Has Respondents",
+            dataIndex: "hasRespondents",
+            key: "hasRespondents",
+            render: (val) => val ? <StatusTag color="blue">Yes</StatusTag> : <StatusTag color="red">No</StatusTag>,
+            width: 120,
+        },
+        {
             title: "Actions",
             key: "actions",
             render: (_, record) => (
                 <Space>
-                    <ActionButton className="view-btn" onClick={() => handleView(record)}>
+                    <ActionButton
+                        className="view-btn"
+                        onClick={() => handleView(record)}
+                    >
                         View
                     </ActionButton>
-                    <ActionButton className="edit-btn" onClick={() => handleOpenUpdateModal(record)}>
+                    <ActionButton
+                        className="edit-btn"
+                        onClick={() => handleOpenUpdateModal(record)}
+                        disabled={record.hasRespondents}
+                        style={record.hasRespondents ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+                    >
                         Edit
                     </ActionButton>
                     <ActionButton
@@ -286,9 +299,6 @@ export default function ManageSurvey() {
                                         {typeof a.score === 'number' && (
                                             <span style={{ color: '#888', marginLeft: 8 }}>(Score: {a.score})</span>
                                         )}
-                                        {a.isCorrect && (
-                                            <Tag color="green" style={{ marginLeft: 8 }}>Correct</Tag>
-                                        )}
                                     </li>
                                 ))}
                             </ul>
@@ -339,19 +349,6 @@ export default function ManageSurvey() {
                     >
                         <Input value="AddictionSurvey" disabled />
                     </Form.Item>
-                    {surveyType === "CourseTest" && (
-                        <Form.Item
-                            label="Course"
-                            name="courseId"
-                            rules={[{ required: true, message: "Please select a course" }]}
-                        >
-                            <Select placeholder="Select a course">
-                                {courses.map(course => (
-                                    <Select.Option key={course.id} value={course.id}>{course.title}</Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    )}
                     <Form.Item
                         label="Survey Name"
                         name="surveyName"
@@ -365,14 +362,6 @@ export default function ManageSurvey() {
                         rules={[{ required: true, message: "Description is required" }]}
                     >
                         <Input.TextArea rows={3} placeholder="Enter description" />
-                    </Form.Item>
-                    <Form.Item
-                        label="Active"
-                        name="isActive"
-                        valuePropName="checked"
-                        initialValue={true}
-                    >
-                        <Switch />
                     </Form.Item>
                     <Divider />
                     <Form.List name="questions">
@@ -394,24 +383,52 @@ export default function ManageSurvey() {
                                                         <div key={ans.key} style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
                                                             <Form.Item
                                                                 name={[ans.name, "answerText"]}
-                                                                rules={[{ required: true, message: "Answer required" }]}
+                                                                rules={[
+                                                                    { required: true, message: "Answer required" },
+                                                                    ({ getFieldValue }) => ({
+                                                                        validator(_, value) {
+                                                                            const allAnswers = getFieldValue(["questions", field.name, "answers"]) || [];
+                                                                            const duplicateCount = allAnswers.filter(
+                                                                                (a, idx) => a && a.answerText === value && idx !== ans.name
+                                                                            ).length;
+                                                                            if (duplicateCount > 0) {
+                                                                                return Promise.reject("Answers in the same question must be unique.");
+                                                                            }
+                                                                            return Promise.resolve();
+                                                                        }
+                                                                    })
+                                                                ]}
                                                                 style={{ flex: 1, marginBottom: 0 }}
                                                             >
                                                                 <Input placeholder={`Answer ${aidx + 1}`} />
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "score"]}
-                                                                rules={surveyType === "CourseTest" ? [] : [{ required: true, message: "Score required" }]}
+                                                                rules={[{ required: true, message: "Score required" }, { type: "number", min: 0, max: 10, message: "Score must be between 0 and 10." }]}
                                                                 style={{ width: 100, marginBottom: 0 }}
                                                             >
-                                                                <Input type="number" placeholder="Score" style={{ width: 80 }} disabled={surveyType === "CourseTest"} />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                name={[ans.name, "isCorrect"]}
-                                                                valuePropName="checked"
-                                                                style={{ marginBottom: 0 }}
-                                                            >
-                                                                <Switch checkedChildren="Correct" unCheckedChildren="Wrong" />
+                                                                <InputNumber
+                                                                    min={0}
+                                                                    max={10}
+                                                                    style={{ width: 80 }}
+                                                                    onInput={e => {
+                                                                        const value = Number(e.target.value);
+                                                                        if (e.target.value !== "" && (value < 0 || value > 10)) {
+                                                                            message.error("Score must be between 0 and 10.");
+                                                                        }
+                                                                    }}
+                                                                    onChange={value => {
+                                                                        if (value === undefined || value === null || value === "") return;
+                                                                        if (value >= 0 && value <= 10) {
+                                                                            form.setFields([
+                                                                                {
+                                                                                    name: ["questions", field.name, "answers", ans.name, "score"],
+                                                                                    errors: []
+                                                                                }
+                                                                            ]);
+                                                                        }
+                                                                    }}
+                                                                />
                                                             </Form.Item>
                                                             {isManager && (
                                                                 <Button danger onClick={() => removeAns(ans.name)} disabled={ansFields.length <= 1} style={{ marginBottom: 0 }}>
@@ -420,7 +437,7 @@ export default function ManageSurvey() {
                                                             )}
                                                         </div>
                                                     ))}
-                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false })} block style={{ marginBottom: 8 }}>
+                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: 0 })} block style={{ marginBottom: 8 }}>
                                                         Add Answer
                                                     </Button>
                                                 </>
@@ -429,7 +446,7 @@ export default function ManageSurvey() {
                                         <Button danger onClick={() => remove(field.name)} style={{ marginTop: 8 }} disabled={fields.length <= 1}>Delete Question</Button>
                                     </div>
                                 ))}
-                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false }] })} block>
+                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: 0 }] })} block>
                                     Add Question
                                 </Button>
                             </>
@@ -458,19 +475,6 @@ export default function ManageSurvey() {
                     >
                         <Input value="AddictionSurvey" disabled />
                     </Form.Item>
-                    {surveyType === "CourseTest" && (
-                        <Form.Item
-                            label="Course"
-                            name="courseId"
-                            rules={[{ required: true, message: "Please select a course" }]}
-                        >
-                            <Select placeholder="Select a course">
-                                {courses.map(course => (
-                                    <Select.Option key={course.id} value={course.id}>{course.title}</Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    )}
                     <Form.Item
                         label="Survey Name"
                         name="surveyName"
@@ -484,14 +488,6 @@ export default function ManageSurvey() {
                         rules={[{ required: true, message: "Description is required" }]}
                     >
                         <Input.TextArea rows={3} placeholder="Enter description" />
-                    </Form.Item>
-                    <Form.Item
-                        label="Active"
-                        name="isActive"
-                        valuePropName="checked"
-                        initialValue={true}
-                    >
-                        <Switch />
                     </Form.Item>
                     <Divider />
                     <Form.List name="questions">
@@ -513,31 +509,59 @@ export default function ManageSurvey() {
                                                         <div key={ans.key} style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
                                                             <Form.Item
                                                                 name={[ans.name, "answerText"]}
-                                                                rules={[{ required: true, message: "Answer required" }]}
+                                                                rules={[
+                                                                    { required: true, message: "Answer required" },
+                                                                    ({ getFieldValue }) => ({
+                                                                        validator(_, value) {
+                                                                            const allAnswers = getFieldValue(["questions", field.name, "answers"]) || [];
+                                                                            const duplicateCount = allAnswers.filter(
+                                                                                (a, idx) => a && a.answerText === value && idx !== ans.name
+                                                                            ).length;
+                                                                            if (duplicateCount > 0) {
+                                                                                return Promise.reject("Answers in the same question must be unique.");
+                                                                            }
+                                                                            return Promise.resolve();
+                                                                        }
+                                                                    })
+                                                                ]}
                                                                 style={{ flex: 1, marginBottom: 0 }}
                                                             >
                                                                 <Input placeholder={`Answer ${aidx + 1}`} />
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "score"]}
-                                                                rules={surveyType === "CourseTest" ? [] : [{ required: true, message: "Score required" }]}
+                                                                rules={[{ required: true, message: "Score required" }, { type: "number", min: 0, max: 10, message: "Score must be between 0 and 10." }]}
                                                                 style={{ width: 100, marginBottom: 0 }}
                                                             >
-                                                                <Input type="number" placeholder="Score" style={{ width: 80 }} disabled={surveyType === "CourseTest"} />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                name={[ans.name, "isCorrect"]}
-                                                                valuePropName="checked"
-                                                                style={{ marginBottom: 0 }}
-                                                            >
-                                                                <Switch checkedChildren="Correct" unCheckedChildren="Wrong" />
+                                                                <InputNumber
+                                                                    min={0}
+                                                                    max={10}
+                                                                    style={{ width: 80 }}
+                                                                    onInput={e => {
+                                                                        const value = Number(e.target.value);
+                                                                        if (e.target.value !== "" && (value < 0 || value > 10)) {
+                                                                            message.error("Score must be between 0 and 10.");
+                                                                        }
+                                                                    }}
+                                                                    onChange={value => {
+                                                                        if (value === undefined || value === null || value === "") return;
+                                                                        if (value >= 0 && value <= 10) {
+                                                                            form.setFields([
+                                                                                {
+                                                                                    name: ["questions", field.name, "answers", ans.name, "score"],
+                                                                                    errors: []
+                                                                                }
+                                                                            ]);
+                                                                        }
+                                                                    }}
+                                                                />
                                                             </Form.Item>
                                                             <Button danger onClick={() => removeAns(ans.name)} disabled={ansFields.length <= 1} style={{ marginBottom: 0 }}>
                                                                 Delete
                                                             </Button>
                                                         </div>
                                                     ))}
-                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false })} block style={{ marginBottom: 8 }}>
+                                                    <Button type="dashed" onClick={() => addAns({ answerText: "", score: 0 })} block style={{ marginBottom: 8 }}>
                                                         Add Answer
                                                     </Button>
                                                 </>
@@ -546,7 +570,7 @@ export default function ManageSurvey() {
                                         <Button danger onClick={() => remove(field.name)} style={{ marginTop: 8 }} disabled={fields.length <= 1}>Delete Question</Button>
                                     </div>
                                 ))}
-                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: surveyType === 'CourseTest' ? null : 0, isCorrect: false }] })} block>
+                                <Button type="dashed" onClick={() => add({ questionText: "", answers: [{ answerText: "", score: 0 }] })} block>
                                     Add Question
                                 </Button>
                             </>

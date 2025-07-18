@@ -82,7 +82,7 @@ export default function Login() {
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.setItem('accessToken', response.token);
           console.log('Stored user data:', userData);
-          navigate('/profile');
+          navigate('/');
         } else {
           throw new Error('Invalid token format');
         }

@@ -200,7 +200,7 @@ export default function Navbar({ onToggleSidebar }) {
                                     aria-labelledby="resourcesDropdown"
                                     style={{ minWidth: '220px', borderRadius: '12px' }}>
                                     <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('/support')}>
+                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
                                             <div className="d-flex align-items-center">
                                                 <i className="material-symbols-rounded text-success me-2">psychology</i>
                                                 <div>
@@ -211,7 +211,7 @@ export default function Navbar({ onToggleSidebar }) {
                                         </a>
                                     </li>
                                     <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('/resources')}>
+                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
                                             <div className="d-flex align-items-center">
                                                 <i className="material-symbols-rounded text-info me-2">library_books</i>
                                                 <div>
@@ -222,7 +222,7 @@ export default function Navbar({ onToggleSidebar }) {
                                         </a>
                                     </li>
                                     <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('/stories')}>
+                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
                                             <div className="d-flex align-items-center">
                                                 <i className="material-symbols-rounded text-warning me-2">auto_stories</i>
                                                 <div>

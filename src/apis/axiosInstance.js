@@ -1,7 +1,6 @@
 // src/apis/axiosInstance.js
 import axios from "axios";
-const apiBase = "https://api-drug-be.purintech.id.vn/api";
-
+import apiBase from "./apiBase";
 
 const axiosInstance = axios.create({
   baseURL: apiBase,

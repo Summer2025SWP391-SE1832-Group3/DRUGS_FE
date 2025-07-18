@@ -10,7 +10,7 @@ export default function CourseList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searching, setSearching] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState('All');
-  const [topics, setTopics] = useState(['All', 'Awareness', 'Prevention', 'Refusal', 'CommunityEducation']); // Có thể lấy động từ API nếu cần
+  const [topics, setTopics] = useState(['All', 'Awareness', 'Prevention', 'Refusal']); // Có thể lấy động từ API nếu cần
   const navigate = useNavigate();
 
 

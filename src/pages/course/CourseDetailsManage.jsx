@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Typography, Card, Row, Col, Tag, Collapse, Modal, Form, Input, Select, message, Upload, Button, List, Switch, Divider } from 'antd';
 import { CourseAPI } from '../../apis/course';
 import { LessonAPI } from '../../apis/lesson';
-import { PlayCircleOutlined, BookOutlined, ClockCircleOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlayCircleOutlined, BookOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
 import { ActionButton, CreateButton } from '../../components/ui/Buttons';
 import { SurveyAPI } from '../../apis/survey';
 import { CourseManagementAPI } from '../../apis/courseManagement';

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { SurveyAPI } from "../../apis/survey";
-import { CourseAPI } from '../../apis/course';
 import { Table, Space, Typography, message, Modal, Tag, List, Form, Input, Switch, Button, Select, Divider, InputNumber } from "antd";
 import { ActionButton, CreateButton } from "../../components/ui/Buttons";
 import StatusTag from "../../components/ui/StatusTag";

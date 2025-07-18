@@ -19,7 +19,6 @@ import {
 } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
 import { CourseAPI } from '../../apis/course';
-import dayjs from 'dayjs';
 import { ActionButton } from '../../components/ui/Buttons';
 
 const { Title, Paragraph, Text } = Typography;

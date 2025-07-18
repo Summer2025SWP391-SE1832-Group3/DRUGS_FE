@@ -62,13 +62,13 @@ const StyledContainer = styled.div`
   min-width: 100%;
   overflow-x: hidden;
   background: linear-gradient(135deg, 
-rgb(212, 213, 221) 0%, 
-rgb(202, 196, 209) 25%, 
-rgb(217, 212, 218) 50%, 
-rgb(224, 172, 179) 75%, 
+    rgb(212, 213, 221) 0%, 
+    rgb(202, 196, 209) 25%, 
+    rgb(217, 212, 218) 50%, 
+    rgb(224, 172, 179) 75%, 
     #4facfe 100%);
   background-size: 400% 400%;
-  animation: ${gradient} 15s ease infinite;
+  /* animation: ${gradient} 15s ease infinite; */
   padding: 32px;
   position: relative;
   
@@ -106,7 +106,7 @@ const StyledHeader = styled.div`
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.1),
     0 1px 0 rgba(255, 255, 255, 0.5) inset;
-  animation: ${fadeInUp} 1s ease-out;
+  /* animation: ${fadeInUp} 1s ease-out; */
   position: relative;
   overflow: hidden;
   
@@ -123,7 +123,7 @@ const StyledHeader = styled.div`
       rgba(255, 255, 255, 0.2),
       transparent
     );
-    animation: ${shimmer} 3s infinite;
+    /* animation: ${shimmer} 3s infinite; */
   }
   
   .header-icon {
@@ -133,7 +133,7 @@ const StyledHeader = styled.div`
     -webkit-text-fill-color: transparent;
     margin-bottom: 16px;
     display: inline-block;
-    animation: ${pulse} 2s infinite;
+    /* animation: ${pulse} 2s infinite; */
   }
   
   .header-title {
@@ -165,9 +165,9 @@ const StyledBlogCard = styled(Card)`
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 1px 0 rgba(255, 255, 255, 0.5) inset;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0;
-  animation: ${slideInLeft} 0.8s ease-out forwards;
+  transition: box-shadow 0.3s;
+  /* opacity: 0; */
+  /* animation: ${slideInLeft} 0.8s ease-out forwards; */
   overflow: hidden;
   position: relative;
   
@@ -179,18 +179,18 @@ const StyledBlogCard = styled(Card)`
     right: 0;
     height: 4px;
     background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-    transform: translateX(-100%);
+    /* transform: translateX(-100%); */
     transition: transform 0.5s ease;
   }
   
   &:hover {
-    transform: translateY(-12px) scale(1.02);
+    /* transform: translateY(-12px) scale(1.02); */
     box-shadow: 
       0 20px 60px rgba(0, 0, 0, 0.15),
       0 8px 32px rgba(102, 126, 234, 0.2);
       
     &::before {
-      transform: translateX(0);
+      /* transform: translateX(0); */
     }
   }
   
@@ -550,20 +550,7 @@ export default function BlogByUserId() {
   }, [userId]);
 
   useEffect(() => {
-    if (blogs.length > 0 && !loading) {
-      setVisibleBlogs([]);
-      let current = 0;
-      const interval = setInterval(() => {
-        setVisibleBlogs(blogs.slice(0, current + 1));
-        current++;
-        if (current >= blogs.length) {
-          clearInterval(interval);
-        }
-      }, 150);
-      return () => clearInterval(interval);
-    } else if (blogs.length === 0 && visibleBlogs.length !== 0) {
-      setVisibleBlogs([]);
-    }
+    setVisibleBlogs(blogs);
   }, [blogs, loading]);
 
   const openViewModal = (blog) => {
@@ -728,13 +715,10 @@ export default function BlogByUserId() {
           />
         ) : (
           <List
-            dataSource={visibleBlogs}
-            renderItem={(blog, index) => (
+            dataSource={blogs}
+            renderItem={(blog) => (
               <StyledBlogCard
                 key={blog.blogId}
-                style={{
-                  animationDelay: `${index * 0.15}s`,
-                }}
                 title={blog.title}
                 extra={
                   <Space wrap>

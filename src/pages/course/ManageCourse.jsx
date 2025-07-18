@@ -3,7 +3,6 @@ import { CreateButton, ActionButton } from '../../components/ui/Buttons'
 import { Table, Modal, Form, Input, message, Space, Typography, Button, Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { CourseManagementAPI } from '../../apis/courseManagement';
-import { CourseAPI } from '../../apis/course';
 import StatusTag from '../../components/ui/StatusTag';
 
 const { Title, Paragraph } = Typography;

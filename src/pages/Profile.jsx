@@ -229,8 +229,8 @@ export default function Profile() {
                       paddingLeft: 24,
                       paddingRight: 24,
                       boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
-                    }}
-                  >
+              }}
+            >
                     Change Password
                   </Button>
                   {!isEditing && (
@@ -439,9 +439,9 @@ export default function Profile() {
                     paddingTop: 24,
                     borderTop: '2px solid #f3f4f6'
                   }}>
-                    <Button 
+                      <Button 
                       onClick={handleCancel}
-                      style={{
+                        style={{
                         borderRadius: 12,
                         height: 44,
                         fontSize: 16,
@@ -450,10 +450,10 @@ export default function Profile() {
                         paddingRight: 24,
                         border: '2px solid #e5e7eb',
                         background: 'white'
-                      }}
-                    >
+                        }}
+                      >
                       Cancel
-                    </Button>
+                      </Button>
                     <Button 
                       type="primary" 
                       icon={<SaveOutlined />}
@@ -473,7 +473,7 @@ export default function Profile() {
                       Save Changes
                     </Button>
                   </div>
-                )}
+                  )}
               </Form>
             </Card>
           </Col>

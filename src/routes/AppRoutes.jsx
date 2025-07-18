@@ -23,6 +23,11 @@ import CourseDetailsManage from '../pages/course/CourseDetailsManage'
 import MemberCourses from '../pages/course/MemberCourses'
 import CompletedCourse from '../pages/course/CompletedCourse'
 import SurveyHistory from '../pages/survey/SurveyHistory'
+import ConsultantList from '../pages/consultation/ConsultantList'
+import ConsultantDetails from '../pages/consultation/ConsultantDetails'
+import ManageConsultationRequests from '../pages/consultation/ManageConsultationRequests'
+import ConsultationRequests from '../pages/consultation/ConsultationRequests'
+import ConsultantProfile from '../pages/consultation/ConsultantProfile'
 
 export default function AppRoutes() {
   return (
@@ -53,6 +58,12 @@ export default function AppRoutes() {
           <Route path="survey/do/:id" element={<SubmitSurvey/>}/>
           <Route path="survey/result/:id" element={<SurveyResult/>}/>
           <Route path="surveyHistory/:userId" element={<SurveyHistory/>}/>
+          {/* Consultation */}
+          <Route path="consultants" element={<ConsultantList/>}/>
+          <Route path="consultantDetails/:id" element={<ConsultantDetails/>}/>
+          <Route path="manageConsultationRequest" element={<ManageConsultationRequests/>}/>
+          <Route path="consultationRequests" element={<ConsultationRequests/>}/>
+          <Route path="consultantProfile" element={<ConsultantProfile/>}/>
         </Route>
 
       </Routes>

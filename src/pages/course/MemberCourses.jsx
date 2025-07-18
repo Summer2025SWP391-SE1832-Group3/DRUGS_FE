@@ -46,7 +46,7 @@ export default function MemberCourses() {
                       style={{ borderRadius: 16, minHeight: 220 }}
                       extra={<Tag color="blue">In Progress</Tag>}
                     >
-                      <Typography.Paragraph ellipsis={{ rows: 4 }}>
+                      <Typography.Paragraph ellipsis={{ rows: 4 }} style={{ height: 88, overflow: 'hidden' }}>
                         {course.description}
                       </Typography.Paragraph>
                       <div style={{ marginTop: 12 }}>
@@ -79,7 +79,7 @@ export default function MemberCourses() {
                       style={{ borderRadius: 16, minHeight: 220 }}
                       extra={<Tag color="purple">Completed</Tag>}
                     >
-                      <Typography.Paragraph ellipsis={{ rows: 4 }}>
+                      <Typography.Paragraph ellipsis={{ rows: 4 }} style={{ height: 88, overflow: 'hidden' }}>
                         {course.description}
                       </Typography.Paragraph>
                       <div style={{ marginTop: 12 }}>

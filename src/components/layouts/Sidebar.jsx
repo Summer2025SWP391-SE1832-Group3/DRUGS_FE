@@ -10,6 +10,7 @@ export default function Sidebar({ open }) {
     let isManager = false;
     let isAdmin = false;
     let isMember = false;
+    let isConsultant = false;
     const userData = localStorage.getItem('user');
     if (userData) {
         try {
@@ -18,6 +19,7 @@ export default function Sidebar({ open }) {
             isManager = user && user.role === "Manager";
             isAdmin = user && user.role === "Admin";
             isMember = user && user.role === "Member";
+            isConsultant = user && user.role === "Consultant";
         } catch { }
     }
 
@@ -121,10 +123,17 @@ export default function Sidebar({ open }) {
                     <span style={{ fontSize: 15 }}>Manage Survey</span>
                 </Link>
                 )}
-                <Link to="/" className="nav-link text-white d-flex align-items-center px-3 py-2">
-                    <i className="material-symbols-rounded me-2">group</i>
-                    <span style={{ fontSize: 15 }}>Consultants</span>
-                </Link>
+                {isConsultant ? (
+                    <Link to="/consultantProfile" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                        <i className="material-symbols-rounded me-2">account_circle</i>
+                        <span style={{ fontSize: 15 }}>Consultant Profile</span>
+                    </Link>
+                ) : (
+                    <Link to="/" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                        <i className="material-symbols-rounded me-2">group</i>
+                        <span style={{ fontSize: 15 }}>Consultants</span>
+                    </Link>
+                )}
                 {isManager && (
                     <Link to="/blogManager" className="nav-link text-white d-flex align-items-center px-3 py-2">
                     <i className="material-symbols-rounded me-2">event</i>
@@ -148,6 +157,18 @@ export default function Sidebar({ open }) {
                         <i className="material-symbols-rounded me-2">history</i>
                         <span style={{ fontSize: 15 }}>Survey History</span>
                     </a>
+                )}
+                {isMember && (
+                    <Link to="/consultationRequests" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                        <i className="material-symbols-rounded me-2">group</i>
+                        <span style={{ fontSize: 15 }}>My Consultation Requests</span>
+                    </Link>
+                )}
+                {isConsultant && (
+                    <Link to="/manageConsultationRequest" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                        <i className="material-symbols-rounded me-2">assignment</i>
+                        <span style={{ fontSize: 15 }}>Consultation Requests</span>
+                    </Link>
                 )}
             </nav>
         </aside>

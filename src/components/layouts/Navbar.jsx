@@ -176,6 +176,26 @@ export default function Navbar({ onToggleSidebar }) {
                                 <i className="material-symbols-rounded" style={{ fontSize: 20 }}>post</i>
                                 Blogs
                             </a>
+                            <a
+                                onClick={() => navigate('/consultants')}
+                                style={{
+                                    minWidth: 140,
+                                    fontWeight: 600,
+                                    fontSize: 16,
+                                    color: 'white',
+                                    background: 'transparent',
+                                    padding: '8px 16px',
+                                    boxShadow: 'none',
+                                    transition: 'all 0.2s',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 2
+                                }}
+                            >
+                                <i className="material-symbols-rounded" style={{ fontSize: 20 }}>groups</i>
+                                Consultants
+                            </a>
                         </div>
                     </div>
                     {/* Right side navigation */}

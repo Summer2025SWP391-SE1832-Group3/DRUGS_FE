@@ -187,72 +187,10 @@ export default function Home() {
         <Title level={3} style={{ color: '#2c3e50', opacity: 0.9, fontWeight: 400 }}>
           Empowering communities through education, support, and prevention
         </Title>
-        <Button 
-          type="primary" 
-          size="large" 
-          style={{ 
-            background: 'linear-gradient(135deg,rgb(46, 105, 139) 0%,rgb(34, 76, 139) 50%,rgb(53, 50, 205) 100%)',
-            border: 'none',
-            color: 'white',
-            height: '48px',
-            padding: '0 32px',
-            fontSize: '16px',
-            borderRadius: '24px',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
-          }}
-          icon={<SafetyOutlined style={{ color: 'white' }} />}
-        >
-          Get Help Now
-        </Button>
+        
       </HeroCard>
       <DividerSection />
-      <StatsSection>
-        <Title level={2} style={{ textAlign: 'center', marginBottom: 48, color: '#2c3e50' }}>
-          Our Impact
-        </Title>
-        <Row gutter={[32, 32]}>
-          <Col xs={12} md={6}>
-            <StatCard>
-              <Statistic 
-                title="Communities Served" 
-                value={150} 
-                suffix="+" 
-                prefix={<TeamOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
-              />
-            </StatCard>
-          </Col>
-          <Col xs={12} md={6}>
-            <StatCard>
-              <Statistic 
-                title="Lives Impacted" 
-                value={5000} 
-                suffix="+" 
-                prefix={<HeartOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
-              />
-            </StatCard>
-          </Col>
-          <Col xs={12} md={6}>
-            <StatCard>
-              <Statistic 
-                title="Success Rate" 
-                value={95} 
-                suffix="%" 
-                prefix={<TrophyOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
-              />
-            </StatCard>
-          </Col>
-          <Col xs={12} md={6}>
-            <StatCard>
-              <Statistic 
-                title="Years of Service" 
-                value={10} 
-                suffix="+" 
-                prefix={<GlobalOutlined style={{ color: '#2c3e50', fontSize: '24px' }} />}
-              />
-            </StatCard>
-          </Col>
-        </Row>
-      </StatsSection>
+      
       <DividerSection />
       <SectionCard>
         <Title level={2} style={{ textAlign: 'center', marginBottom: 16, color: '#2c3e50' }}>
@@ -412,38 +350,7 @@ export default function Home() {
           <PhoneOutlined style={{ marginRight: '12px' }} />
           24/7 Support Hotline: 1-800-HELP-NOW
         </Title>
-        <div>
-          <Button 
-            type="default" 
-            size="large"
-            style={{ 
-              marginRight: 16, 
-              color: 'white', 
-              borderColor: 'white',
-              height: '48px',
-              padding: '0 32px',
-              fontSize: '16px',
-              borderRadius: '24px'
-            }}
-          >
-            Contact Us
-          </Button>
-          <Button 
-            type="primary" 
-            size="large"
-            style={{ 
-              backgroundColor: 'white', 
-              color: '#2c3e50',
-              height: '48px',
-              padding: '0 32px',
-              fontSize: '16px',
-              borderRadius: '24px',
-              borderColor: 'white'
-            }}
-          >
-            Find Resources
-          </Button>
-        </div>
+        
       </CallToActionSection>
     </MainContainer>
   );

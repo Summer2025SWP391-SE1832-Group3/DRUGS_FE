@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Typography, List, Collapse, Spin, Empty, Tag, Space, Divider } from 'antd';
+import { Card, Typography, List, Collapse, Spin, Empty, Tag, Space, Divider, Pagination } from 'antd';
 import { SurveyAPI } from '../../apis/survey';
 
 const { Title, Paragraph, Text } = Typography;
@@ -7,6 +7,8 @@ const { Title, Paragraph, Text } = Typography;
 export default function SurveyHistory() {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(5);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -24,6 +26,19 @@ export default function SurveyHistory() {
     };
     fetchHistory();
   }, []);
+
+  // Calculate pagination
+  const totalItems = results.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentPageData = results.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (loading) {
     return (
@@ -98,6 +113,14 @@ export default function SurveyHistory() {
         >
           Your completed surveys and results
         </Text>
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: 16,
+          color: '#8c8c8c',
+          fontSize: 14
+        }}>
+          Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} surveys
+        </div>
       </Card>
 
       <Card 
@@ -115,7 +138,7 @@ export default function SurveyHistory() {
             border: 'none'
           }}
         >
-          {results.map((result, index) => (
+          {currentPageData.map((result, index) => (
             <Collapse.Panel
               header={
                 <div style={{ 
@@ -158,7 +181,7 @@ export default function SurveyHistory() {
               }
               key={result.surveyResultId}
               style={{
-                marginBottom: index < results.length - 1 ? 16 : 0,
+                marginBottom: index < currentPageData.length - 1 ? 16 : 0,
                 border: '1px solid #f0f0f0',
                 borderRadius: 8,
                 backgroundColor: '#fff'
@@ -290,6 +313,40 @@ export default function SurveyHistory() {
           ))}
         </Collapse>
       </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Card 
+          style={{ 
+            marginTop: 24,
+            borderRadius: 12,
+            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+            border: 'none'
+          }}
+        >
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            padding: '16px 0'
+          }}>
+            <Pagination
+              current={currentPage}
+              total={totalItems}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              showSizeChanger={false}
+              showQuickJumper
+              showTotal={(total, range) => 
+                `${range[0]}-${range[1]} of ${total} surveys`
+              }
+              style={{
+                fontSize: 14
+              }}
+            />
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

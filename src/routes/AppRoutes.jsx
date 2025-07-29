@@ -42,11 +42,13 @@ export default function AppRoutes() {
           <Route path="accountListAdmin" element={<AccountListAdmin/>}/>
           {/* Course */}
           <Route path="courseList" element={<CourseList/>}/>
+          <Route path="courseList/:topic" element={<CourseList/>}/>
           <Route path="manageCourse" element={<ManageCourse/>}/>
           <Route path="courseDetailsMember/:id" element={<CourseDetailsMember/>}/>
           <Route path="courseDetailsManage/:id" element={<CourseDetailsManage/>}/>
           <Route path="completedCourse/:id" element={<CompletedCourse/>}/>
           <Route path="memberCourses/:userId" element={<MemberCourses/>}/>
+          
           {/* Blog */}
           <Route path="blogManager" element={<BlogManager/>}/>
           <Route path="blogList" element={<BlogList/>}/>

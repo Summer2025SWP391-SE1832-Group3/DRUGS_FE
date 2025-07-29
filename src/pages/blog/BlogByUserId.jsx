@@ -792,6 +792,10 @@ export default function BlogByUserId() {
                 </BlogContent>
               </StyledBlogCard>
             )}
+            pagination={{
+              pageSize: 5,
+              showSizeChanger: false,
+            }}
           />
         )}
 

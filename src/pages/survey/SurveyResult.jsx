@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SurveyAPI } from '../../apis/survey';
 import { Card, Typography, List, Divider, Spin, Button, Row, Col, Space } from 'antd';
-import { ClockCircleOutlined, UserOutlined, TrophyOutlined, BulbOutlined, LeftOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, UserOutlined, TrophyOutlined, BulbOutlined, LeftOutlined, BookOutlined } from '@ant-design/icons';
 import StatusTag from '../../components/ui/StatusTag';
 
 const { Title, Paragraph, Text } = Typography;
@@ -12,6 +12,44 @@ export default function SurveyResult() {
     const navigate = useNavigate();
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    // Hàm để extract topic từ recommendation
+    const extractTopicFromRecommendation = (recommendation) => {
+        if (!recommendation) return null;
+        
+        // Các topic có thể có
+        const topics = ['Awareness', 'Prevention', 'Refusal'];
+        
+        // Chuyển recommendation về lowercase để so sánh
+        const lowerRecommendation = recommendation.toLowerCase();
+        
+        for (const topic of topics) {
+            // Kiểm tra nhiều pattern khác nhau
+            if (lowerRecommendation.includes(topic.toLowerCase()) ||
+                lowerRecommendation.includes(topic.toLowerCase() + ' course') ||
+                lowerRecommendation.includes(topic.toLowerCase() + ' courses') ||
+                lowerRecommendation.includes('recommend: ' + topic.toLowerCase()) ||
+                lowerRecommendation.includes('recommendation: ' + topic.toLowerCase())) {
+                return topic;
+            }
+        }
+        
+        return null;
+    };
+
+    // Hàm để navigate đến course với topic
+    const navigateToCourseWithTopic = (recommendation) => {
+        const topic = extractTopicFromRecommendation(recommendation);
+        console.log('Recommendation:', recommendation);
+        console.log('Extracted topic:', topic);
+        
+        if (topic) {
+            navigate(`/courseList/${encodeURIComponent(topic)}`);
+        } else {
+            // Nếu không tìm thấy topic cụ thể, navigate đến courseList chung
+            navigate('/courseList');
+        }
+    };
 
     useEffect(() => {
         const fetchResult = async () => {
@@ -169,10 +207,44 @@ export default function SurveyResult() {
                     <Col xs={24} sm={12}>
                         <Space align="start" style={{ width: '100%' }}>
                             <BulbOutlined style={{ color: '#722ed1', fontSize: '1.1rem' }} />
-                            <div>
+                            <div style={{ width: '100%' }}>
                                 <Text strong style={{ color: '#595959' }}>{result.surveyType === 'CourseTest' ? 'Result' : 'Recommendation'}</Text>
                                 <br />
                                 <Text style={{ fontSize: '1rem' }}>{result.surveyType === "CourseTest" ? result.resultStatus : result.recommendation}</Text>
+                                
+                                {/* Thêm button navigate đến course nếu có recommendation và không phải CourseTest */}
+                                {result.surveyType !== 'CourseTest' && 
+                                 result.recommendation && 
+                                 extractTopicFromRecommendation(result.recommendation) && (
+                                    <div style={{ marginTop: '0.5rem' }}>
+                                        <Button
+                                            type="primary"
+                                            size="small"
+                                            icon={<BookOutlined />}
+                                            onClick={() => navigateToCourseWithTopic(result.recommendation)}
+                                            title={`View courses related to ${extractTopicFromRecommendation(result.recommendation)} topic`}
+                                            style={{
+                                                borderRadius: '6px',
+                                                fontSize: '0.9rem',
+                                                height: '32px',
+                                                background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                                                border: 'none',
+                                                boxShadow: '0 2px 8px rgba(24,144,255,0.3)',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                            onMouseOver={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(24,144,255,0.4)';
+                                            }}
+                                            onMouseOut={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(24,144,255,0.3)';
+                                            }}
+                                        >
+                                            View Recommended Courses
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </Space>
                     </Col>

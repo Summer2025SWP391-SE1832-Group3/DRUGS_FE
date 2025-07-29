@@ -2,31 +2,56 @@ import React, { useEffect, useState } from 'react'
 import { Card, Row, Col, Empty, Typography, Input, Button, message, Select, Spin } from 'antd'
 import { CourseAPI } from '../../apis/course';
 import { ActionButton } from '../../components/ui/Buttons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function CourseList() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [searching, setSearching] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState('All');
+  const [selectedTopic, setSelectedTopic] = useState(null); // Không set default value
   const [topics, setTopics] = useState(['All', 'Awareness', 'Prevention', 'Refusal']); // Có thể lấy động từ API nếu cần
   const navigate = useNavigate();
+  const { topic } = useParams();
 
+  // Khởi tạo selectedTopic từ URL params
+  useEffect(() => {
+    if (topic) {
+      const decodedTopic = decodeURIComponent(topic);
+      if (topics.includes(decodedTopic)) {
+        setSelectedTopic(decodedTopic);
+      } else {
+        // Nếu topic không hợp lệ, reset về All và navigate về /courseList
+        setSelectedTopic('All');
+        navigate('/courseList');
+      }
+    } else {
+      // Nếu không có topic trong URL, set về All
+      setSelectedTopic('All');
+    }
+  }, [topic, topics, navigate]);
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const data = await CourseAPI.getAllCourses();
-        setCourses(data);
-      } catch {
-        setCourses([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCourses();
-  }, []);
+    // Chỉ fetch courses khi selectedTopic đã được khởi tạo đúng
+    if (selectedTopic !== null) {
+      const fetchCourses = async () => {
+        try {
+          if (selectedTopic === 'All') {
+            const data = await CourseAPI.getAllCourses();
+            setCourses(data);
+          } else {
+            const data = await CourseAPI.filterByTopic(selectedTopic);
+            setCourses(data);
+          }
+        } catch {
+          setCourses([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCourses();
+    }
+  }, [selectedTopic]);
 
   let isMember = false;
   let isStaffOrManager = false;
@@ -43,8 +68,14 @@ export default function CourseList() {
     setSearching(true);
     try {
       if (searchTerm.trim() === "") {
-        const data = await CourseAPI.getAllCourses();
-        setCourses(data);
+        // Reset về topic hiện tại khi search rỗng
+        if (selectedTopic === 'All' || selectedTopic === null) {
+          const data = await CourseAPI.getAllCourses();
+          setCourses(data);
+        } else {
+          const data = await CourseAPI.filterByTopic(selectedTopic);
+          setCourses(data);
+        }
       } else {
         const data = await CourseAPI.searchCourseByTitle(searchTerm);
         setCourses(data);
@@ -56,9 +87,27 @@ export default function CourseList() {
     }
   };
 
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    // Reset về topic hiện tại khi clear search
+    if (selectedTopic === 'All' || selectedTopic === null) {
+      CourseAPI.getAllCourses().then(data => setCourses(data)).catch(() => setCourses([]));
+    } else {
+      CourseAPI.filterByTopic(selectedTopic).then(data => setCourses(data)).catch(() => setCourses([]));
+    }
+  };
+
   const handleFilter = async (topic) => {
     setSelectedTopic(topic);
     setLoading(true);
+    
+    // Cập nhật URL theo topic được chọn
+    if (topic === 'All') {
+      navigate('/courseList');
+    } else {
+      navigate(`/courseList/${encodeURIComponent(topic)}`);
+    }
+    
     try {
       if (topic === 'All') {
         const data = await CourseAPI.getAllCourses();
@@ -161,7 +210,7 @@ export default function CourseList() {
               transition: 'all 0.3s ease',
               flex: 1
             }}
-            allowClear
+            allowClear={{ clearIcon: <span onClick={handleClearSearch}>✕</span> }}
             disabled={searching}
             onFocus={(e) => {
               e.target.style.borderColor = '#1890ff';
@@ -199,7 +248,7 @@ export default function CourseList() {
             Search
           </Button>
           <Select
-            value={selectedTopic}
+            value={selectedTopic || undefined}
             onChange={handleFilter}
             style={{
               width: 180,

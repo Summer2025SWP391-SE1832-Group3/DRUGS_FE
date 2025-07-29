@@ -198,62 +198,10 @@ export default function Navbar({ onToggleSidebar }) {
                             </a>
                         </div>
                     </div>
-                    {/* Right side navigation */}
                     <div className="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                         <ul className="ms-md-auto pe-md-3 d-flex align-items-center navbar-nav justify-content-end">
                             
-                            {/* Support Resources Dropdown */}
-                            <li className="nav-item dropdown me-2">
-                                <a 
-                                    className="nav-link text-white p-2 d-flex align-items-center"
-                                    id="resourcesDropdown"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    style={{ cursor: 'pointer', borderRadius: '8px' }}
-                                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                                >
-                                    <i className="material-symbols-rounded me-1">support_agent</i>
-                                    <span className="d-none d-lg-inline">Support</span>
-                                </a>
-                                <ul className="dropdown-menu dropdown-menu-end p-2 border-0 shadow-lg" 
-                                    aria-labelledby="resourcesDropdown"
-                                    style={{ minWidth: '220px', borderRadius: '12px' }}>
-                                    <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
-                                            <div className="d-flex align-items-center">
-                                                <i className="material-symbols-rounded text-success me-2">psychology</i>
-                                                <div>
-                                                    <h6 className="text-sm font-weight-bold mb-0">Counseling</h6>
-                                                    <small className="text-muted">Professional support</small>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
-                                            <div className="d-flex align-items-center">
-                                                <i className="material-symbols-rounded text-info me-2">library_books</i>
-                                                <div>
-                                                    <h6 className="text-sm font-weight-bold mb-0">Resources</h6>
-                                                    <small className="text-muted">Educational materials</small>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
-                                            <div className="d-flex align-items-center">
-                                                <i className="material-symbols-rounded text-warning me-2">auto_stories</i>
-                                                <div>
-                                                    <h6 className="text-sm font-weight-bold mb-0">Success Stories</h6>
-                                                    <small className="text-muted">Real experiences</small>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                            
 
                             {/* Profile */}
                             <li className="nav-item me-2">
@@ -286,7 +234,7 @@ export default function Navbar({ onToggleSidebar }) {
                                     aria-labelledby="settingsDropdown"
                                     style={{ minWidth: '180px', borderRadius: '12px' }}>
                                     <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('/settings')}>
+                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
                                             <div className="d-flex align-items-center">
                                                 <i className="material-symbols-rounded text-secondary me-2">settings</i>
                                                 <span className="font-weight-bold">Settings</span>

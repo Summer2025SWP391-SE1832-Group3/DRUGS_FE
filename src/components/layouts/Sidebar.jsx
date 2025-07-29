@@ -101,10 +101,12 @@ export default function Sidebar({ open }) {
             }}
         >
             <nav className="nav flex-column mt-2">
-                <Link to="/profile" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                {(isMember || isManager || isStaff) && ( 
+                    <Link to="/profile" className="nav-link text-white d-flex align-items-center px-3 py-2">
                     <i className="material-symbols-rounded me-2">account_circle</i>
                     <span style={{ fontSize: 15 }}>Profile</span>
                 </Link>
+                )}
                 {isAdmin && (
                     <Link to="/accountListAdmin" className="nav-link text-white d-flex align-items-center px-3 py-2">
                     <i className="material-symbols-rounded me-2">group</i>
@@ -129,7 +131,7 @@ export default function Sidebar({ open }) {
                         <span style={{ fontSize: 15 }}>Consultant Profile</span>
                     </Link>
                 ) : (
-                    <Link to="/" className="nav-link text-white d-flex align-items-center px-3 py-2">
+                    <Link to="/consultants" className="nav-link text-white d-flex align-items-center px-3 py-2">
                         <i className="material-symbols-rounded me-2">group</i>
                         <span style={{ fontSize: 15 }}>Consultants</span>
                     </Link>

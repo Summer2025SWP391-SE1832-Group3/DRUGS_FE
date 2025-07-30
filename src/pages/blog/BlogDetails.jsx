@@ -235,7 +235,6 @@ export default function BlogDetails() {
               <CalendarOutlined />
               <Text>{new Date(blog.postedAt).toLocaleDateString()}</Text>
             </Space>
-            <StyledTag color="blue">{blog.status}</StyledTag>
           </Space>
         </StyledMeta>
 

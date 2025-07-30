@@ -14,35 +14,6 @@ export default function Navbar({ onToggleSidebar }) {
         window.location.reload();
     };
 
-    // Function to get page name based on current path
-    const getPageName = () => {
-        const path = location.pathname;
-        
-        switch (path) {
-            case '/':
-                return 'Home';
-            case '/login':
-                return 'Login';
-            case '/register':
-                return 'Join Community';
-            case '/profile':
-                return 'My Profile';
-            case '/resources':
-                return 'Resources';
-            
-            default:
-                if (path.startsWith('/resources/')) {
-                    return 'Resources';
-                }
-                if (path.startsWith('/education/')) {
-                    return 'Education Center';
-                }
-                return 'Prevention Hub';
-        }
-    };
-
-    const currentPageName = getPageName();
-
     return (
         <>
             <nav

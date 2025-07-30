@@ -2,9 +2,6 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Header() {
-    const preventDefault = (e) => {
-        e.preventDefault();
-    };
     const navigate = useNavigate();
     return (
         <>
@@ -69,11 +66,30 @@ export default function Header() {
                                 // borderRadius: 30,
                                 padding: '8px 20px',
                                 boxShadow: 'none',
-                                transition: 'all 0.2s',
+                                transition: 'all 0.3s ease',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 2
+                                gap: 2,
+                                borderRadius: '8px',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.background = 'rgba(255,255,255,0.15)';
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(255,255,255,0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.background = 'transparent';
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = 'none';
+                            }}
+                            onMouseDown={(e) => {
+                                e.target.style.transform = 'translateY(0px) scale(0.98)';
+                            }}
+                            onMouseUp={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
                             }}
                         >
                             <i className="material-symbols-rounded" style={{ fontSize: 20 }}>dashboard</i>
@@ -91,11 +107,30 @@ export default function Header() {
                                 // borderRadius: 30,
                                 padding: '8px 28px',
                                 boxShadow: 'none',
-                                transition: 'all 0.2s',
+                                transition: 'all 0.3s ease',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 2
+                                gap: 2,
+                                borderRadius: '8px',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.background = 'rgba(255,255,255,0.15)';
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(255,255,255,0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.background = 'transparent';
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = 'none';
+                            }}
+                            onMouseDown={(e) => {
+                                e.target.style.transform = 'translateY(0px) scale(0.98)';
+                            }}
+                            onMouseUp={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
                             }}
                         >
                             <i className="material-symbols-rounded" style={{ fontSize: 20 }}>post</i>
@@ -103,7 +138,7 @@ export default function Header() {
                         </a>
                     </div>
                     {/* Nút Courses, All Blogs, Login/Register */}
-                    <div className="d-flex align-items-center mb-0 pb-0 pt-1 px-0">
+                    <div className="d-flex mb-0 pb-0 pt-1 px-0">
                         <a
                             className="btn btn-success btn-sm"
                             onClick={() => navigate('/login')}
@@ -128,6 +163,53 @@ export default function Header() {
                 }
                 .navbar-main .btn:active {
                     transform: scale(0.98);
+                }
+
+                /* Custom hover effects for navigation links */
+                .nav-link-custom {
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .nav-link-custom::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                    transition: left 0.5s;
+                }
+
+                .nav-link-custom:hover::before {
+                    left: 100%;
+                }
+
+                /* Smooth transitions for all interactive elements */
+                * {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                /* Enhanced button press effect */
+                .nav-link-custom:active {
+                    transform: scale(0.95) translateY(1px);
+                }
+
+                /* Logo hover effect */
+                .navbar-brand:hover {
+                    transform: scale(1.02);
+                    transition: transform 0.2s ease;
+                }
+
+                /* Button hover effects */
+                .btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                }
+
+                .btn:active {
+                    transform: translateY(0) scale(0.98);
                 }
             `}</style>
         </>

@@ -44,7 +44,13 @@ export default function SurveyResult() {
         console.log('Extracted topic:', topic);
         
         if (topic) {
-            navigate(`/courseList/${encodeURIComponent(topic)}`);
+            if (topic && topic.toLowerCase().includes('refusal')) {
+                // Nếu topic là Refusal, navigate đến consultants
+                navigate('/consultants');
+            } else {
+                // Các topic khác navigate đến courseList với topic
+                navigate(`/courseList/${encodeURIComponent(topic)}`);
+            }
         } else {
             // Nếu không tìm thấy topic cụ thể, navigate đến courseList chung
             navigate('/courseList');
@@ -217,32 +223,79 @@ export default function SurveyResult() {
                                  result.recommendation && 
                                  extractTopicFromRecommendation(result.recommendation) && (
                                     <div style={{ marginTop: '0.5rem' }}>
-                                        <Button
-                                            type="primary"
-                                            size="small"
-                                            icon={<BookOutlined />}
-                                            onClick={() => navigateToCourseWithTopic(result.recommendation)}
-                                            title={`View courses related to ${extractTopicFromRecommendation(result.recommendation)} topic`}
-                                            style={{
-                                                borderRadius: '6px',
-                                                fontSize: '0.9rem',
-                                                height: '32px',
-                                                background: 'linear-gradient(135deg, #1890ff, #722ed1)',
-                                                border: 'none',
-                                                boxShadow: '0 2px 8px rgba(24,144,255,0.3)',
-                                                transition: 'all 0.3s ease'
-                                            }}
-                                            onMouseOver={(e) => {
-                                                e.currentTarget.style.transform = 'translateY(-1px)';
-                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(24,144,255,0.4)';
-                                            }}
-                                            onMouseOut={(e) => {
-                                                e.currentTarget.style.transform = 'translateY(0)';
-                                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(24,144,255,0.3)';
-                                            }}
-                                        >
-                                            View Recommended Courses
-                                        </Button>
+                                        <Space size="small" style={{ width: '100%' }}>
+                                            {/* Button cho courses */}
+                                            <Button
+                                                type="primary"
+                                                size="small"
+                                                icon={<BookOutlined />}
+                                                onClick={() => {
+                                                    const topic = extractTopicFromRecommendation(result.recommendation);
+                                                    if (topic) {
+                                                        navigate(`/courseList/${encodeURIComponent(topic)}`);
+                                                    } else {
+                                                        navigate('/courseList');
+                                                    }
+                                                }}
+                                                title={`View courses related to ${extractTopicFromRecommendation(result.recommendation)} topic`}
+                                                style={{
+                                                    borderRadius: '6px',
+                                                    fontSize: '0.9rem',
+                                                    height: '32px',
+                                                    background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                                                    border: 'none',
+                                                    boxShadow: '0 2px 8px rgba(24,144,255,0.3)',
+                                                    transition: 'all 0.3s ease',
+                                                    flex: 1
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(24,144,255,0.4)';
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.transform = 'translateY(0)';
+                                                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(24,144,255,0.3)';
+                                                }}
+                                            >
+                                                View Recommended Courses
+                                            </Button>
+                                            
+                                            {/* Button cho consultants nếu có refusal */}
+                                            {result.recommendation.toLowerCase().includes('refusal') && (
+                                                <Button
+                                                    type="default"
+                                                    size="small"
+                                                    icon={<UserOutlined />}
+                                                    onClick={() => navigate('/consultants')}
+                                                    title="Get consultation from experts"
+                                                    style={{
+                                                        borderRadius: '6px',
+                                                        fontSize: '0.9rem',
+                                                        height: '32px',
+                                                        background: 'rgba(255,255,255,0.9)',
+                                                        border: '2px solid #1890ff',
+                                                        color: '#1890ff',
+                                                        boxShadow: '0 2px 8px rgba(24,144,255,0.2)',
+                                                        transition: 'all 0.3s ease',
+                                                        flex: 1
+                                                    }}
+                                                    onMouseOver={(e) => {
+                                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(24,144,255,0.3)';
+                                                        e.currentTarget.style.background = '#1890ff';
+                                                        e.currentTarget.style.color = 'white';
+                                                    }}
+                                                    onMouseOut={(e) => {
+                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(24,144,255,0.2)';
+                                                        e.currentTarget.style.background = 'rgba(255,255,255,0.9)';
+                                                        e.currentTarget.style.color = '#1890ff';
+                                                    }}
+                                                >
+                                                    Get Expert Consultation
+                                                </Button>
+                                            )}
+                                        </Space>
                                     </div>
                                 )}
                             </div>

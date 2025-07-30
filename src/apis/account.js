@@ -10,11 +10,6 @@ export const AccountAPI =  {
     },
 
     login: (value) => {
-        axios.post("https://localhost:7045/api/Account/login",
-            value
-        )
-        .then((response)=> {
-            console.log(response)
-        })
-    } 
+    return axios.post(`${apiBase}/Account/login`, value);
+}
 }

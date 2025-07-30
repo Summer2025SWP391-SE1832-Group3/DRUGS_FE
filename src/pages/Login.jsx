@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { Form, Input, Button, Card, message } from 'antd'
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { BlogAPI } from '../apis/blog';
+import { AccountAPI } from '../apis/account';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -10,22 +11,33 @@ export default function Login() {
   useEffect(() => {
     BlogAPI.getAll();
   },[])
-  const fakeAccount = {
-    userName: 'anhvu',
-    password: '1'
-  }
+  const onFinishFailed = (errorInfo) => {
+    console.log('Login failed:', errorInfo);
+  };
+
   const onFinish = (values) => {
-    if (values.username === fakeAccount.userName && values.password === fakeAccount.password) {
+    // Gọi API login
+    AccountAPI.login({
+    userName: values.username,    // đúng tên field backend yêu cầu
+    password: values.password
+  })
+      .then(response => {
+      // Xử lý đăng nhập thành công
       message.success('Login successfully!');
       setIsLoggedIn(true);
       navigate('/profile');
-    } else {
-      message.error('Login failed! Please enter again your information.');
-    }
-  }
-  const onFinishFailed = errorInfo => {
-    console.log('Failed:', errorInfo);
-  };
+      // Có thể lưu token nếu backend trả về
+      // localStorage.setItem('token', response.data.token)
+    })
+    .catch(error => {
+      // Xử lý lỗi đăng nhập
+      if (error.response && error.response.data && error.response.data.message) {
+        message.error(error.response.data.message);
+      } else {
+        message.error('Login failed! Please enter again your information.');
+      }
+    });
+};
 
   return (
     <div style={{

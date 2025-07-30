@@ -1,6 +1,5 @@
 import axios from "axios"
-
-export default apiBase = "https://localhost:7045/api"
+const apiBase = "https://localhost:7045/api"
 export const BlogAPI = {
     getAll: () => {
         const result = axios.get(`${apiBase}/Blog`)
@@ -10,3 +9,5 @@ export const BlogAPI = {
         return result
     }
 }
+
+export default apiBase

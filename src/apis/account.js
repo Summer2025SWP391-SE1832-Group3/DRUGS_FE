@@ -62,5 +62,22 @@ export const AccountAPI =  {
         } catch (error) {
             handleError(error, "Error changing password:");
         }
+    },
+
+    checkUsernameExists: async (username, token) => {
+        try {
+            const { data } = await axios.get(`${apiBase}/Account/check-username/${username}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return data;
+        } catch (error) {
+            // Return the error response data instead of throwing
+            if (error.response && error.response.data) {
+                return error.response.data;
+            }
+            throw error;
+        }
     }
 }

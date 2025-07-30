@@ -191,13 +191,6 @@ export default function ManageSurvey() {
             width: 100,
         },
         {
-            title: "Has Respondents",
-            dataIndex: "hasRespondents",
-            key: "hasRespondents",
-            render: (val) => val ? <StatusTag color="blue">Yes</StatusTag> : <StatusTag color="red">No</StatusTag>,
-            width: 120,
-        },
-        {
             title: "Actions",
             key: "actions",
             render: (_, record) => (

@@ -19,6 +19,27 @@ export default function ManageCourse() {
     const [searching, setSearching] = useState(false);
     const [topicFilter, setTopicFilter] = useState('All');
 
+    // Add event listeners to handle scroll issues
+    useEffect(() => {
+        const handleSelectOpen = () => {
+            document.body.style.overflow = 'hidden';
+        };
+        
+        const handleSelectClose = () => {
+            document.body.style.overflow = '';
+        };
+
+        // Listen for select dropdown events
+        document.addEventListener('ant-select-dropdown-open', handleSelectOpen);
+        document.addEventListener('ant-select-dropdown-close', handleSelectClose);
+
+        return () => {
+            document.removeEventListener('ant-select-dropdown-open', handleSelectOpen);
+            document.removeEventListener('ant-select-dropdown-close', handleSelectClose);
+            document.body.style.overflow = '';
+        };
+    }, []);
+
     let isManager = false;
     const userdata = localStorage.getItem('user');
     if (userdata) {
@@ -187,6 +208,7 @@ export default function ManageCourse() {
     };
 
     const handleTopicFilter = async (topic) => {
+        console.log('Topic filter changed to:', topic); // Debug log
         setTopicFilter(topic);
         if (topic === 'All') {
             fetchCourses(statusFilter);
@@ -301,6 +323,15 @@ export default function ManageCourse() {
                             value={statusFilter}
                             onChange={value => setStatusFilter(value)}
                             style={{ width: 120 }}
+                            getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                            dropdownStyle={{ zIndex: 9999 }}
+                            onDropdownVisibleChange={(open) => {
+                                if (open) {
+                                    document.body.style.overflow = 'hidden';
+                                } else {
+                                    document.body.style.overflow = '';
+                                }
+                            }}
                         >
                             <Select.Option value="">All</Select.Option>
                             <Select.Option value="Active">Active</Select.Option>
@@ -312,6 +343,15 @@ export default function ManageCourse() {
                         value={topicFilter}
                         onChange={handleTopicFilter}
                         style={{ width: 150 }}
+                        getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                        dropdownStyle={{ zIndex: 9999 }}
+                        onDropdownVisibleChange={(open) => {
+                            if (open) {
+                                document.body.style.overflow = 'hidden';
+                            } else {
+                                document.body.style.overflow = '';
+                            }
+                        }}
                     >
                         <Select.Option value="All">All Topics</Select.Option>
                         <Select.Option value="Awareness">Awareness</Select.Option>
@@ -361,6 +401,91 @@ export default function ManageCourse() {
         .ant-btn {
           font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
         }
+        
+        /* Fix dropdown issues */
+        .ant-select-dropdown {
+          z-index: 9999 !important;
+          position: absolute !important;
+          overflow: visible !important;
+        }
+        .ant-select-selector {
+          z-index: 1 !important;
+        }
+        .ant-select-focused .ant-select-selector {
+          z-index: 2 !important;
+        }
+        /* Ensure dropdown options are visible */
+        .ant-select-item {
+          position: relative !important;
+          z-index: 1 !important;
+        }
+        /* Override any conflicting CSS */
+        .ant-select-dropdown .ant-select-item-option {
+          background: white !important;
+          color: #333 !important;
+        }
+        .ant-select-dropdown .ant-select-item-option:hover {
+          background: #f5f5f5 !important;
+        }
+        /* Ensure container doesn't clip dropdown */
+        .ant-select {
+          position: relative !important;
+          z-index: 1 !important;
+        }
+        /* Fix modal dropdown issues */
+        .ant-modal .ant-select-dropdown {
+          z-index: 10000 !important;
+        }
+        .ant-modal .ant-select {
+          z-index: 1 !important;
+        }
+        /* Ensure all dropdowns are visible */
+        .ant-select-dropdown:not(.ant-select-dropdown-hidden) {
+          display: block !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+        /* Fix scroll issues */
+        .ant-select-dropdown {
+          overflow: visible !important;
+          overflow-x: visible !important;
+          overflow-y: visible !important;
+        }
+        /* Prevent unwanted scroll on body when dropdown opens */
+        body.ant-select-dropdown-open {
+          overflow: hidden !important;
+        }
+        /* Ensure dropdown container doesn't cause scroll */
+        .ant-select-dropdown .ant-select-dropdown-menu {
+          overflow: visible !important;
+          max-height: none !important;
+        }
+        /* Fix any container overflow issues */
+        .ant-select {
+          overflow: visible !important;
+        }
+        /* Ensure parent containers don't clip dropdown */
+        .ant-select-dropdown {
+          position: fixed !important;
+          z-index: 9999 !important;
+        }
+        /* Fix container overflow issues */
+        .ant-select-dropdown .ant-select-dropdown-menu-container {
+          overflow: visible !important;
+        }
+        /* Ensure the main container doesn't cause scroll */
+        .ant-select-dropdown {
+          transform: none !important;
+          transition: none !important;
+        }
+        /* Prevent any unwanted scrollbars */
+        .ant-select-dropdown .ant-select-dropdown-menu {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+        .ant-select-dropdown .ant-select-dropdown-menu::-webkit-scrollbar {
+          display: none !important;
+        }
       `}</style>
             <Modal
                 title={isEditMode ? 'Edit Course' : 'Create New Course'}
@@ -394,7 +519,18 @@ export default function ManageCourse() {
                         name="topic"
                         rules={[{ required: true, message: 'Please select the course topic!' }]}
                     >
-                        <Select placeholder="Select topic">
+                        <Select 
+                            placeholder="Select topic"
+                            getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                            dropdownStyle={{ zIndex: 9999 }}
+                            onDropdownVisibleChange={(open) => {
+                                if (open) {
+                                    document.body.style.overflow = 'hidden';
+                                } else {
+                                    document.body.style.overflow = '';
+                                }
+                            }}
+                        >
                             <Select.Option value="Awareness">Awareness</Select.Option>
                             <Select.Option value="Prevention">Prevention</Select.Option>
                             <Select.Option value="Refusal">Refusal</Select.Option>

@@ -19,22 +19,28 @@ export default function Profile() {
     if (userId && token) {
       AccountAPI.getAccountById(userId, token).then(data => {
         if (data) {
-          setUserInfo({
+          const userData = {
             fullName: data.fullName || '',
             username: data.userName || '',
             email: data.email || '',
             phone: data.phoneNumber || '',
             dateOfBirth: data.dateOfBirth ? dayjs(data.dateOfBirth).format('DD/MM/YYYY') : '',
             gender: data.gender || ''
-          });
-          setTempUserInfo({
-            fullName: data.fullName || '',
-            username: data.userName || '',
-            email: data.email || '',
-            phone: data.phoneNumber || '',
-            dateOfBirth: data.dateOfBirth ? dayjs(data.dateOfBirth).format('DD/MM/YYYY') : '',
-            gender: data.gender || ''
-          });
+          };
+          setUserInfo(userData);
+          setTempUserInfo(userData);
+          
+          // Set form values if in edit mode
+          if (isEditing) {
+            form.setFieldsValue({
+              fullName: userData.fullName,
+              username: userData.username,
+              email: userData.email,
+              phone: userData.phone,
+              dateOfBirth: userData.dateOfBirth ? dayjs(userData.dateOfBirth, 'DD/MM/YYYY') : null,
+              gender: userData.gender
+            });
+          }
         }
       });
     }
@@ -43,6 +49,15 @@ export default function Profile() {
   const handleEdit = () => {
     setIsEditing(true);
     setTempUserInfo({...userInfo});
+    // Set form values when entering edit mode
+    form.setFieldsValue({
+      fullName: userInfo.fullName,
+      username: userInfo.username,
+      email: userInfo.email,
+      phone: userInfo.phone,
+      dateOfBirth: userInfo.dateOfBirth ? dayjs(userInfo.dateOfBirth, 'DD/MM/YYYY') : null,
+      gender: userInfo.gender
+    });
   };
 
   const handleSave = async () => {
@@ -50,6 +65,23 @@ export default function Profile() {
       await form.validateFields();
       const user = JSON.parse(localStorage.getItem('user'));
       const token = localStorage.getItem('accessToken');
+      
+      // Kiểm tra nếu username đã thay đổi
+      if (tempUserInfo.username !== userInfo.username) {
+        try {
+          const usernameCheck = await AccountAPI.checkUsernameExists(tempUserInfo.username, token);
+          if (usernameCheck && usernameCheck.length > 0) {
+            const error = usernameCheck.find(err => err.description === "UserName is already taken");
+            if (error) {
+              message.error('Username is already taken!');
+              return;
+            }
+          }
+        } catch (usernameError) {
+          console.log('Username check error:', usernameError);
+        }
+      }
+      
       // Chuẩn bị dữ liệu gửi lên API
       const updateData = {
         userName: tempUserInfo.username,
@@ -59,6 +91,7 @@ export default function Profile() {
         gender: tempUserInfo.gender,
         email: tempUserInfo.email
       };
+      
       await AccountAPI.updateProfile(updateData, token);
       message.success('Profile updated successfully!');
       setIsEditing(false);
@@ -87,6 +120,17 @@ export default function Profile() {
         });
       }
     } catch (error) {
+      // Kiểm tra nếu lỗi từ API có chứa thông báo về username
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        if (Array.isArray(errorData)) {
+          const usernameError = errorData.find(err => err.description === "UserName is already taken");
+          if (usernameError) {
+            message.error('Username is already taken!');
+            return;
+          }
+        }
+      }
       message.error('Failed to update profile!');
       console.log('Validation failed:', error);
     }
@@ -96,6 +140,15 @@ export default function Profile() {
     setTempUserInfo({...userInfo});
     setIsEditing(false);
     form.resetFields();
+    // Reset form values to current user info
+    form.setFieldsValue({
+      fullName: userInfo.fullName,
+      username: userInfo.username,
+      email: userInfo.email,
+      phone: userInfo.phone,
+      dateOfBirth: userInfo.dateOfBirth ? dayjs(userInfo.dateOfBirth, 'DD/MM/YYYY') : null,
+      gender: userInfo.gender
+    });
   };
 
   const handleInputChange = (field, value) => {
@@ -270,11 +323,11 @@ export default function Profile() {
                         { required: true, message: 'Please enter your full name!' },
                         { min: 2, message: 'Name must be at least 2 characters!' }
                       ]} 
-                      initialValue={tempUserInfo.fullName}
                     >
                       {isEditing ? (
                         <Input 
                           placeholder="Enter your full name" 
+                          value={tempUserInfo.fullName}
                           onChange={e => handleInputChange('fullName', e.target.value)}
                           style={{
                             borderRadius: 12,
@@ -298,11 +351,11 @@ export default function Profile() {
                         { min: 4, message: 'Username must be at least 4 characters!' },
                         { pattern: /^[a-zA-Z0-9_]+$/, message: 'Username can only contain letters, numbers and underscore!' }
                       ]} 
-                      initialValue={tempUserInfo.username}
                     >
                       {isEditing ? (
                         <Input 
                           placeholder="Enter username" 
+                          value={tempUserInfo.username}
                           onChange={e => handleInputChange('username', e.target.value)}
                           style={{
                             borderRadius: 12,
@@ -327,11 +380,11 @@ export default function Profile() {
                         { required: true, message: 'Please enter your email!' },
                         { type: 'email', message: 'Please enter a valid email address!' }
                       ]} 
-                      initialValue={tempUserInfo.email}
                     >
                       {isEditing ? (
                         <Input 
                           placeholder="Enter your email" 
+                          value={tempUserInfo.email}
                           onChange={e => handleInputChange('email', e.target.value)}
                           style={{
                             borderRadius: 12,
@@ -354,11 +407,11 @@ export default function Profile() {
                         { required: true, message: 'Please enter your phone number!' },
                         { pattern: /^[0-9]{10}$/, message: 'Phone number must be 10 digits!' }
                       ]} 
-                      initialValue={tempUserInfo.phone}
                     >
                       {isEditing ? (
                         <Input 
                           placeholder="Enter your phone number" 
+                          value={tempUserInfo.phone}
                           onChange={e => handleInputChange('phone', e.target.value)}
                           style={{
                             borderRadius: 12,
@@ -382,7 +435,6 @@ export default function Profile() {
                       rules={[
                         { required: true, message: 'Please select your date of birth!' }
                       ]} 
-                      initialValue={tempUserInfo.dateOfBirth ? dayjs(tempUserInfo.dateOfBirth, 'DD/MM/YYYY') : null}
                     >
                       {isEditing ? (
                         <DatePicker 
@@ -394,6 +446,7 @@ export default function Profile() {
                             border: '2px solid #e1e5e9'
                           }}
                           format="DD/MM/YYYY"
+                          value={tempUserInfo.dateOfBirth ? dayjs(tempUserInfo.dateOfBirth, 'DD/MM/YYYY') : null}
                           onChange={date => handleInputChange('dateOfBirth', date ? date.format('DD/MM/YYYY') : '')}
                           disabledDate={current => current && current > dayjs().endOf('day')}
                         />
@@ -409,7 +462,6 @@ export default function Profile() {
                       rules={[
                         { required: true, message: 'Please select your gender!' }
                       ]} 
-                      initialValue={tempUserInfo.gender}
                     >
                       {isEditing ? (
                         <Select
@@ -417,6 +469,7 @@ export default function Profile() {
                             height: 44,
                             fontSize: 15
                           }}
+                          value={tempUserInfo.gender}
                           onChange={value => handleInputChange('gender', value)}
                           options={[
                             { value: 'Male', label: 'Male' },

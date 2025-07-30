@@ -80,11 +80,8 @@ export default function CourseDetailsMember() {
 
   if (loading) return <div style={{ textAlign: 'center', padding: '80px 0' }}><Spin size="large" /></div>;
   if (!course) return <div>Course not found</div>;
-
-  const welcomeText = 'Take a look at the science of how addictive drugs affect your body and why substance addiction can be so difficult to treat.';
-  const author = 'Judy Grisel From TED Ed';
+ 
   const type = course?.topic || '';
-  const duration = '30 minutes to complete';
   const lessonCount = course?.lessions?.length || 0;
 
   return (
@@ -109,16 +106,6 @@ export default function CourseDetailsMember() {
           position: 'relative',
           zIndex: 1
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {[...Array(5)].map((_, i) => (
-                <StarFilled key={i} style={{ color: '#ffd700', fontSize: '16px', marginRight: '2px' }} />
-              ))}
-              <Text style={{ color: 'rgba(255,255,255,0.8)', marginLeft: '8px', fontSize: '14px' }}>
-                4.8 (2,847 reviews)
-              </Text>
-            </div>
-          </div>
           <Title
             level={1}
             style={{
@@ -141,53 +128,7 @@ export default function CourseDetailsMember() {
                 ? 'Completed' : 'In Progress'}
             </Tag>
           )}
-          <Paragraph style={{
-            fontSize: '20px',
-            color: 'rgba(255,255,255,0.9)',
-            marginBottom: '32px',
-            lineHeight: '1.6',
-            maxWidth: '800px'
-          }}>
-            {welcomeText}
-          </Paragraph>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            padding: '20px',
-            borderRadius: '12px',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)'
-          }}>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '16px'
-            }}>
-              <UserOutlined style={{ fontSize: '24px', color: 'white' }} />
-            </div>
-            <div>
-              <Text style={{
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: '14px',
-                display: 'block'
-              }}>
-                Course Instructor
-              </Text>
-              <Text style={{
-                color: 'white',
-                fontSize: '18px',
-                fontWeight: '600'
-              }}>
-                {author}
-              </Text>
-            </div>
-          </div>
+          
         </div>
       </div>
       {/* Main Content */}
@@ -241,12 +182,6 @@ export default function CourseDetailsMember() {
                     <BookOutlined style={{ fontSize: '20px', marginRight: '8px' }} />
                     <Text style={{ color: 'white', fontSize: '16px', fontWeight: '600' }}>
                       {lessonCount} Lessons
-                    </Text>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-                    <ClockCircleOutlined style={{ fontSize: '20px', marginRight: '8px' }} />
-                    <Text style={{ color: 'white', fontSize: '16px', fontWeight: '600' }}>
-                      {duration}
                     </Text>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>

@@ -179,7 +179,7 @@ export default function CompletedCourse() {
 
           <Row gutter={[24, 24]}>
             {(course.lessons || []).map((lesson, index) => (
-              <Col xs={24} sm={12} lg={8} key={lesson.id}>
+              <Col xs={24} key={lesson.id}>
                 <Card
                   hoverable
                   style={{ 
@@ -244,7 +244,7 @@ export default function CompletedCourse() {
                       <div style={{ 
                         position: 'relative',
                         background: '#f5f5f5',
-                        height: 140,
+                        height: "500px",
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -252,7 +252,7 @@ export default function CompletedCourse() {
                         <PlayCircleOutlined style={{ fontSize: 48, color: '#1890ff' }} />
                         <video 
                           width="100%" 
-                          height="140" 
+                          height="500px"
                           controls 
                           src={lesson.videoUrl}
                           style={{ 
@@ -270,9 +270,7 @@ export default function CompletedCourse() {
                     <Tag color={lesson.isCompleted ? 'success' : 'default'} style={{ fontWeight: 600 }}>
                       {lesson.isCompleted ? 'Completed' : 'Not Completed'}
                     </Tag>
-                    <Tag color={lesson.isActive ? 'processing' : 'default'}>
-                      {lesson.isActive ? 'Active' : 'Inactive'}
-                    </Tag>
+                    
                   </div>
                 </Card>
               </Col>

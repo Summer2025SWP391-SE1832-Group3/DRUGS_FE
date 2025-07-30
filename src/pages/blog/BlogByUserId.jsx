@@ -340,11 +340,9 @@ const StyledModal = styled(Modal)`
       height: 44px;
       line-height: 44px;
       background: rgba(255, 255, 255, 0.9);
-      border-radius: 50%;
       transition: all 0.3s ease;
       
       &:hover {
-        background: rgba(239, 68, 68, 0.1);
         color: #ef4444;
       }
     }

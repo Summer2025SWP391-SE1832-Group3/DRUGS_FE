@@ -29,18 +29,7 @@ export default function Navbar({ onToggleSidebar }) {
                 return 'My Profile';
             case '/resources':
                 return 'Resources';
-            case '/education':
-                return 'Education Center';
-            case '/support':
-                return 'Support & Help';
-            case '/stories':
-                return 'Recovery Stories';
-            case '/events':
-                return 'Events & Programs';
-            case '/contact':
-                return 'Contact Us';
-            case '/crisis':
-                return 'Crisis Help';
+            
             default:
                 if (path.startsWith('/resources/')) {
                     return 'Resources';
@@ -122,11 +111,30 @@ export default function Navbar({ onToggleSidebar }) {
                                     // borderRadius: 30,
                                     padding: '8px 10px',
                                     boxShadow: 'none',
-                                    transition: 'all 0.2s',
+                                    transition: 'all 0.3s ease',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 2
+                                    gap: 2,
+                                    borderRadius: '8px',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'rgba(255,255,255,0.15)';
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 4px 12px rgba(255,255,255,0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'transparent';
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                                onMouseDown={(e) => {
+                                    e.target.style.transform = 'translateY(0px) scale(0.98)';
+                                }}
+                                onMouseUp={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
                                 }}
                             >
                                 <i className="material-symbols-rounded" style={{ fontSize: 20}}>quiz</i>
@@ -144,11 +152,30 @@ export default function Navbar({ onToggleSidebar }) {
                                     // borderRadius: 30,
                                     padding: '8px 10px',
                                     boxShadow: 'none',
-                                    transition: 'all 0.2s',
+                                    transition: 'all 0.3s ease',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 2
+                                    gap: 2,
+                                    borderRadius: '8px',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'rgba(255,255,255,0.15)';
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 4px 12px rgba(255,255,255,0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'transparent';
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                                onMouseDown={(e) => {
+                                    e.target.style.transform = 'translateY(0px) scale(0.98)';
+                                }}
+                                onMouseUp={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
                                 }}
                             >
                                 <i className="material-symbols-rounded" style={{ fontSize: 20}}>dashboard</i>
@@ -166,11 +193,30 @@ export default function Navbar({ onToggleSidebar }) {
                                     // borderRadius: 30,
                                     padding: '8px 16px',
                                     boxShadow: 'none',
-                                    transition: 'all 0.2s',
+                                    transition: 'all 0.3s ease',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 2
+                                    gap: 2,
+                                    borderRadius: '8px',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'rgba(255,255,255,0.15)';
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 4px 12px rgba(255,255,255,0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'transparent';
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                                onMouseDown={(e) => {
+                                    e.target.style.transform = 'translateY(0px) scale(0.98)';
+                                }}
+                                onMouseUp={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
                                 }}
                             >
                                 <i className="material-symbols-rounded" style={{ fontSize: 20 }}>post</i>
@@ -186,11 +232,30 @@ export default function Navbar({ onToggleSidebar }) {
                                     background: 'transparent',
                                     padding: '8px 16px',
                                     boxShadow: 'none',
-                                    transition: 'all 0.2s',
+                                    transition: 'all 0.3s ease',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 2
+                                    gap: 2,
+                                    borderRadius: '8px',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'rgba(255,255,255,0.15)';
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 4px 12px rgba(255,255,255,0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'transparent';
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                                onMouseDown={(e) => {
+                                    e.target.style.transform = 'translateY(0px) scale(0.98)';
+                                }}
+                                onMouseUp={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
                                 }}
                             >
                                 <i className="material-symbols-rounded" style={{ fontSize: 20 }}>groups</i>
@@ -201,12 +266,10 @@ export default function Navbar({ onToggleSidebar }) {
                     <div className="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                         <ul className="ms-md-auto pe-md-3 d-flex align-items-center navbar-nav justify-content-end">
                             
-                            
-
                             {/* Profile */}
                             <li className="nav-item me-2">
                                 <a
-                                    className="nav-link text-white p-2 d-flex align-items-center"
+                                    className="nav-link text-white p-2"
                                     onClick={() => navigate('/profile')}
                                     style={{ cursor: 'pointer', borderRadius: '8px' }}
                                     onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
@@ -233,15 +296,6 @@ export default function Navbar({ onToggleSidebar }) {
                                 <ul className="dropdown-menu dropdown-menu-end p-2 border-0 shadow-lg" 
                                     aria-labelledby="settingsDropdown"
                                     style={{ minWidth: '180px', borderRadius: '12px' }}>
-                                    <li>
-                                        <a className="dropdown-item border-radius-md py-2" onClick={() => navigate('#')}>
-                                            <div className="d-flex align-items-center">
-                                                <i className="material-symbols-rounded text-secondary me-2">settings</i>
-                                                <span className="font-weight-bold">Settings</span>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li><hr className="dropdown-divider my-2" /></li>
                                     <li>
                                         <a className="dropdown-item border-radius-md py-2" onClick={e => { e.preventDefault(); handleLogout(); }}>
                                             <div className="d-flex align-items-center">
@@ -288,6 +342,37 @@ export default function Navbar({ onToggleSidebar }) {
                 .navbar-brand:hover {
                     transform: scale(1.02);
                     transition: transform 0.2s ease;
+                }
+
+                /* Custom hover effects for navigation links */
+                .nav-link-custom {
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .nav-link-custom::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                    transition: left 0.5s;
+                }
+
+                .nav-link-custom:hover::before {
+                    left: 100%;
+                }
+
+                /* Smooth transitions for all interactive elements */
+                * {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                /* Enhanced button press effect */
+                .nav-link-custom:active {
+                    transform: scale(0.95) translateY(1px);
                 }
             `}</style>
         </>

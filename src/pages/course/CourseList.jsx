@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Row, Col, Empty, Typography, Input, Button, message, Select, Spin } from 'antd'
+import { Card, Row, Col, Empty, Typography, Input, Button, message, Select, Spin, Modal } from 'antd'
 import { CourseAPI } from '../../apis/course';
 import { ActionButton } from '../../components/ui/Buttons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -11,6 +11,8 @@ export default function CourseList() {
   const [searching, setSearching] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(null); // Không set default value
   const [topics, setTopics] = useState(['All', 'Awareness', 'Prevention', 'Refusal']); // Có thể lấy động từ API nếu cần
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const navigate = useNavigate();
   const { topic } = useParams();
 
@@ -100,14 +102,14 @@ export default function CourseList() {
   const handleFilter = async (topic) => {
     setSelectedTopic(topic);
     setLoading(true);
-    
+
     // Cập nhật URL theo topic được chọn
     if (topic === 'All') {
       navigate('/courseList');
     } else {
       navigate(`/courseList/${encodeURIComponent(topic)}`);
     }
-    
+
     try {
       if (topic === 'All') {
         const data = await CourseAPI.getAllCourses();
@@ -141,6 +143,16 @@ export default function CourseList() {
     } catch {
       message.error('Enroll course failed!');
     }
+  };
+
+  const handleCardClick = (course) => {
+    setSelectedCourse(course);
+    setModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    setSelectedCourse(null);
   };
 
   return (
@@ -185,7 +197,7 @@ export default function CourseList() {
           Discover knowledge, skills, and support for a better future
         </Typography.Text>
 
-        {/* Improved Search Bar + Filter */}
+        {/* Improved Search Bar */}
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -247,129 +259,58 @@ export default function CourseList() {
           >
             Search
           </Button>
-          <Select
-            value={selectedTopic || undefined}
-            onChange={handleFilter}
-            style={{
-              width: 180,
-              height: 52,
-              fontSize: '16px',
-              fontWeight: 500,
-              fontFamily: 'inherit'
-            }}
-            dropdownStyle={{
-              borderRadius: '16px',
-              overflow: 'hidden',
-              background: 'rgba(255,255,255,0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
-            }}
-            options={topics.map(t => ({
-              label: (
-                <span style={{
-                  fontSize: '15px',
-                  fontWeight: 500,
-                  color: '#333',
-                  fontFamily: 'inherit'
-                }}>
-                  {t}
-                </span>
-              ),
-              value: t
-            }))}
-            placeholder="Filter by topic"
-            suffixIcon={
-              <div style={{
-                width: '20px',
-                height: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#666'
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            }
-            // Custom styles for Select component
-            styles={{
-              selector: (provided) => ({
-                ...provided,
-                height: '52px !important',
-                borderRadius: '16px !important',
-                border: '2px solid rgba(255,255,255,0.3) !important',
-                background: 'rgba(255,255,255,0.9) !important',
-                backdropFilter: 'blur(10px) !important',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.08) !important',
-                transition: 'all 0.3s ease !important',
-                fontSize: '16px !important',
-                fontWeight: '500 !important',
-                color: '#333 !important',
-                display: 'flex !important',
-                alignItems: 'center !important',
-                cursor: 'pointer !important'
-              }),
-              control: (provided, state) => ({
-                ...provided,
-                height: '52px',
-                borderRadius: '16px',
-                border: state.isFocused
-                  ? '2px solid #1890ff'
-                  : '2px solid rgba(255,255,255,0.3)',
-                background: 'rgba(255,255,255,0.9)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: state.isFocused
-                  ? '0 8px 32px rgba(24,144,255,0.15)'
-                  : '0 8px 24px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                fontSize: '16px',
-                fontWeight: '500',
-                color: '#333',
-                cursor: 'pointer',
-                '&:hover': {
-                  borderColor: '#1890ff',
-                  boxShadow: '0 8px 32px rgba(24,144,255,0.15)',
-                  transform: 'translateY(-1px)'
-                }
-              }),
-              singleValue: (provided) => ({
-                ...provided,
-                fontSize: '16px',
-                fontWeight: '500',
-                color: '#333',
-                fontFamily: 'inherit'
-              }),
-              placeholder: (provided) => ({
-                ...provided,
-                fontSize: '16px',
-                fontWeight: '400',
-                color: '#999',
-                fontFamily: 'inherit'
-              }),
-              option: (provided, state) => ({
-                ...provided,
-                fontSize: '15px',
-                fontWeight: '500',
-                color: state.isSelected ? '#fff' : '#333',
-                backgroundColor: state.isSelected
+        </div>
+
+        {/* Topic Filter Buttons */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '12px',
+          marginTop: '24px',
+          flexWrap: 'wrap'
+        }}>
+          {topics.map((topic) => (
+            <Button
+              key={topic}
+              type={selectedTopic === topic ? "primary" : "default"}
+              onClick={() => handleFilter(topic)}
+              style={{
+                height: '44px',
+                padding: '0 20px',
+                fontSize: '14px',
+                fontWeight: 600,
+                borderRadius: '12px',
+                border: selectedTopic === topic ? 'none' : '2px solid rgba(255,255,255,0.3)',
+                background: selectedTopic === topic
                   ? 'linear-gradient(135deg, #1890ff, #722ed1)'
-                  : state.isFocused
-                    ? 'rgba(24,144,255,0.1)'
-                    : 'transparent',
-                padding: '12px 20px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                fontFamily: 'inherit',
-                '&:hover': {
-                  backgroundColor: state.isSelected
-                    ? 'linear-gradient(135deg, #1890ff, #722ed1)'
-                    : 'rgba(24,144,255,0.1)'
+                  : 'rgba(255,255,255,0.9)',
+                color: selectedTopic === topic ? 'white' : '#333',
+                backdropFilter: 'blur(10px)',
+                boxShadow: selectedTopic === topic
+                  ? '0 8px 24px rgba(24,144,255,0.3)'
+                  : '0 4px 16px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                fontFamily: 'inherit'
+              }}
+              onMouseOver={(e) => {
+                if (selectedTopic !== topic) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(24,144,255,0.2)';
+                  e.currentTarget.style.borderColor = '#1890ff';
                 }
-              })
-            }}
-          />
+              }}
+              onMouseOut={(e) => {
+                if (selectedTopic !== topic) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                }
+              }}
+            >
+              {topic}
+            </Button>
+          ))}
         </div>
       </div>
 
@@ -422,6 +363,7 @@ export default function CourseList() {
                     transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     display: 'flex',
                     flexDirection: 'column',
+                    cursor: 'pointer'
                   }}
                   styles={{
                     body: {
@@ -432,6 +374,7 @@ export default function CourseList() {
                       fontFamily: 'inherit'
                     }
                   }}
+                  onClick={() => handleCardClick(item)}
                   onMouseOver={(e) => {
                     e.currentTarget.style.transform = 'translateY(-8px)';
                     e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
@@ -457,7 +400,9 @@ export default function CourseList() {
                         letterSpacing: '-0.01em',
                         fontFamily: 'inherit',
                         height: 60
-                      }}>
+                      }}
+                        ellipsis={{ rows: 2 }}
+                      >
                         {item.course.title}
                       </Typography.Title>
 
@@ -555,7 +500,10 @@ export default function CourseList() {
                           letterSpacing: '0.02em',
                           fontFamily: 'inherit'
                         }}
-                        onClick={() => navigate(`/CourseDetailsManage/${item.course.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/CourseDetailsManage/${item.course.id}`);
+                        }}
                       >
                         View Course Details
                       </ActionButton>
@@ -571,7 +519,10 @@ export default function CourseList() {
                           letterSpacing: '0.02em',
                           fontFamily: 'inherit'
                         }}
-                        onClick={() => handleEnroll(item.course.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEnroll(item.course.id);
+                        }}
                       >
                         Enroll
                       </ActionButton>
@@ -587,7 +538,10 @@ export default function CourseList() {
                           letterSpacing: '0.02em',
                           fontFamily: 'inherit'
                         }}
-                        onClick={() => navigate(`/CompletedCourse/${item.course.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/CompletedCourse/${item.course.id}`);
+                        }}
                       >
                         View Course Details
                       </ActionButton>
@@ -603,7 +557,10 @@ export default function CourseList() {
                           letterSpacing: '0.02em',
                           fontFamily: 'inherit'
                         }}
-                        onClick={() => navigate(`/CourseDetailsMember/${item.course.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/CourseDetailsMember/${item.course.id}`);
+                        }}
                       >
                         Continue studying
                       </ActionButton>
@@ -615,6 +572,239 @@ export default function CourseList() {
           </Row>
         </div>
       )}
+
+      {/* Course Details Modal */}
+      <Modal
+        title={
+          <div style={{
+            textAlign: 'center',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: '#1a1a1a'
+          }}>
+            Course Details
+          </div>
+        }
+        open={modalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={600}
+        centered
+        styles={{
+          body: {
+            padding: '32px',
+            fontSize: '16px',
+            lineHeight: '1.6'
+          },
+          mask: {
+            backdropFilter: 'blur(8px)'
+          }
+        }}
+      >
+        {selectedCourse && (
+          <div style={{ fontFamily: 'inherit' }}>
+            {/* Title */}
+            <div style={{ marginBottom: '24px' }}>
+              <Typography.Title level={3} style={{
+                color: '#1a1a1a',
+                fontWeight: 700,
+                margin: '0 0 8px 0',
+                fontSize: '1.4rem'
+              }}>
+                {selectedCourse.course.title}
+              </Typography.Title>
+            </div>
+
+            {/* Description */}
+            <div style={{ marginBottom: '24px' }}>
+              <Typography.Title level={5} style={{
+                color: '#666',
+                fontWeight: 600,
+                margin: '0 0 12px 0',
+                fontSize: '1rem'
+              }}>
+                Description
+              </Typography.Title>
+              <Typography.Paragraph style={{
+                color: '#555',
+                fontSize: '1rem',
+                lineHeight: '1.7',
+                margin: 0,
+                textAlign: 'justify'
+              }}>
+                {selectedCourse.course.description}
+              </Typography.Paragraph>
+            </div>
+
+            {/* Topic */}
+            <div style={{ marginBottom: '24px' }}>
+              <Typography.Title level={5} style={{
+                color: '#666',
+                fontWeight: 600,
+                margin: '0 0 12px 0',
+                fontSize: '1rem'
+              }}>
+                Topic
+              </Typography.Title>
+              <div style={{
+                display: 'inline-block',
+                background: 'linear-gradient(135deg, #52c41a, #389e0d)',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {selectedCourse.course.topic || 'General'}
+              </div>
+            </div>
+
+            {/* Status (only for members) */}
+            {isMember && (
+              <div style={{ marginBottom: '24px' }}>
+                <Typography.Title level={5} style={{
+                  color: '#666',
+                  fontWeight: 600,
+                  margin: '0 0 12px 0',
+                  fontSize: '1rem'
+                }}>
+                  Status
+                </Typography.Title>
+                <div style={{
+                  display: 'inline-block',
+                  background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  {selectedCourse.status}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              marginTop: '32px',
+              justifyContent: 'center'
+            }}>
+              {isStaffOrManager ? (
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModalClose();
+                    navigate(`/CourseDetailsManage/${selectedCourse.course.id}`);
+                  }}
+                  style={{
+                    height: '48px',
+                    padding: '0 32px',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                    border: 'none',
+                    boxShadow: '0 4px 16px rgba(24,144,255,0.3)'
+                  }}
+                >
+                  View Course Details
+                </Button>
+              ) : selectedCourse.status === "NotEnrolled" ? (
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModalClose();
+                    handleEnroll(selectedCourse.course.id);
+                  }}
+                  style={{
+                    height: '48px',
+                    padding: '0 32px',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                    border: 'none',
+                    boxShadow: '0 4px 16px rgba(24,144,255,0.3)'
+                  }}
+                >
+                  Enroll Now
+                </Button>
+              ) : selectedCourse.status === "Completed" ? (
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModalClose();
+                    navigate(`/CompletedCourse/${selectedCourse.course.id}`);
+                  }}
+                  style={{
+                    height: '48px',
+                    padding: '0 32px',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                    border: 'none',
+                    boxShadow: '0 4px 16px rgba(24,144,255,0.3)'
+                  }}
+                >
+                  View Course Details
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModalClose();
+                    navigate(`/CourseDetailsMember/${selectedCourse.course.id}`);
+                  }}
+                  style={{
+                    height: '48px',
+                    padding: '0 32px',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #1890ff, #722ed1)',
+                    border: 'none',
+                    boxShadow: '0 4px 16px rgba(24,144,255,0.3)'
+                  }}
+                >
+                  Continue Studying
+                </Button>
+              )}
+              
+              <Button
+                size="large"
+                onClick={handleModalClose}
+                style={{
+                  height: '48px',
+                  padding: '0 32px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  borderRadius: '12px',
+                  border: '2px solid #1890ff',
+                  color: '#1890ff',
+                  background: 'transparent'
+                }}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

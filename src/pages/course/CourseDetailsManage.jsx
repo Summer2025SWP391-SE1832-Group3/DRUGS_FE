@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Card, Row, Col, Tag, Collapse, Modal, Form, Input, Select, message, Upload, Button, List, Switch, Divider } from 'antd';
+import { Typography, Card, Row, Col, Tag, Collapse, Modal, Form, Input, Select, message, Upload, Button, List, Switch, Divider, Spin } from 'antd';
 import { CourseAPI } from '../../apis/course';
 import { LessonAPI } from '../../apis/lesson';
 import { PlayCircleOutlined, BookOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
@@ -53,6 +53,8 @@ export default function CourseDetailsManage() {
   const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null); // 'activate' | 'deactivate'
+  const [enrollmentLoading, setEnrollmentLoading] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   let isManager = false;
   let isStaff = false;
@@ -399,12 +401,15 @@ export default function CourseDetailsManage() {
 
   const showEnrollmentModal = async () => {
     try {
+      setEnrollmentLoading(true);
       const res = await CourseManagementAPI.getLessonProgressReport(id);
       setEnrollmentDetails(res.reports || []);
       setIsEnrollmentModalVisible(true);
     } catch (error) {
       setEnrollmentDetails([]);
       setIsEnrollmentModalVisible(true);
+    } finally {
+      setEnrollmentLoading(false);
     }
   };
 
@@ -414,12 +419,15 @@ export default function CourseDetailsManage() {
 
   const showFeedbackModal = async () => {
     try {
+      setFeedbackLoading(true);
       const res = await CourseManagementAPI.getAllFeedback(id);
       setFeedbackDetails(Array.isArray(res) ? res : []);
       setIsFeedbackModalVisible(true);
     } catch (error) {
       setFeedbackDetails([]);
       setIsFeedbackModalVisible(true);
+    } finally {
+      setFeedbackLoading(false);
     }
   };
 
@@ -427,8 +435,124 @@ export default function CourseDetailsManage() {
     setIsFeedbackModalVisible(false);
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (!courseDetail) return <div>Course not found</div>;
+  if (loading) return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      flexDirection: 'column',
+      gap: '24px'
+    }}>
+      <div style={{
+        background: 'rgba(255,255,255,0.1)',
+        borderRadius: '20px',
+        padding: '40px',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '20px'
+      }}>
+        <Spin 
+          size="large" 
+          style={{ 
+            color: 'white',
+            '--antd-wave-shadow-color': 'rgba(255,255,255,0.3)'
+          }}
+        />
+        <div style={{
+          color: 'white',
+          fontSize: '18px',
+          fontWeight: '600',
+          textAlign: 'center'
+        }}>
+          Loading Course Details...
+        </div>
+        <div style={{
+          color: 'rgba(255,255,255,0.8)',
+          fontSize: '14px',
+          textAlign: 'center'
+        }}>
+          Please wait while we fetch the course information
+        </div>
+      </div>
+    </div>
+  );
+  if (!courseDetail) return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      flexDirection: 'column',
+      gap: '24px'
+    }}>
+      <div style={{
+        background: 'rgba(255,255,255,0.1)',
+        borderRadius: '20px',
+        padding: '40px',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '20px',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '16px'
+        }}>
+          <BookOutlined style={{ fontSize: '40px', color: 'white' }} />
+        </div>
+        <div style={{
+          color: 'white',
+          fontSize: '24px',
+          fontWeight: '700',
+          marginBottom: '8px'
+        }}>
+          Course Not Found
+        </div>
+        <div style={{
+          color: 'rgba(255,255,255,0.8)',
+          fontSize: '16px',
+          maxWidth: '400px',
+          lineHeight: '1.5'
+        }}>
+          The course you're looking for doesn't exist or has been removed.
+        </div>
+        <Button 
+          type="primary" 
+          size="large"
+          style={{
+            marginTop: '16px',
+            background: 'rgba(255,255,255,0.2)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '12px',
+            height: '48px',
+            padding: '0 32px',
+            fontSize: '16px',
+            fontWeight: '600'
+          }}
+          onClick={() => window.history.back()}
+        >
+          Go Back
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -611,7 +735,7 @@ export default function CourseDetailsManage() {
                     <div style={{ fontSize: '16px', opacity: 0.9, marginBottom: '4px' }}>
                       Completed
                     </div>
-                    <div style={{ fontSize: '14px', opacity: 0.8 }}>
+                    <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '12px' }}>
                       {courseStats.pendingCount} Pending
                     </div>
                   </div>
@@ -1300,6 +1424,25 @@ export default function CourseDetailsManage() {
         footer={null}
         width={800}
       >
+        {enrollmentLoading ? (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '200px',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            <Spin size="large" />
+            <div style={{
+              color: '#666',
+              fontSize: '16px',
+              fontWeight: '500'
+            }}>
+              Loading enrollment details...
+            </div>
+          </div>
+        ) : (
         <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
           <List
             dataSource={enrollmentDetails}
@@ -1392,6 +1535,7 @@ export default function CourseDetailsManage() {
             )}
           />
         </div>
+        )}
       </Modal>
       {/* Feedback Details Modal */}
       <Modal 
@@ -1401,6 +1545,25 @@ export default function CourseDetailsManage() {
         footer={null} 
         width={800}
       >
+        {feedbackLoading ? (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '200px',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            <Spin size="large" />
+            <div style={{
+              color: '#666',
+              fontSize: '16px',
+              fontWeight: '500'
+            }}>
+              Loading feedback details...
+            </div>
+          </div>
+        ) : (
         <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
           <List 
             dataSource={feedbackDetails} 
@@ -1496,6 +1659,7 @@ export default function CourseDetailsManage() {
             )} 
           />
         </div>
+        )}
       </Modal>
       {/* Modal xác nhận cho Activate/Deactivate */}
       <Modal

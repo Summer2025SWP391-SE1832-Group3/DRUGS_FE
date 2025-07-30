@@ -187,49 +187,10 @@ export default function Home() {
         <Title level={3} style={{ color: '#2c3e50', opacity: 0.9, fontWeight: 400 }}>
           Empowering communities through education, support, and prevention
         </Title>
-        
       </HeroCard>
-      <DividerSection />
       
       <DividerSection />
-      <SectionCard>
-        <Title level={2} style={{ textAlign: 'center', marginBottom: 16, color: '#2c3e50' }}>
-          Our Services
-        </Title>
-        <Paragraph style={{ textAlign: 'center', marginBottom: 48, fontSize: '18px', color: '#6c757d' }}>
-          Comprehensive support and resources for drug prevention and community wellness
-        </Paragraph>
-        <Row gutter={[32, 32]}>
-          <Col xs={24} md={8}>
-            <StyledCard>
-              <BookOutlined className="service-icon" />
-              <Title level={4}>Education & Awareness</Title>
-              <Paragraph>
-                Access comprehensive resources and educational materials about drug prevention and healthy lifestyle choices.
-              </Paragraph>
-            </StyledCard>
-          </Col>
-          <Col xs={24} md={8}>
-            <StyledCard>
-              <TeamOutlined className="service-icon" />
-              <Title level={4}>Support Network</Title>
-              <Paragraph>
-                Connect with trained professionals and peer support groups for guidance and assistance.
-              </Paragraph>
-            </StyledCard>
-          </Col>
-          <Col xs={24} md={8}>
-            <StyledCard>
-              <SafetyOutlined className="service-icon" />
-              <Title level={4}>Crisis Intervention</Title>
-              <Paragraph>
-                Immediate support and resources for those in need of urgent assistance.
-              </Paragraph>
-            </StyledCard>
-          </Col>
-        </Row>
-      </SectionCard>
-      <DividerSection />
+      
       <BlogSection>
         <MainContainer>
           <SectionCard style={{ background: '#f8f9fa', boxShadow: 'none' }}>

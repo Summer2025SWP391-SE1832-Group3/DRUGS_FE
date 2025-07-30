@@ -33,9 +33,8 @@ export const ConsultantAPI = {
     const res = await axiosInstance.get(`/Consultation/session/by-request/${requestId}`);
     return res.data;
   },
-  updateSession: async (sessionId, { startTime, sessionNotes, recommendations }) => {
+  updateSession: async (sessionId, {sessionNotes, recommendations }) => {
     const res = await axiosInstance.put(`/Consultation/session/${sessionId}`, {
-      startTime,
       sessionNotes,
       recommendations,
       googleMeetLink: 'string',
@@ -46,9 +45,9 @@ export const ConsultantAPI = {
     const res = await axiosInstance.put(`/consultation/${id}/confirm`);
     return res.data;
   },
-  createSession: async (requestId, { startTime, sessionNotes, recommendations }) => {
+  createSession: async (requestId, {sessionNotes, recommendations }) => {
     const res = await axiosInstance.post(`/Consultation/session`, {
-      startTime,
+      
       sessionNotes,
       recommendations,
       googleMeetLink: 'string',
@@ -75,6 +74,10 @@ export const ConsultantAPI = {
   },
   addWorkingHoursRange: async (data) => {
     const res = await axiosInstance.post(`/Consultant/workinghours/range`, data);
+    return res.data;
+  },
+  addConsultationFeedback: async (id, { rating, comment }) => {
+    const res = await axiosInstance.post(`/Consultation/${id}/feedback`, { rating, comment });
     return res.data;
   },
 };

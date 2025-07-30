@@ -37,7 +37,6 @@ import { ConsultantAPI } from '../../apis/consultant';
 
 const { Title, Paragraph, Text } = Typography;
 
-// Animation keyframes
 const fadeInUp = keyframes`
   from {
     opacity: 0;
@@ -158,7 +157,49 @@ const ViewSlotsButton = styled(Button)`
   }
 `;
 
-const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400';
+
+const MALE_AVATARS = [
+  'https://images.unsplash.com/photo-1557862921-37829c790f19?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face'
+];
+
+const FEMALE_AVATARS = [
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
+];
+
+const getAvatarForConsultant = (consultantName) => {
+  if (!consultantName) return MALE_AVATARS[0];
+  
+  
+  if (consultantName.toLowerCase().includes('pham thi hoa')) {
+    return FEMALE_AVATARS[0];
+  }
+  
+  const nameMapping = {
+    'đặng lâm anh tuấn': 0, 
+    'đặng võ minh trung': 1, 
+    'nguyễnn văn an': 2, 
+    'nguyễn văn a': 3, 
+    'nguyễn văn minh': 4, 
+  };
+  
+  const lowerName = consultantName.toLowerCase();
+  const mappedIndex = nameMapping[lowerName];
+  
+  if (mappedIndex !== undefined) {
+    return MALE_AVATARS[mappedIndex];
+  }
+  
+  
+  const nameHash = consultantName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const maleIndex = nameHash % MALE_AVATARS.length;
+  return MALE_AVATARS[maleIndex];
+};
+
+
 
 export default function ConsultantDetail() {
   const { id } = useParams();
@@ -192,7 +233,7 @@ export default function ConsultantDetail() {
     setSelectedDate(date);
     setSelectedSlot(null);
     if (!consultant) return;
-    // Gọi API lấy slot trống theo ngày
+    
     try {
       const dateStr = date.format('YYYY-MM-DDT00:00:00');
       const slots = await ConsultantAPI.getAvailableSlotsByDate(consultant.id, dateStr);
@@ -244,15 +285,8 @@ export default function ConsultantDetail() {
   };
 
   const disabledDate = (current) => {
-    if (!consultant || !consultant.workingHours) return true;
-    // Chỉ disable ngày trong quá khứ
     const today = moment().startOf('day');
-    const currentStr = current.startOf('day');
-    if (currentStr.isBefore(today)) return true;
-    // Chỉ cho chọn ngày có workingHours
-    return !consultant.workingHours.some(wh => 
-      moment(wh.date).isSame(currentStr, 'day')
-    );
+    return !current || current.isBefore(today, 'day') || current.isSame(today, 'day');
   };
 
   const getStatusColor = (status) => {
@@ -264,12 +298,12 @@ export default function ConsultantDetail() {
     }
   };
 
-  // Lọc chỉ lấy mỗi ngày một lần (theo ngày, giữ khung giờ đầu tiên)
+  
   const uniqueWorkingDays = [];
   const seenDays = new Set();
   if (consultant && consultant.workingHours) {
     consultant.workingHours
-      .filter(wh => moment(wh.date).isSameOrAfter(moment(), 'day'))
+      .filter(wh => moment(wh.date).isAfter(moment(), 'day')) 
       .forEach(wh => {
         const dayStr = moment(wh.date).format('YYYY-MM-DD');
         if (!seenDays.has(dayStr)) {
@@ -299,6 +333,10 @@ export default function ConsultantDetail() {
     );
   }
 
+ 
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const hideBooking = ['Consultant', 'Staff', 'Manager'].includes(user.role);
+
   return (
     <StyledContainer>
       <Row gutter={[24, 24]}>
@@ -307,7 +345,7 @@ export default function ConsultantDetail() {
             <ProfileHeader>
               <StyledAvatar
                 size={120}
-                src={consultant.avatarUrl || DEFAULT_AVATAR}
+                src={consultant.avatarUrl || getAvatarForConsultant(consultant.fullName)}
                 icon={<UserOutlined />}
               />
               <Title level={2} style={{ color: 'white', margin: '16px 0 8px 0' }}>
@@ -345,15 +383,18 @@ export default function ConsultantDetail() {
 
             <Divider />
 
-            <BookingButton 
-              type="primary" 
-              size="large" 
-              block
-              onClick={() => setBookingModalVisible(true)}
-              icon={<CalendarOutlined />}
-            >
-              Book Consultation
-            </BookingButton>
+            {/* Ẩn nút Book Consultation nếu là consultant, staff, manager */}
+            {!hideBooking && (
+              <BookingButton 
+                type="primary" 
+                size="large" 
+                block
+                onClick={() => setBookingModalVisible(true)}
+                icon={<CalendarOutlined />}
+              >
+                Book Consultation
+              </BookingButton>
+            )}
           </StyledCard>
         </Col>
 
@@ -472,14 +513,20 @@ export default function ConsultantDetail() {
             {availableSlots.length > 0 ? (
               <List
                 grid={{ gutter: 8, column: 2 }}
-                dataSource={availableSlots}
+                dataSource={availableSlots.filter(slot => slot.status !== 'Pending' && slot.status !== 'Rejected')}
                 renderItem={slot => (
                   <List.Item>
                     <SlotCard
                       size="small"
                       selected={selectedSlot?.slotId === slot.slotId}
-                      onClick={() => slot.status !== 'Booked' && handleSlotSelect(slot)}
-                      style={slot.status === 'Booked' ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed' } : {}}
+                      onClick={() =>
+                        slot.status !== 'Booked' && handleSlotSelect(slot)
+                      }
+                      style={
+                        slot.status === 'Booked'
+                          ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed' }
+                          : {}
+                      }
                     >
                       <div style={{ textAlign: 'center' }}>
                         <ClockCircleOutlined style={{ marginRight: '8px', color: '#667eea' }} />
@@ -487,7 +534,14 @@ export default function ConsultantDetail() {
                           {moment(slot.startTime).format('HH:mm')} - {moment(slot.endTime).format('HH:mm')}
                         </Text>
                         <br />
-                        <Badge status={slot.status === 'Booked' ? 'error' : 'success'} text={slot.status} />
+                        <Badge
+                          status={
+                            slot.status === 'Booked'
+                              ? 'error'
+                              : 'success'
+                          }
+                          text={slot.status}
+                        />
                       </div>
                     </SlotCard>
                   </List.Item>
@@ -499,7 +553,8 @@ export default function ConsultantDetail() {
           </div>
         )}
 
-        {selectedSlot && (
+        {/* Ẩn nút Confirm Booking nếu là consultant, staff, manager */}
+        {selectedSlot && !hideBooking && (
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <Button
               type="primary"
@@ -534,14 +589,18 @@ export default function ConsultantDetail() {
           {availableSlots.length > 0 ? (
             <List
               grid={{ gutter: 8, column: 2 }}
-              dataSource={availableSlots}
+              dataSource={availableSlots.filter(slot => slot.status !== 'Pending' && slot.status !== 'Rejected')}
               renderItem={slot => (
                 <List.Item>
                   <SlotCard
                     size="small"
                     selected={selectedSlot?.slotId === slot.slotId}
                     onClick={() => slot.status !== 'Booked' && handleSlotSelect(slot)}
-                    style={slot.status === 'Booked' ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed' } : {}}
+                    style={
+                      slot.status === 'Booked'
+                        ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed' }
+                        : {}
+                    }
                   >
                     <div style={{ textAlign: 'center' }}>
                       <ClockCircleOutlined style={{ marginRight: '8px', color: '#667eea' }} />
@@ -549,7 +608,10 @@ export default function ConsultantDetail() {
                         {moment(slot.startTime).format('HH:mm')} - {moment(slot.endTime).format('HH:mm')}
                       </Text>
                       <br />
-                      <Badge status={slot.status === 'Booked' ? 'error' : 'success'} text={slot.status} />
+                      <Badge
+                        status={slot.status === 'Booked' ? 'error' : 'success'}
+                        text={slot.status}
+                      />
                     </div>
                   </SlotCard>
                 </List.Item>
@@ -560,7 +622,8 @@ export default function ConsultantDetail() {
           )}
         </div>
 
-        {selectedSlot && (
+        {/* Ẩn nút Confirm Booking nếu là consultant, staff, manager */}
+        {selectedSlot && !hideBooking && (
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <Button
               type="primary"

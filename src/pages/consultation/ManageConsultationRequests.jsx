@@ -23,39 +23,42 @@ export default function ManageConsultationRequests() {
   const [createSessionForm] = Form.useForm();
   const [sessionMap, setSessionMap] = useState({});
 
-  useEffect(() => {
-    const fetchRequests = async () => {
+  
+const fetchRequests = async () => {
+  try {
+    const data = await ConsultantAPI.getConsultationRequests();
+    setRequests(data);
+    // Lấy session cho từng request (nếu cần)
+    const sessionPromises = data.map(async (r) => {
       try {
-        const data = await ConsultantAPI.getConsultationRequests();
-        setRequests(data);
-        // Lấy session cho từng request (nếu cần)
-        const sessionPromises = data.map(async (r) => {
-          try {
-            const session = await ConsultantAPI.getSessionByRequestId(r.id);
-            return [r.id, session];
-          } catch {
-            return [r.id, null];
-          }
-        });
-        const sessionResults = await Promise.all(sessionPromises);
-        const map = {};
-        sessionResults.forEach(([id, session]) => {
-          map[id] = session;
-        });
-        setSessionMap(map);
+        const session = await ConsultantAPI.getSessionByRequestId(r.id);
+        return [r.id, session];
       } catch {
-        setRequests([]);
-        setSessionMap({});
+        return [r.id, null];
       }
-    };
-    fetchRequests();
-  }, []);
+    });
+    const sessionResults = await Promise.all(sessionPromises);
+    const map = {};
+    sessionResults.forEach(([id, session]) => {
+      map[id] = session;
+    });
+    setSessionMap(map);
+  } catch {
+    setRequests([]);
+    setSessionMap({});
+  }
+};
+
+useEffect(() => {
+  fetchRequests();
+}, []);
+
 
   const handleApprove = async (id) => {
     try {
       await ConsultantAPI.approveConsultationRequest(id);
       message.success('Request approved! Now create a session.');
-      // Reload requests to update status
+      
       const data = await ConsultantAPI.getConsultationRequests();
       setRequests(data);
       setCreateSessionModal({ visible: true, requestId: id });
@@ -98,7 +101,7 @@ export default function ManageConsultationRequests() {
 
   const handleEditSession = () => {
     setEditMode(true);
-    // Set initial values for form
+    
     editForm.setFieldsValue({
       startTime: sessionModal.session ? moment(sessionModal.session.startTime).local() : null,
       sessionNotes: sessionModal.session?.sessionNotes,
@@ -114,16 +117,18 @@ export default function ManageConsultationRequests() {
     try {
       const values = await editForm.validateFields();
       await ConsultantAPI.updateSession(sessionModal.session.id, {
-        startTime: values.startTime.toISOString(),
         sessionNotes: values.sessionNotes,
         recommendations: values.recommendations,
       });
       message.success('Session updated successfully!');
-      // Reload session
-      const updatedSession = await ConsultantAPI.getSessionByRequestId(sessionModal.session.id);
-      setSessionModal({ ...sessionModal, session: updatedSession, isCompleted: !!updatedSession.isCompleted });
       setEditMode(false);
-      await fetchRequests();
+      setSessionModal({ visible: false, session: null, isCompleted: false }); 
+     
+      try {
+        await fetchRequests();
+      } catch (err) {
+        
+      }
     } catch (error) {
       message.error('Failed to update session');
     }
@@ -137,17 +142,20 @@ export default function ManageConsultationRequests() {
     try {
       const values = await createSessionForm.validateFields();
       await ConsultantAPI.createSession(createSessionModal.requestId, {
-        startTime: values.startTime.toISOString(),
         sessionNotes: values.sessionNotes,
         recommendations: values.recommendations,
       });
-      await ConsultantAPI.approveConsultationRequest(createSessionModal.requestId);
-      message.success('Session created and request approved!');
+      message.success('Session created!');
       setCreateSessionModal({ visible: false, requestId: null });
       createSessionForm.resetFields();
-      await fetchRequests();
+     
+      try {
+        await fetchRequests();
+      } catch {
+       
+      }
     } catch {
-      message.error('Failed to create session or approve request');
+      message.error('Failed to create session');
     }
   };
 
@@ -162,32 +170,53 @@ export default function ManageConsultationRequests() {
       message.error('No session found for this request');
       return;
     }
+
+   
+    const request = requests.find(r => r.id === requestId);
+    if (!request) {
+      message.error('Request not found');
+      return;
+    }
+
+    
+    const now = new Date();
+    const startTime = new Date(request.startTime);
+    
+    if (now < startTime) {
+      message.error('Consultation has not started yet. Please wait until the scheduled time.');
+      return;
+    }
+
     try {
       await ConsultantAPI.completeSession(session.id);
       message.success('Session marked as completed!');
-      // Reload requests and session map
-      const data = await ConsultantAPI.getConsultationRequests();
-      setRequests(data);
-      const sessionPromises = data.map(async (r) => {
-        try {
-          const session = await ConsultantAPI.getSessionByRequestId(r.id);
-          return [r.id, session];
-        } catch {
-          return [r.id, null];
-        }
-      });
-      const sessionResults = await Promise.all(sessionPromises);
-      const map = {};
-      sessionResults.forEach(([id, session]) => {
-        map[id] = session;
-      });
-      setSessionMap(map);
-      await fetchRequests();
+      
+      
+      try {
+        const data = await ConsultantAPI.getConsultationRequests();
+        setRequests(data);
+        
+        const sessionPromises = data.map(async (r) => {
+          try {
+            const session = await ConsultantAPI.getSessionByRequestId(r.id);
+            return [r.id, session];
+          } catch {
+            return [r.id, null];
+          }
+        });
+        const sessionResults = await Promise.all(sessionPromises);
+        const map = {};
+        sessionResults.forEach(([id, session]) => {
+          map[id] = session;
+        });
+        setSessionMap(map);
+      } catch {
+        
+      }
     } catch {
       message.error('Failed to complete session');
     }
   };
-
   const columns = [
     {
       title: 'ID',
@@ -196,15 +225,24 @@ export default function ManageConsultationRequests() {
       width: 80,
     },
     {
-      title: 'Member ID',
-      dataIndex: 'memberId',
-      key: 'memberId',
+      title: 'Member Name',
+      dataIndex: 'memberName',
+      key: 'memberName',
       width: 140,
     },
     {
       title: 'Schedule',
       key: 'schedule',
-      render: (_, record) => `${record.startTime} - ${record.endTime}`,
+      render: (_, record) => {
+        if (!record.startTime || !record.endTime) return '';
+        const start = new Date(record.startTime);
+        const end = new Date(record.endTime);
+        const pad = (n) => n.toString().padStart(2, '0');
+        const dateStr = `${pad(start.getDate())}/${pad(start.getMonth() + 1)}/${start.getFullYear()}`;
+        const startTimeStr = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+        const endTimeStr = `${pad(end.getHours())}:${pad(end.getMinutes())}`;
+        return `${dateStr} ${startTimeStr} - ${endTimeStr}`;
+      },
       width: 260,
     },
     {
@@ -242,14 +280,6 @@ export default function ManageConsultationRequests() {
               loading={loadingSession}
             >
               View Session
-            </Button>
-          )}
-          {record.status === 'Approved' && !sessionMap[record.id]?.isCompleted && (
-            <Button
-              type="dashed"
-              onClick={() => setCreateSessionModal({ visible: true, requestId: record.id })}
-            >
-              Create Session
             </Button>
           )}
           {sessionMap[record.id] && !sessionMap[record.id]?.isCompleted && (
@@ -296,9 +326,6 @@ export default function ManageConsultationRequests() {
       >
         {sessionModal.session && !editMode && (
           <Descriptions column={1} bordered size="middle">
-            <Descriptions.Item label="Schedule">
-              {sessionModal.session.startTime} - {sessionModal.session.endTime}
-            </Descriptions.Item>
             <Descriptions.Item label="Link and Notes">
               {sessionModal.session.sessionNotes}
             </Descriptions.Item>
@@ -314,13 +341,10 @@ export default function ManageConsultationRequests() {
         )}
         {sessionModal.session && editMode && (
           <Form form={editForm} layout="vertical" onFinish={handleSubmitEdit} initialValues={{
-            startTime: sessionModal.session.startTime ? moment(sessionModal.session.startTime).local() : null,
             sessionNotes: sessionModal.session.sessionNotes,
             recommendations: sessionModal.session.recommendations,
           }}>
-            <Form.Item label="Start Time" name="startTime" rules={[{ required: true, message: 'Please select start time' }]}> 
-              <DatePicker showTime format="YYYY-MM-DDTHH:mm:ss" style={{ width: '100%' }} />
-            </Form.Item>
+            
             <Form.Item label="Link and Notes" name="sessionNotes" rules={[{ required: true, message: 'Please enter notes' }]}> 
               <Input.TextArea rows={3} />
             </Form.Item>
@@ -340,19 +364,30 @@ export default function ManageConsultationRequests() {
         footer={null}
         title="Create Session"
         width={600}
+        closable={false} 
+        maskClosable={false} 
       >
-        <Form form={createSessionForm} layout="vertical" onFinish={handleCreateSession}>
-          <Form.Item label="Start Time" name="startTime" rules={[{ required: true, message: 'Please select start time' }]}> 
-            <DatePicker showTime format="YYYY-MM-DDTHH:mm:ss" style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="Link and Notes" name="sessionNotes" rules={[{ required: true, message: 'Please enter notes' }]}> 
+        <Form
+          form={createSessionForm}
+          layout="vertical"
+          onFinish={handleCreateSession}
+        >
+          <Form.Item
+            label="Link and Notes"
+            name="sessionNotes"
+            rules={[{ required: true, message: 'Please enter notes' }]}
+          >
             <Input.TextArea rows={3} />
           </Form.Item>
-          <Form.Item label="Recommendations" name="recommendations" rules={[{ required: true, message: 'Please enter recommendations' }]}> 
+          <Form.Item
+            label="Recommendations"
+            name="recommendations"
+            rules={[{ required: true, message: 'Please enter recommendations' }]}
+          >
             <Input.TextArea rows={2} />
           </Form.Item>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button onClick={handleCancelCreateSession}>Cancel</Button>
+            {/* Không có nút Cancel để bắt buộc phải nhập và Create */}
             <Button type="primary" htmlType="submit">Create</Button>
           </div>
         </Form>

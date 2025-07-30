@@ -180,7 +180,6 @@ export default function ConsultantProfile() {
       await ConsultantAPI.updateConsultantProfile(payload);
       message.success('Profile updated successfully');
       setEditModalVisible(false);
-      // Refresh profile
       const user = JSON.parse(localStorage.getItem('user'));
       const data = await ConsultantAPI.getConsultantById(user.userId);
       setConsultant(data);
@@ -191,12 +190,12 @@ export default function ConsultantProfile() {
     }
   };
 
-  // Lọc chỉ lấy mỗi ngày một lần (theo ngày, giữ khung giờ đầu tiên)
+  
   const uniqueWorkingDays = [];
   const seenDays = new Set();
   if (consultant && consultant.workingHours) {
     consultant.workingHours
-      .filter(wh => moment(wh.date).isSameOrAfter(moment(), 'day'))
+      .filter(wh => moment(wh.date).isAfter(moment(), 'day')) 
       .forEach(wh => {
         const dayStr = moment(wh.date).format('YYYY-MM-DD');
         if (!seenDays.has(dayStr)) {
@@ -241,8 +240,7 @@ export default function ConsultantProfile() {
     }
     setAddingWH(true);
     try {
-      // Ensure startTime/endTime are in HH:mm:ss
-      const formatTime = t => t.length === 5 ? t + ':00' : t;
+      const formatTime = t => t ? `${t.padStart(2, '0')}:00:00` : '';
       const payload = {
         fromDate: addWHForm.fromDate ? addWHForm.fromDate.toISOString() : null,
         toDate: addWHForm.toDate ? addWHForm.toDate.toISOString() : null,
@@ -252,7 +250,6 @@ export default function ConsultantProfile() {
       await ConsultantAPI.addWorkingHoursRange(payload);
       message.success('Added working hours successfully');
       setAddWHModalVisible(false);
-      // Refresh profile
       const user = JSON.parse(localStorage.getItem('user'));
       const data = await ConsultantAPI.getConsultantById(user.userId);
       setConsultant(data);
@@ -603,39 +600,84 @@ export default function ConsultantProfile() {
         <div style={{ marginBottom: 16 }}>
           <label>From Date</label>
           <DatePicker
-            showTime
             style={{ width: '100%', marginBottom: 8 }}
             value={addWHForm.fromDate}
-            onChange={val => handleAddWHFormChange('fromDate', val)}
-            format="YYYY-MM-DD HH:mm:ss"
+            onChange={val => handleAddWHFormChange('fromDate', val ? val.startOf('day') : null)}
+            format="YYYY-MM-DD"
+            disabledDate={(current) => {
+              const today = moment().startOf('day');
+              return !current || current.isBefore(today, 'day') || current.isSame(today, 'day');
+            }}
+            disabledTime={() => ({
+              disabledHours: () => Array.from({ length: 24 }, (_, i) => i),
+              disabledMinutes: () => Array.from({ length: 60 }, (_, i) => i),
+              disabledSeconds: () => Array.from({ length: 60 }, (_, i) => i),
+            })}
+            showTime={false}
+            allowClear={false}
+            inputReadOnly
           />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>To Date</label>
           <DatePicker
-            showTime
             style={{ width: '100%', marginBottom: 8 }}
             value={addWHForm.toDate}
-            onChange={val => handleAddWHFormChange('toDate', val)}
-            format="YYYY-MM-DD HH:mm:ss"
+            onChange={val => handleAddWHFormChange('toDate', val ? val.startOf('day') : null)}
+            format="YYYY-MM-DD"
+            disabledDate={(current) => {
+              const today = moment().startOf('day');
+              const fromDate = addWHForm.fromDate;
+              return !current || 
+                     current.isBefore(today, 'day') || 
+                     current.isSame(today, 'day') || 
+                     (fromDate && current.isBefore(fromDate, 'day')) ||
+                     (fromDate && current.isSame(fromDate, 'day'));
+            }}
+            disabledTime={() => ({
+              disabledHours: () => Array.from({ length: 24 }, (_, i) => i),
+              disabledMinutes: () => Array.from({ length: 60 }, (_, i) => i),
+              disabledSeconds: () => Array.from({ length: 60 }, (_, i) => i),
+            })}
+            showTime={false}
+            allowClear={false}
+            inputReadOnly
           />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Start Time</label>
           <TimePicker
             style={{ width: '100%', marginBottom: 8 }}
-            value={addWHForm.startTime ? moment(addWHForm.startTime, 'HH:mm') : null}
-            onChange={val => handleAddWHFormChange('startTime', val ? val.format('HH:mm') : '')}
-            format="HH:mm"
+            value={addWHForm.startTime ? moment(addWHForm.startTime, 'HH') : null}
+            onChange={val => handleAddWHFormChange('startTime', val ? val.format('HH') : '')}
+            format="HH"
+            minuteStep={60}
+            disabledMinutes={() => Array.from({ length: 60 }, (_, i) => i !== 0)}
+            disabledHours={() => {
+              // Nếu đã chọn endTime thì chỉ cho chọn giờ chẵn nhỏ hơn endTime
+              const end = parseInt(addWHForm.endTime, 10);
+              return Array.from({ length: 24 }, (_, i) => i).filter(
+                h => h % 2 !== 0 || (addWHForm.endTime && h >= end)
+              );
+            }}
           />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>End Time</label>
           <TimePicker
             style={{ width: '100%' }}
-            value={addWHForm.endTime ? moment(addWHForm.endTime, 'HH:mm') : null}
-            onChange={val => handleAddWHFormChange('endTime', val ? val.format('HH:mm') : '')}
-            format="HH:mm"
+            value={addWHForm.endTime ? moment(addWHForm.endTime, 'HH') : null}
+            onChange={val => handleAddWHFormChange('endTime', val ? val.format('HH') : '')}
+            format="HH"
+            minuteStep={60}
+            disabledMinutes={() => Array.from({ length: 60 }, (_, i) => i !== 0)}
+            disabledHours={() => {
+              // Nếu đã chọn startTime thì chỉ cho chọn giờ chẵn lớn hơn startTime
+              const start = parseInt(addWHForm.startTime, 10);
+              return Array.from({ length: 24 }, (_, i) => i).filter(
+                h => h % 2 !== 0 || (addWHForm.startTime && h <= start)
+              );
+            }}
           />
         </div>
       </Modal>

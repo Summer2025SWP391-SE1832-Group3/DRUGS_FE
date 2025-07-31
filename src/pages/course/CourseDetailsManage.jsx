@@ -52,7 +52,7 @@ export default function CourseDetailsManage() {
   const [isEnrollmentModalVisible, setIsEnrollmentModalVisible] = useState(false);
   const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(null); // 'activate' | 'deactivate'
+  const [confirmAction, setConfirmAction] = useState(null); 
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
 
@@ -82,7 +82,6 @@ export default function CourseDetailsManage() {
       try {
         const res = await CourseAPI.getCourseById(id);
         setCourseDetail(res);
-        // Fetch lessons
         const lessonRes = await LessonAPI.getLessonsByCourseId(id);
         setLessons(Array.isArray(lessonRes) ? lessonRes : []);
       } catch (error) {
@@ -107,7 +106,7 @@ export default function CourseDetailsManage() {
     fetchCourseStats();
   }, [id, isManager]);
 
-  // Open Edit Modal and prefill
+
   const showEditModal = () => {
     editForm.setFieldsValue({
       title: courseDetail.title,
@@ -117,34 +116,29 @@ export default function CourseDetailsManage() {
     setIsEditModalVisible(true);
   };
 
-  // Handle Edit Modal OK
+ 
   const handleEditOk = async () => {
     try {
       const values = await editForm.validateFields();
       await CourseManagementAPI.updateCourse(courseDetail.id, values);
       message.success('Course updated successfully');
       setIsEditModalVisible(false);
-      // Reload course data
       const res = await CourseAPI.getCourseById(courseDetail.id);
       setCourseDetail(res);
     } catch (err) {
       message.error('Failed to update course');
     }
   };
-
-  // Handle Edit Modal Cancel
   const handleEditCancel = () => {
     setIsEditModalVisible(false);
     editForm.resetFields();
   };
 
-  // Open Create Modal
   const showCreateModal = () => {
     createForm.resetFields();
     setIsCreateModalVisible(true);
   };
 
-  // Handle Create Modal OK
   const handleCreateOk = async () => {
     try {
       setUploading(true);
@@ -175,13 +169,11 @@ export default function CourseDetailsManage() {
     }
   };
 
-  // Handle Create Modal Cancel
   const handleCreateCancel = () => {
     setIsCreateModalVisible(false);
     createForm.resetFields();
   };
 
-  // Open Edit Lesson Modal
   const showLessonEditModal = (lesson) => {
     setEditingLesson(lesson);
     lessonEditForm.setFieldsValue({
@@ -192,7 +184,6 @@ export default function CourseDetailsManage() {
     setIsLessonEditModalVisible(true);
   };
 
-  // Handle Edit Lesson OK
   const handleLessonEditOk = async () => {
     try {
       setLessonUploading(true);
@@ -221,15 +212,11 @@ export default function CourseDetailsManage() {
       }
     }
   };
-
-  // Handle Edit Lesson Cancel
   const handleLessonEditCancel = () => {
     setIsLessonEditModalVisible(false);
     lessonEditForm.resetFields();
     setEditingLesson(null);
   };
-
-  // Handle Delete Lesson
   const handleDeleteLesson = (lesson) => {
     Modal.confirm({
       title: 'Delete Lesson',
@@ -241,7 +228,6 @@ export default function CourseDetailsManage() {
         try {
           await LessonAPI.deleteLesson(lesson.id);
           message.success('Lesson deleted successfully');
-          // Reload lessons
           const lessonRes = await LessonAPI.getLessonsByCourseId(courseDetail.id);
           setLessons(Array.isArray(lessonRes) ? lessonRes : []);
         } catch (err) {
@@ -1265,7 +1251,19 @@ export default function CourseDetailsManage() {
             <Switch />
           </Form.Item>
           <Divider />
-          <Form.List name="questions">
+          <Form.List
+            name="questions"
+            rules={[
+              {
+                validator: async (_, questions) => {
+                  if (!questions) return;
+                  const texts = questions.map(q => (q?.questionText || '').trim().toLowerCase());
+                  const hasDuplicate = texts.some((t, i) => t && texts.indexOf(t) !== i);
+                  if (hasDuplicate) throw new Error('Questions must not be duplicated!');
+                }
+              }
+            ]}
+          >
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field, idx) => (
@@ -1277,28 +1275,61 @@ export default function CourseDetailsManage() {
                     >
                       <Input placeholder="Enter question..." />
                     </Form.Item>
-                    <Form.List name={[field.name, "answers"]}>
+                    <Form.List
+                      name={[field.name, "answers"]}
+                      rules={[
+                        {
+                          validator: async (_, answers) => {
+                            if (!answers) return;
+                            const texts = answers.map(a => (a?.answerText || '').trim().toLowerCase());
+                            const hasDuplicate = texts.some((t, i) => t && texts.indexOf(t) !== i);
+                            if (hasDuplicate) throw new Error('Answers must not be duplicated!');
+                            const correctCount = answers.filter(a => a?.isCorrect).length;
+                            if (correctCount !== 1) throw new Error('Each question must have exactly one correct answer!');
+                          }
+                        }
+                      ]}
+                    >
                       {(ansFields, { add: addAns, remove: removeAns }) => (
                         <>
-                          {ansFields.map((ans, aidx) => (
-                            <div key={ans.key} style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
-                              <Form.Item
-                                name={[ans.name, "answerText"]}
-                                rules={[{ required: true, message: "Answer required" }]}
-                                style={{ flex: 1, marginBottom: 0 }}
-                              >
-                                <Input placeholder={`Answer ${aidx + 1}`} />
-                              </Form.Item>
-                              <Form.Item
-                                name={[ans.name, "isCorrect"]}
-                                valuePropName="checked"
-                                style={{ marginBottom: 0 }}
-                              >
-                                <Switch checkedChildren="True" unCheckedChildren="Wrong" />
-                              </Form.Item>
-                              <Button danger onClick={() => removeAns(ans.name)} size="small">Delete</Button>
-                            </div>
-                          ))}
+                          {ansFields.map((ans, aidx) => {
+                            // Lấy danh sách answers hiện tại để disable các switch khác nếu đã có 1 đáp án đúng
+                            const answers = createExamForm.getFieldValue(['questions', idx, 'answers']) || [];
+                            const isAnyCorrect = answers.filter(a => a?.isCorrect).length > 0;
+                            const isCurrentCorrect = answers[aidx]?.isCorrect;
+                            return (
+                              <div key={ans.key} style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
+                                <Form.Item
+                                  name={[ans.name, "answerText"]}
+                                  rules={[{ required: true, message: "Answer required" }]}
+                                  style={{ flex: 1, marginBottom: 0 }}
+                                >
+                                  <Input placeholder={`Answer ${aidx + 1}`} />
+                                </Form.Item>
+                                <Form.Item
+                                  name={[ans.name, "isCorrect"]}
+                                  valuePropName="checked"
+                                  style={{ marginBottom: 0 }}
+                                >
+                                  <Switch
+                                    checkedChildren="True"
+                                    unCheckedChildren="Wrong"
+                                    checked={!!isCurrentCorrect}
+                                    disabled={!isCurrentCorrect && isAnyCorrect}
+                                    onChange={checked => {
+                                      const answers = createExamForm.getFieldValue(['questions', idx, 'answers']) || [];
+                                      const newAnswers = answers.map((a, i) => ({
+                                        ...a,
+                                        isCorrect: i === aidx ? checked : false
+                                      }));
+                                      createExamForm.setFieldValue(['questions', idx, 'answers'], newAnswers);
+                                    }}
+                                  />
+                                </Form.Item>
+                                <Button danger onClick={() => removeAns(ans.name)} size="small">Delete</Button>
+                              </div>
+                            );
+                          })}
                           <Button type="dashed" onClick={() => addAns()} block icon={<PlusOutlined />}>Add Answer</Button>
                         </>
                       )}
@@ -1312,6 +1343,7 @@ export default function CourseDetailsManage() {
           </Form.List>
         </Form>
       </Modal>
+
       {/* Edit Exam Modal */}
       <Modal
         title="Edit Exam"
@@ -1352,7 +1384,19 @@ export default function CourseDetailsManage() {
             <Input.TextArea rows={3} placeholder="Enter description" />
           </Form.Item>
           <Divider />
-          <Form.List name="questions">
+          <Form.List
+            name="questions"
+            rules={[
+              {
+                validator: async (_, questions) => {
+                  if (!questions) return;
+                  const texts = questions.map(q => (q?.questionText || '').trim().toLowerCase());
+                  const hasDuplicate = texts.some((t, i) => t && texts.indexOf(t) !== i);
+                  if (hasDuplicate) throw new Error('Questions must not be duplicated!');
+                }
+              }
+            ]}
+          >
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field, idx) => (
@@ -1364,28 +1408,60 @@ export default function CourseDetailsManage() {
                     >
                       <Input placeholder="Enter question..." />
                     </Form.Item>
-                    <Form.List name={[field.name, "answers"]}>
+                    <Form.List
+                      name={[field.name, "answers"]}
+                      rules={[
+                        {
+                          validator: async (_, answers) => {
+                            if (!answers) return;
+                            const texts = answers.map(a => (a?.answerText || '').trim().toLowerCase());
+                            const hasDuplicate = texts.some((t, i) => t && texts.indexOf(t) !== i);
+                            if (hasDuplicate) throw new Error('Answers must not be duplicated!');
+                            const correctCount = answers.filter(a => a?.isCorrect).length;
+                            if (correctCount !== 1) throw new Error('Each question must have exactly one correct answer!');
+                          }
+                        }
+                      ]}
+                    >
                       {(ansFields, { add: addAns, remove: removeAns }) => (
                         <>
-                          {ansFields.map((ans, aidx) => (
-                            <div key={ans.key} style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
-                              <Form.Item
-                                name={[ans.name, "answerText"]}
-                                rules={[{ required: true, message: "Answer required" }]}
-                                style={{ flex: 1, marginBottom: 0 }}
-                              >
-                                <Input placeholder={`Answer ${aidx + 1}`} />
-                              </Form.Item>
-                              <Form.Item
-                                name={[ans.name, "isCorrect"]}
-                                valuePropName="checked"
-                                style={{ marginBottom: 0 }}
-                              >
-                                <Switch checkedChildren="True" unCheckedChildren="Wrong" />
-                              </Form.Item>
-                              <Button danger onClick={() => removeAns(ans.name)} size="small">Delete</Button>
-                            </div>
-                          ))}
+                          {ansFields.map((ans, aidx) => {
+                            const answers = editExamForm.getFieldValue(['questions', idx, 'answers']) || [];
+                            const isAnyCorrect = answers.filter(a => a?.isCorrect).length > 0;
+                            const isCurrentCorrect = answers[aidx]?.isCorrect;
+                            return (
+                              <div key={ans.key} style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
+                                <Form.Item
+                                  name={[ans.name, "answerText"]}
+                                  rules={[{ required: true, message: "Answer required" }]}
+                                  style={{ flex: 1, marginBottom: 0 }}
+                                >
+                                  <Input placeholder={`Answer ${aidx + 1}`} />
+                                </Form.Item>
+                                <Form.Item
+                                  name={[ans.name, "isCorrect"]}
+                                  valuePropName="checked"
+                                  style={{ marginBottom: 0 }}
+                                >
+                                  <Switch
+                                    checkedChildren="True"
+                                    unCheckedChildren="Wrong"
+                                    checked={!!isCurrentCorrect}
+                                    disabled={!isCurrentCorrect && isAnyCorrect}
+                                    onChange={checked => {
+                                      const answers = editExamForm.getFieldValue(['questions', idx, 'answers']) || [];
+                                      const newAnswers = answers.map((a, i) => ({
+                                        ...a,
+                                        isCorrect: i === aidx ? checked : false
+                                      }));
+                                      editExamForm.setFieldValue(['questions', idx, 'answers'], newAnswers);
+                                    }}
+                                  />
+                                </Form.Item>
+                                <Button danger onClick={() => removeAns(ans.name)} size="small">Delete</Button>
+                              </div>
+                            );
+                          })}
                           <Button type="dashed" onClick={() => addAns()} block icon={<PlusOutlined />}>Add Answer</Button>
                         </>
                       )}
@@ -1717,4 +1793,4 @@ export default function CourseDetailsManage() {
       </Modal>
     </div>
   );
-} 
+}

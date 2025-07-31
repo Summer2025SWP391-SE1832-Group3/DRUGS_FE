@@ -30,7 +30,7 @@ export default function Profile() {
           setUserInfo(userData);
           setTempUserInfo(userData);
           
-          // Set form values if in edit mode
+          
           if (isEditing) {
             form.setFieldsValue({
               fullName: userData.fullName,
@@ -49,7 +49,7 @@ export default function Profile() {
   const handleEdit = () => {
     setIsEditing(true);
     setTempUserInfo({...userInfo});
-    // Set form values when entering edit mode
+    
     form.setFieldsValue({
       fullName: userInfo.fullName,
       username: userInfo.username,
@@ -66,7 +66,7 @@ export default function Profile() {
       const user = JSON.parse(localStorage.getItem('user'));
       const token = localStorage.getItem('accessToken');
       
-      // Kiểm tra nếu username đã thay đổi
+    
       if (tempUserInfo.username !== userInfo.username) {
         try {
           const usernameCheck = await AccountAPI.checkUsernameExists(tempUserInfo.username, token);
@@ -82,7 +82,7 @@ export default function Profile() {
         }
       }
       
-      // Chuẩn bị dữ liệu gửi lên API
+      
       const updateData = {
         userName: tempUserInfo.username,
         fullName: tempUserInfo.fullName,
@@ -95,7 +95,6 @@ export default function Profile() {
       await AccountAPI.updateProfile(updateData, token);
       message.success('Profile updated successfully!');
       setIsEditing(false);
-      // Reload lại thông tin mới nhất từ API
       const userId = user?.userId || user?.id;
       if (userId && token) {
         AccountAPI.getAccountById(userId, token).then(data => {
@@ -120,7 +119,7 @@ export default function Profile() {
         });
       }
     } catch (error) {
-      // Kiểm tra nếu lỗi từ API có chứa thông báo về username
+      
       if (error.response && error.response.data) {
         const errorData = error.response.data;
         if (Array.isArray(errorData)) {
@@ -140,7 +139,7 @@ export default function Profile() {
     setTempUserInfo({...userInfo});
     setIsEditing(false);
     form.resetFields();
-    // Reset form values to current user info
+    
     form.setFieldsValue({
       fullName: userInfo.fullName,
       username: userInfo.username,

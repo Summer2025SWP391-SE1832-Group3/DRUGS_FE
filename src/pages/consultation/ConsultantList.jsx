@@ -6,9 +6,9 @@ import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph, Text } = Typography;
-const apiBase = "https://api-drug-be.purintech.id.vn";  // Base URL without /api for static files
+const apiBase = "https://api-drug-be.purintech.id.vn";  
 
-// Animation keyframes
+
 const fadeInUp = keyframes`
   from {
     opacity: 0;
@@ -114,8 +114,46 @@ const RatingSection = styled.div`
   padding: 8px 0;
 `;
 
-// Default avatar for consultants without images
-const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400';
+
+const MALE_AVATARS = [
+  'https://images.unsplash.com/photo-1557862921-37829c790f19?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face'
+];
+
+const FEMALE_AVATARS = [
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
+];
+
+
+const getAvatarForConsultant = (consultantName) => {
+  if (!consultantName) return MALE_AVATARS[0];
+  
+  if (consultantName.toLowerCase().includes('pham thi hoa')) {
+    return FEMALE_AVATARS[0];
+  }
+  
+  const nameMapping = {
+    'đặng lâm anh tuấn': 0, 
+    'đặng võ minh trung': 1, 
+    'nguyễnn văn an': 2, 
+    'nguyễn văn a': 3, 
+    'nguyễn văn minh': 4, 
+  };
+  
+  const lowerName = consultantName.toLowerCase();
+  const mappedIndex = nameMapping[lowerName];
+  
+  if (mappedIndex !== undefined) {
+    return MALE_AVATARS[mappedIndex];
+  }
+
+  const nameHash = consultantName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const maleIndex = nameHash % MALE_AVATARS.length;
+  return MALE_AVATARS[maleIndex];
+};
 
 export default function ConsultantList() {
   const [loading, setLoading] = useState(true);
@@ -130,7 +168,7 @@ export default function ConsultantList() {
       try {
         const data = await ConsultantAPI.getConsultants({ page: 1, pageSize: 10 });
         setConsultants(data);
-        // Gọi API chứng chỉ cho từng consultant
+        
         const certPromises = data.map(async (c) => {
           try {
             const certs = await ConsultantAPI.getCertificatesByConsultantId(c.id);
@@ -155,7 +193,7 @@ export default function ConsultantList() {
     fetchConsultants();
   }, []);
 
-  // Animate consultants appearing one by one
+ 
   useEffect(() => {
     if (consultants.length > 0 && !loading) {
       const timer = setTimeout(() => {
@@ -168,7 +206,7 @@ export default function ConsultantList() {
           });
         };
 
-        // Show consultants one by one with 200ms delay
+        
         const interval = setInterval(() => {
           animateConsultants();
           if (visibleConsultants.length >= consultants.length) {
@@ -177,7 +215,7 @@ export default function ConsultantList() {
         }, 200);
 
         return () => clearInterval(interval);
-      }, 500); // Start animation after header appears
+      }, 500); 
 
       return () => clearTimeout(timer);
     }
@@ -280,7 +318,7 @@ export default function ConsultantList() {
                       <AvatarWrapper>
                         <StyledAvatar
                           size={80}
-                          src={consultant.avatarUrl ? `${apiBase}${consultant.avatarUrl}` : DEFAULT_AVATAR}
+                          src={consultant.avatarUrl ? `${apiBase}${consultant.avatarUrl}` : getAvatarForConsultant(consultant.fullName)}
                           icon={<UserOutlined />}
                         />
                       </AvatarWrapper>

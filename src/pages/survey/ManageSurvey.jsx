@@ -364,7 +364,21 @@ export default function ManageSurvey() {
                                         <Form.Item
                                             label={`Question ${idx + 1}`}
                                             name={[field.name, "questionText"]}
-                                            rules={[{ required: true, message: "Please input question" }]}
+                                            rules={[
+                                                { required: true, message: "Please input question" },
+                                                ({ getFieldValue }) => ({
+                                                    validator(_, value) {
+                                                        const allQuestions = getFieldValue("questions") || [];
+                                                        const duplicateCount = allQuestions.filter(
+                                                            (q, qIdx) => q && q.questionText === value && qIdx !== field.name
+                                                        ).length;
+                                                        if (duplicateCount > 0) {
+                                                            return Promise.reject("Questions must be unique.");
+                                                        }
+                                                        return Promise.resolve();
+                                                    }
+                                                })
+                                            ]}
                                         >
                                             <Input placeholder="Enter question..." />
                                         </Form.Item>
@@ -396,7 +410,22 @@ export default function ManageSurvey() {
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "score"]}
-                                                                rules={[{ required: true, message: "Score required" }, { type: "number", min: 0, max: 10, message: "Score must be between 0 and 10." }]}
+                                                                rules={[
+                                                                    { required: true, message: "Score required" }, 
+                                                                    { type: "number", min: 0, max: 10, message: "Score must be between 0 and 10." },
+                                                                    ({ getFieldValue }) => ({
+                                                                        validator(_, value) {
+                                                                            const allAnswers = getFieldValue(["questions", field.name, "answers"]) || [];
+                                                                            const duplicateCount = allAnswers.filter(
+                                                                                (a, aIdx) => a && a.score === value && aIdx !== ans.name
+                                                                            ).length;
+                                                                            if (duplicateCount > 0) {
+                                                                                return Promise.reject("Scores in the same question must be different.");
+                                                                            }
+                                                                            return Promise.resolve();
+                                                                        }
+                                                                    })
+                                                                ]}
                                                                 style={{ width: 100, marginBottom: 0 }}
                                                             >
                                                                 <InputNumber
@@ -490,7 +519,21 @@ export default function ManageSurvey() {
                                         <Form.Item
                                             label={`Question ${idx + 1}`}
                                             name={[field.name, "questionText"]}
-                                            rules={[{ required: true, message: "Please input question" }]}
+                                            rules={[
+                                                { required: true, message: "Please input question" },
+                                                ({ getFieldValue }) => ({
+                                                    validator(_, value) {
+                                                        const allQuestions = getFieldValue("questions") || [];
+                                                        const duplicateCount = allQuestions.filter(
+                                                            (q, qIdx) => q && q.questionText === value && qIdx !== field.name
+                                                        ).length;
+                                                        if (duplicateCount > 0) {
+                                                            return Promise.reject("Questions must be unique.");
+                                                        }
+                                                        return Promise.resolve();
+                                                    }
+                                                })
+                                            ]}
                                         >
                                             <Input placeholder="Enter question..." />
                                         </Form.Item>
@@ -522,7 +565,22 @@ export default function ManageSurvey() {
                                                             </Form.Item>
                                                             <Form.Item
                                                                 name={[ans.name, "score"]}
-                                                                rules={[{ required: true, message: "Score required" }, { type: "number", min: 0, max: 10, message: "Score must be between 0 and 10." }]}
+                                                                rules={[
+                                                                    { required: true, message: "Score required" }, 
+                                                                    { type: "number", min: 0, max: 10, message: "Score must be between 0 and 10." },
+                                                                    ({ getFieldValue }) => ({
+                                                                        validator(_, value) {
+                                                                            const allAnswers = getFieldValue(["questions", field.name, "answers"]) || [];
+                                                                            const duplicateCount = allAnswers.filter(
+                                                                                (a, aIdx) => a && a.score === value && aIdx !== ans.name
+                                                                            ).length;
+                                                                            if (duplicateCount > 0) {
+                                                                                return Promise.reject("Scores in the same question must be different.");
+                                                                            }
+                                                                            return Promise.resolve();
+                                                                        }
+                                                                    })
+                                                                ]}
                                                                 style={{ width: 100, marginBottom: 0 }}
                                                             >
                                                                 <InputNumber
